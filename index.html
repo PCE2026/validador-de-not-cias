@@ -401,7 +401,7 @@ button.btn:disabled{opacity:.4;cursor:not-allowed}
 // ═════════════════════════════════════════════════════════════════════════════
 // CONFIGURAÇÃO
 // ═════════════════════════════════════════════════════════════════════════════
-const API_URL = 'https://script.google.com/macros/s/AKfycbx7mdQj-j2LHwKeWAyECU6eDmVulbs96uwGS1us8Y9sHvYNlGKXdA70EksTBvPgBsjKlg/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxOF2MSrYaoPXWjle1VjR3WW2eZUw3TXpT77wiXfQf5eDPSHRZAyjPjImfBnmX3HAqOQw/exec';
 
 const CATS = ['Atividades','Bibliotecas','Centro Qualifica','Clubes e Projetos','Cursos Profissionais','Erasmus+','Eventos','Informação','PNC','PCE'];
 
@@ -448,11 +448,15 @@ document.getElementById('cats-ck').innerHTML = CATS.map(c=>
 // ═════════════════════════════════════════════════════════════════════════════
 // API HELPERS
 // ═════════════════════════════════════════════════════════════════════════════
+function safeJSON(str,fallback){
+  try{ return str ? JSON.parse(str) : fallback; }catch(e){ return fallback; }
+}
+
 async function apiGet(){
-  const res = await fetch(API_URL);
+  const url = API_URL + '?action=listar&t=' + Date.now();
+  const res = await fetch(url);
   const data = await res.json();
   if(!data.ok) throw new Error(data.error||'Erro desconhecido');
-  // Normaliza tipos (categorias/outrasFotos vêm como string separada por ;)
   return data.noticias.map(n=>({
     ...n,
     categorias: (n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
@@ -461,15 +465,22 @@ async function apiGet(){
     pub: safeJSON(n.pub,{})
   }));
 }
-function safeJSON(str,fallback){
-  try{ return str ? JSON.parse(str) : fallback; }catch(e){ return fallback; }
-}
+
 async function apiPost(body){
-  const res = await fetch(API_URL,{
-    method:'POST',
-    headers:{'Content-Type':'text/plain'}, // evita preflight CORS
-    body:JSON.stringify(body)
-  });
+  // Usa GET com parâmetros para evitar CORS (Apps Script não suporta POST cross-origin)
+  const action = body.action;
+  let url = API_URL + '?action=' + action + '&t=' + Date.now();
+  
+  if(action === 'criar'){
+    const dados = {...body};
+    delete dados.action;
+    url += '&dados=' + encodeURIComponent(JSON.stringify(dados));
+  } else if(action === 'atualizar'){
+    url += '&id=' + body.id;
+    url += '&fields=' + encodeURIComponent(JSON.stringify(body.fields));
+  }
+  
+  const res = await fetch(url);
   const data = await res.json();
   if(!data.ok) throw new Error(data.error||'Erro desconhecido');
   return data;
