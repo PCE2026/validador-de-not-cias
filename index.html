@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Validador de Notícias — AET</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--bg2:#f6f6f4;--bg3:#efefec;
+  --text:#171715;--text2:#65655f;--text3:#9a9a94;
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.17);
+  --blue:#1a6fc4;--blue-bg:#e8f1fb;--blue-text:#0c4a8a;
+  --green:#1a7a4a;--green-bg:#e5f3ec;--green-text:#0e5230;
+  --red:#c0392b;--red-bg:#fdecea;--red-text:#7d1f17;
+  --amber:#b06000;--amber-bg:#fef3e1;--amber-text:#7a4100;
+  --r:8px;--rl:12px;--font:'Segoe UI',system-ui,sans-serif;
+}
+body{font-family:var(--font);background:#ededeb;color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
+.wrap{max-width:820px;margin:0 auto;padding:24px 16px}
+
+/* home screen */
+.home-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.home-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:40px 36px;max-width:560px;width:100%;text-align:center}
+.home-logo{width:60px;height:60px;border-radius:var(--r);background:var(--blue-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.home-logo svg{width:30px;height:30px;stroke:var(--blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.home-box h1{font-size:22px;font-weight:800;margin-bottom:6px}
+.home-box p{font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.6}
+.area-grid{display:grid;grid-template-columns:1fr;gap:12px}
+.area-btn{display:flex;align-items:center;gap:14px;padding:16px 18px;border:1.5px solid var(--border);border-radius:var(--rl);background:var(--bg2);cursor:pointer;text-align:left;transition:all .15s;font-family:var(--font)}
+.area-btn:hover{border-color:#7aabdf;background:var(--blue-bg)}
+.area-btn .ai{width:42px;height:42px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px}
+.area-btn .at{flex:1}
+.area-btn .at-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px}
+.area-btn .at-sub{font-size:12px;color:var(--text2);line-height:1.4}
+
+/* login específico de validação */
+.login-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:36px 32px;max-width:500px;width:100%;text-align:center}
+.login-label{font-size:12px;font-weight:700;color:var(--text2);display:block;text-align:left;margin-bottom:5px}
+.login-box input{width:100%;font-size:14px;padding:10px 12px;border:1.5px solid var(--border2);border-radius:var(--r);font-family:var(--font);margin-bottom:14px}
+.login-box input:focus{outline:none;border-color:var(--blue)}
+.grupo-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.grupo-btn{padding:14px 12px;border:2px solid var(--border);border-radius:var(--r);background:var(--bg2);cursor:pointer;text-align:center;transition:all .15s;font-family:var(--font)}
+.grupo-btn:hover{border-color:#7aabdf;background:var(--blue-bg)}
+.grupo-btn.selected{border-color:var(--blue);background:var(--blue-bg)}
+.grupo-btn .gb-icon{font-size:24px;margin-bottom:6px}
+.grupo-btn .gb-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px}
+.grupo-btn .gb-sub{font-size:11px;color:var(--text2);line-height:1.4}
+
+/* header */
+.header{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.logo{width:44px;height:44px;border-radius:var(--r);background:var(--blue-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo svg{width:22px;height:22px;stroke:var(--blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hb{flex:1}
+.hb h1{font-size:17px;font-weight:800;color:var(--text)}
+.hb p{font-size:12px;color:var(--text2);margin-top:1px}
+.pill-row{display:flex;gap:8px;align-items:center}
+.user-pill{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;white-space:nowrap}
+.user-pill:hover{background:var(--bg3)}
+.user-pill svg{width:13px;height:13px;stroke:var(--text2);fill:none;stroke-width:2}
+
+/* tabs */
+.tabs{display:flex;gap:4px;margin-bottom:20px;padding:3px;background:var(--bg2);border-radius:var(--r)}
+.tab{flex:1;padding:7px 8px;font-size:12px;border:none;background:transparent;border-radius:6px;cursor:pointer;color:var(--text2);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;font-family:var(--font);font-weight:500}
+.tab.active{background:var(--bg);color:var(--text);font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.09)}
+.panel{display:none}.panel.active{display:block}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.sc{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
+.sv{font-size:24px;font-weight:800;color:var(--text);line-height:1}
+.sl{font-size:11px;color:var(--text2);margin-top:4px}
+
+/* card */
+.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:20px;margin-bottom:14px}
+
+/* form */
+.fl{font-size:12px;font-weight:700;color:var(--text2);display:block;margin-bottom:4px;margin-top:14px}
+.fl:first-child{margin-top:0}
+input[type=text],textarea,select{width:100%;font-size:14px;padding:9px 12px;border:1.5px solid var(--border2);border-radius:var(--r);font-family:var(--font)}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--blue)}
+textarea{resize:vertical}
+.cats-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.cat-ck-lbl{display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;background:var(--bg2);padding:5px 11px;border-radius:20px;border:1px solid var(--border);user-select:none}
+.cat-ck-lbl input{width:13px;height:13px;accent-color:var(--blue)}
+.char-count{text-align:right;font-size:11px;color:var(--text2);margin-top:3px}
+
+/* notícia header (validação) */
+.ntitle{font-size:19px;font-weight:800;color:var(--text);margin-bottom:8px;line-height:1.3}
+.meta-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;padding:10px 12px;background:var(--bg2);border-radius:var(--r)}
+.mi{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
+.mi svg{width:12px;height:12px;stroke:var(--text3);fill:none;stroke-width:2;flex-shrink:0}
+.nivel-badge{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;margin-bottom:12px}
+.nivel-a{background:#fff3e0;color:#7a4000;border:1px solid #f0c070}
+.nivel-b{background:#e8f0fe;color:#1a3a7a;border:1px solid #90b0e8}
+.status-badge{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700}
+.status-pendente{background:var(--amber-bg);color:var(--amber-text)}
+.status-aprovada{background:var(--green-bg);color:var(--green-text)}
+.status-revisao{background:var(--blue-bg);color:var(--blue-text)}
+.status-rejeitada{background:var(--red-bg);color:var(--red-text)}
+.cat-pill{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--text2)}
+
+.resp-banner{background:var(--amber-bg);border:1px solid #e8c070;border-radius:var(--r);padding:14px 16px;margin-bottom:16px;font-size:13px;color:var(--amber-text);line-height:1.65}
+.resp-banner strong{display:block;font-size:14px;margin-bottom:6px}
+
+.progress-steps{display:flex;align-items:center;gap:4px;margin-bottom:18px;flex-wrap:wrap}
+.pstep{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--bg2);color:var(--text2);border:2px solid var(--border);flex-shrink:0}
+.pstep.done{background:var(--green-bg);color:var(--green-text);border-color:var(--green)}
+.pstep.current{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue)}
+.pstep.flagged{background:var(--red-bg);color:var(--red-text);border-color:var(--red)}
+.pstep-line{flex:1;height:2px;background:var(--border);min-width:8px}
+
+.field-block{border:1.5px solid var(--border);border-radius:var(--rl);padding:18px;margin-bottom:14px}
+.field-block.field-ok{border-color:#90d4a8;background:var(--green-bg)}
+.field-block.field-flag{border-color:#e8a090;background:var(--red-bg)}
+.field-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:10px}
+.field-label{font-size:11px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.06em}
+.field-status{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;flex-shrink:0}
+.field-status.ok{background:var(--green-bg);color:var(--green-text)}
+.field-status.flag{background:var(--red-bg);color:var(--red-text)}
+.field-status.pending{background:var(--bg2);color:var(--text2)}
+.field-content{font-size:14px;color:var(--text);line-height:1.7;margin-bottom:12px;white-space:pre-wrap}
+.field-content.empty-val{color:var(--text2);font-style:italic}
+.dest-img{width:100%;max-height:220px;object-fit:cover;border-radius:var(--r);border:1px solid var(--border);display:block;margin-bottom:8px;cursor:pointer;transition:opacity .15s}
+.dest-img:hover{opacity:.88}
+.field-char-info{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:8px}
+.field-prog-wrap{height:5px;background:var(--bg3);border-radius:3px;margin-bottom:10px}
+.field-prog-bar{height:5px;border-radius:3px}
+.field-btns{display:flex;gap:8px;flex-wrap:wrap}
+.fbtn{flex:1;min-width:130px;padding:9px 14px;border-radius:var(--r);font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;border:1.5px solid;transition:all .15s;font-family:var(--font)}
+.fbtn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.3;stroke-linecap:round;flex-shrink:0}
+.fbtn-ok{background:var(--bg);color:var(--green-text);border-color:#90d4a8}
+.fbtn-ok:hover,.fbtn-ok.active{background:var(--green-bg);border-color:var(--green)}
+.fbtn-flag{background:var(--bg);color:var(--red-text);border-color:#e8a090}
+.fbtn-flag:hover,.fbtn-flag.active{background:var(--red-bg);border-color:var(--red)}
+.flag-note{width:100%;font-size:13px;padding:9px 11px;border:1.5px solid var(--red);border-radius:var(--r);font-family:var(--font);margin-top:10px;resize:vertical;min-height:55px;display:none}
+.flag-note.show{display:block}
+
+.media-grid{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.mpill{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:5px 10px;font-size:12px;display:flex;align-items:center;gap:5px}
+.mpill svg{width:13px;height:13px;stroke:var(--text2);fill:none;stroke-width:2;flex-shrink:0}
+.mpill a{color:var(--blue);text-decoration:none}
+
+.ai-block{background:linear-gradient(135deg,#f0f6ff,#f4f0ff);border:1px solid #c5d5f0;border-radius:var(--rl);padding:14px 16px;margin:14px 0}
+.ai-hd{font-size:10px;font-weight:800;color:#4a5a80;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ai-hd svg{width:14px;height:14px;stroke:#4a5a80;fill:none;stroke-width:2}
+.ai-body{font-size:13px;color:var(--text);line-height:1.65}
+.ai-body strong{color:#2a3a5a}
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid #c8d0e8;border-top-color:#5570c0;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-load{font-size:12px;color:#4a5a80;display:flex;align-items:center;gap:8px;font-style:italic}
+
+.final-summary{border-radius:var(--rl);padding:18px;margin-bottom:14px}
+.final-summary.ok{background:var(--green-bg);border:1.5px solid var(--green)}
+.final-summary.warn{background:var(--red-bg);border:1.5px solid var(--red)}
+.final-summary h3{font-size:15px;font-weight:800;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.final-summary.ok h3{color:var(--green-text)}
+.final-summary.warn h3{color:var(--red-text)}
+.final-summary p{font-size:13px;line-height:1.6}
+.final-summary.ok p{color:var(--green-text)}
+.final-summary.warn p{color:var(--red-text)}
+.flagged-list{margin-top:10px;padding-left:18px}
+.flagged-list li{font-size:13px;color:var(--red-text);margin-bottom:4px}
+
+.pub-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
+.pub-lbl{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer;padding:8px 16px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);transition:all .15s;user-select:none}
+.pub-lbl.on{border-color:var(--green);background:var(--green-bg);color:var(--green-text)}
+.pub-lbl input{width:14px;height:14px;accent-color:var(--green);cursor:pointer}
+
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+button.btn{padding:10px 18px;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;border:none;font-family:var(--font);transition:filter .15s}
+button.btn:hover{filter:brightness(.93)}
+button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+button.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-apro{background:var(--green-bg);color:var(--green-text)}
+.btn-revi{background:var(--amber-bg);color:var(--amber-text)}
+.btn-reje{background:var(--red-bg);color:var(--red-text)}
+.btn-sec{background:var(--bg2);color:var(--text2);border:1px solid var(--border2)!important}
+.btn-pri{background:var(--blue-bg);color:var(--blue-text)}
+.btn-full{width:100%;justify-content:center}
+
+/* email modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg);border-radius:var(--rl);padding:26px;max-width:560px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.18);max-height:88vh;overflow-y:auto}
+.modal h2{font-size:16px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.modal h2 svg{width:18px;height:18px;stroke:var(--blue);fill:none;stroke-width:2}
+.modal p.sub{font-size:12px;color:var(--text2);margin-bottom:16px}
+.email-field{margin-bottom:12px}
+.email-field label{font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:4px}
+.email-field textarea{min-height:220px;resize:vertical;line-height:1.6}
+.modal-btns{display:flex;gap:8px;margin-top:14px}
+
+/* listas (gestão / histórico) */
+.li{padding:11px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:11px}
+.li:last-child{border-bottom:none;padding-bottom:0}
+.li-ico{width:34px;height:34px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.li-b{flex:1;min-width:0}
+.li-t{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li-s{font-size:11px;color:var(--text2)}
+.li-r{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700}
+.b-apro{background:var(--green-bg);color:var(--green-text)}
+.b-reje{background:var(--red-bg);color:var(--red-text)}
+.b-revi{background:var(--blue-bg);color:var(--blue-text)}
+.b-pend{background:var(--amber-bg);color:var(--amber-text)}
+
+.filter-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.filter-chip{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--text2)}
+.filter-chip.active{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue)}
+
+.empty{text-align:center;padding:36px 16px;color:var(--text2)}
+.empty svg{width:36px;height:36px;stroke:var(--text3);fill:none;stroke-width:1.5;margin:0 auto 10px;display:block}
+.empty p{font-size:13px;line-height:1.6}
+
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bg);border:1px solid var(--border2);border-radius:var(--rl);padding:10px 14px;font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.13);z-index:9999;transform:translateY(60px);opacity:0;transition:all .25s;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast svg{width:16px;height:16px;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
+.loading{display:none;position:fixed;inset:0;background:rgba(255,255,255,.82);z-index:8888;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.loading.show{display:flex}
+.loading .sp{width:28px;height:28px;border:3px solid #dde;border-top-color:#5570c0;border-radius:50%;animation:spin .7s linear infinite}
+.loading p{font-size:13px;color:var(--text2)}
+
+@media(max-width:580px){
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .btn-row button{flex:1;justify-content:center}
+  .grupo-grid{grid-template-columns:1fr}
+  .tab span{display:none}
+  .fbtn{min-width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ HOME — Escolha de área ═══════════ -->
+<div class="home-screen" id="home-screen">
+  <div class="home-box">
+    <div class="home-logo">
+      <svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+    </div>
+    <h1>Validador de Notícias</h1>
+    <p>Agrupamento de Escolas Templários de Tomar<br>Escolhe a área a que queres aceder.</p>
+    <div class="area-grid">
+      <div class="area-btn" onclick="irPara('inserir')">
+        <div class="ai" style="background:var(--blue-bg)">📝</div>
+        <div class="at"><div class="at-title">Inserir Notícia</div><div class="at-sub">Propor uma nova notícia para publicação</div></div>
+      </div>
+      <div class="area-btn" onclick="irPara('login-validar')">
+        <div class="ai" style="background:var(--amber-bg)">✅</div>
+        <div class="at"><div class="at-title">Validar Notícias</div><div class="at-sub">Área reservada aos professores validadores</div></div>
+      </div>
+      <div class="area-btn" onclick="irPara('gestao')">
+        <div class="ai" style="background:var(--green-bg)">📊</div>
+        <div class="at"><div class="at-title">Gestão — Ver Todas</div><div class="at-sub">Panorama total de todas as notícias e estados</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ LOGIN VALIDADOR ═══════════ -->
+<div class="home-screen" id="login-screen" style="display:none">
+  <div class="login-box">
+    <div class="home-logo">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </div>
+    <h1 style="font-size:20px;font-weight:800;margin-bottom:6px">Área de Validação</h1>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:28px">Identifica-te para aceder às notícias do teu grupo.</p>
+
+    <label class="login-label">O teu nome completo *</label>
+    <input type="text" id="login-nome" placeholder="Ex: Ana Martins" autocomplete="name">
+
+    <label class="login-label" style="margin-bottom:10px">O teu grupo de ensino *</label>
+    <div class="grupo-grid">
+      <div class="grupo-btn" id="gbtn-A" onclick="selecionarGrupo('A')">
+        <div class="gb-icon">🏫</div>
+        <div class="gb-title">Pré-escolar e 1.º Ciclo</div>
+        <div class="gb-sub">Escolas Básicas / JI<br>e Centros Escolares</div>
+      </div>
+      <div class="grupo-btn" id="gbtn-B" onclick="selecionarGrupo('B')">
+        <div class="gb-icon">🎓</div>
+        <div class="gb-title">2.º Ciclo, 3.º Ciclo<br>e Secundário</div>
+        <div class="gb-sub">EBI Santa Iria<br>EB 2,3 Gualdim Pais<br>ES Jácome Ratton</div>
+      </div>
+    </div>
+
+    <button class="btn btn-apro btn-full" onclick="fazerLogin()">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Entrar
+    </button>
+    <button class="btn btn-sec btn-full" onclick="irPara('home')" style="margin-top:8px">Voltar</button>
+  </div>
+</div>
+
+<!-- ═══════════ ÁREA: INSERIR NOTÍCIA ═══════════ -->
+<div id="screen-inserir" style="display:none">
+<div class="wrap">
+  <div class="header">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg></div>
+    <div class="hb"><h1>Inserir Notícia</h1><p>Propor uma notícia para publicação nos meios do AET</p></div>
+    <button class="btn btn-sec" onclick="irPara('home')" style="font-size:12px">Voltar</button>
+  </div>
+
+  <div class="card">
+    <label class="fl">1. Nome do proponente *</label>
+    <input type="text" id="a1" placeholder="Nome completo">
+    <label class="fl">2. Email *</label>
+    <input type="text" id="a1b" placeholder="email@aetemplarios.pt">
+    <label class="fl">3. Título da notícia (sem nome da escola ou estrutura) *</label>
+    <input type="text" id="a2" placeholder="Título da notícia">
+    <label class="fl">4. Categoria(s)</label>
+    <div class="cats-grid" id="cats-ck"></div>
+    <label class="fl">5. Estabelecimento de Ensino *</label>
+    <select id="a4">
+      <option value="">— Selecionar —</option>
+      <option>Escola Secundária Jácome Ratton</option>
+      <option>Escola Básica Integrada Santa Iria</option>
+      <option>Escola Básica 2,3 Gualdim Pais</option>
+      <option>Escola Básica/JI Valdonas</option>
+      <option>Escola Básica/JI Serra</option>
+      <option>Escola Básica/JI Carvalhos de Figueiredo</option>
+      <option>Escola Básica/JI Curvaceiras</option>
+      <option>Escola Básica/JI Junceira</option>
+      <option>Escola Básica/JI Olalhas</option>
+      <option>Escola Básica/JI Templários</option>
+      <option>Escola Básica/JI D. Pedro IV – Linhaceira</option>
+      <option>Centro Escolar de São Pedro</option>
+      <option>Centro Escolar dos Casais</option>
+    </select>
+    <label class="fl">6. Texto da notícia * (Quê? Quem? Quando? Como? Porquê? — máx. 2200 car.)</label>
+    <textarea id="a5" rows="8" oninput="updateCharAdd()"></textarea>
+    <div class="char-count" id="char-add">0 / 2200</div>
+    <label class="fl">7. Imagem de Destaque (URL)</label>
+    <input type="text" id="a6" placeholder="https://…">
+    <label class="fl">8. Outras fotos (URLs, uma por linha)</label>
+    <textarea id="a7" rows="3" placeholder="https://foto1.jpg"></textarea>
+    <label class="fl">9. Vídeo (URL)</label>
+    <input type="text" id="a8" placeholder="https://youtube.com/…">
+    <label class="fl">10. Links</label>
+    <input type="text" id="a9" placeholder="https://…">
+    <div class="btn-row">
+      <button class="btn btn-apro btn-full" onclick="submeterNoticia()">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Submeter notícia
+      </button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════ ÁREA: VALIDAR ═══════════ -->
+<div id="screen-validar" style="display:none">
+<div class="wrap">
+  <div class="header">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg></div>
+    <div class="hb"><h1>Validar Notícias</h1><p id="header-sub-validar">...</p></div>
+    <div class="user-pill" onclick="sairValidador()">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span id="user-name-pill">—</span>
+    </div>
+  </div>
+  <div class="stats" id="stats-row"></div>
+  <div id="main-content"></div>
+</div>
+</div>
+
+<!-- ═══════════ ÁREA: GESTÃO — VER TODAS ═══════════ -->
+<div id="screen-gestao" style="display:none">
+<div class="wrap">
+  <div class="header">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg></div>
+    <div class="hb"><h1>Gestão — Ver Todas</h1><p>Panorama total de todas as notícias</p></div>
+    <button class="btn btn-sec" onclick="irPara('home')" style="font-size:12px">Voltar</button>
+  </div>
+  <div class="stats" id="stats-gestao"></div>
+  <div class="filter-row" id="filter-row"></div>
+  <div class="card"><div id="lista-gestao"></div></div>
+</div>
+</div>
+
+<!-- EMAIL MODAL -->
+<div class="modal-overlay" id="email-modal">
+  <div class="modal">
+    <h2><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>Email para o proponente</h2>
+    <p class="sub">Revê e ajusta a mensagem antes de copiar ou enviar.</p>
+    <div class="email-field"><label>Assunto</label><input type="text" id="email-assunto"></div>
+    <div class="email-field"><label>Mensagem</label><textarea id="email-corpo"></textarea></div>
+    <div class="modal-btns">
+      <button class="btn btn-pri" onclick="copiarEmail()" style="flex:1;justify-content:center">
+        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copiar mensagem
+      </button>
+      <button class="btn btn-sec" onclick="fecharEmailModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="loading" id="loading"><div class="sp"></div><p id="load-msg">A processar…</p></div>
+
+<script>
+// ═════════════════════════════════════════════════════════════════════════════
+// CONFIGURAÇÃO
+// ═════════════════════════════════════════════════════════════════════════════
+const API_URL = 'https://script.google.com/macros/s/AKfycbw7xJV-RznpjnJE7tgpzKguXPet2c5efkNr8ThNXjJKR9m33QtBCUCEPciesGZdYug9eQ/exec';
+
+const CATS = ['Atividades','Bibliotecas','Centro Qualifica','Clubes e Projetos','Cursos Profissionais','Erasmus+','Eventos','Informação','PNC','PCE'];
+
+const GRUPOS = {
+  A:{label:'Pré-escolar e 1.º Ciclo',
+     escolas:['valdonas','serra','carvalhos de figueiredo','curvaceiras','junceira','olalhas','templários','d. pedro iv','são pedro','casais']},
+  B:{label:'2.º Ciclo, 3.º Ciclo e Secundário',
+     escolas:['santa iria','gualdim','jácome','jacome','ratton']}
+};
+function normalizar(str){
+  return (str||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[,.]/g,'').trim();
+}
+function escolaParaGrupo(escola){
+  if(!escola)return null;
+  const e=normalizar(escola);
+  if(GRUPOS.B.escolas.some(s=>e.includes(normalizar(s))))return 'B';
+  if(GRUPOS.A.escolas.some(s=>e.includes(normalizar(s))))return 'A';
+  return null;
+}
+
+const CAMPOS = [
+  {key:'titulo',     label:'1. Título da notícia', tipo:'texto'},
+  {key:'categorias', label:'2. Categoria(s)',       tipo:'tags'},
+  {key:'escola',     label:'3. Estabelecimento de Ensino', tipo:'texto'},
+  {key:'corpo',      label:'4. Texto da notícia (Quê? Quem? Quando? Como? Porquê?)', tipo:'corpo'},
+  {key:'imgDestaque',label:'5. Imagem de Destaque', tipo:'imagem'},
+  {key:'outrasFotos',label:'6. Outras Fotos',       tipo:'fotos'},
+  {key:'video',      label:'7. Vídeo',              tipo:'link'},
+  {key:'links',      label:'8. Links',              tipo:'link'}
+];
+
+// ═════════════════════════════════════════════════════════════════════════════
+// STATE
+// ═════════════════════════════════════════════════════════════════════════════
+let noticias = [];     // cache local, vem do Apps Script
+let sessao = null;     // {nome, grupo}
+let grupoSel = null;
+let stepAtual = 0;
+let filtroGestao = 'todas';
+
+document.getElementById('cats-ck').innerHTML = CATS.map(c=>
+  `<label class="cat-ck-lbl"><input type="checkbox" value="${c}"> ${c}</label>`).join('');
+
+// ═════════════════════════════════════════════════════════════════════════════
+// API HELPERS
+// ═════════════════════════════════════════════════════════════════════════════
+async function apiGet(){
+  const res = await fetch(API_URL);
+  const data = await res.json();
+  if(!data.ok) throw new Error(data.error||'Erro desconhecido');
+  // Normaliza tipos (categorias/outrasFotos vêm como string separada por ;)
+  return data.noticias.map(n=>({
+    ...n,
+    categorias: (n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
+    outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
+    revisoes: safeJSON(n.revisoesJSON,{}),
+    pub: safeJSON(n.pub,{})
+  }));
+}
+function safeJSON(str,fallback){
+  try{ return str ? JSON.parse(str) : fallback; }catch(e){ return fallback; }
+}
+async function apiPost(body){
+  const res = await fetch(API_URL,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain'}, // evita preflight CORS
+    body:JSON.stringify(body)
+  });
+  const data = await res.json();
+  if(!data.ok) throw new Error(data.error||'Erro desconhecido');
+  return data;
+}
+async function carregarNoticias(){
+  showLoad('A carregar notícias…');
+  try{
+    noticias = await apiGet();
+    hideLoad();
+    return true;
+  }catch(e){
+    hideLoad();
+    toast('Erro ao carregar notícias: '+e.message,'error');
+    return false;
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// NAVEGAÇÃO ENTRE ÁREAS
+// ═════════════════════════════════════════════════════════════════════════════
+function irPara(area){
+  document.getElementById('home-screen').style.display='none';
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('screen-inserir').style.display='none';
+  document.getElementById('screen-validar').style.display='none';
+  document.getElementById('screen-gestao').style.display='none';
+
+  if(area==='home'){ document.getElementById('home-screen').style.display='flex'; }
+  else if(area==='inserir'){ document.getElementById('screen-inserir').style.display='block'; }
+  else if(area==='login-validar'){ document.getElementById('login-screen').style.display='flex'; }
+  else if(area==='gestao'){
+    document.getElementById('screen-gestao').style.display='block';
+    renderGestao();
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ÁREA: INSERIR NOTÍCIA
+// ═════════════════════════════════════════════════════════════════════════════
+function updateCharAdd(){
+  const v=document.getElementById('a5').value;
+  const el=document.getElementById('char-add');
+  el.textContent=v.length+' / 2200';
+  el.style.color=v.length>2200?'var(--red)':v.length>1800?'var(--amber)':'var(--text2)';
+}
+
+async function submeterNoticia(){
+  const proponente=(document.getElementById('a1').value||'').trim();
+  const email=(document.getElementById('a1b').value||'').trim();
+  const titulo=(document.getElementById('a2').value||'').trim();
+  const escola=document.getElementById('a4').value;
+  const corpo=(document.getElementById('a5').value||'').trim();
+
+  if(!proponente||!titulo||!escola||!corpo){
+    toast('Preenche todos os campos obrigatórios (*)','warning');return;
+  }
+  const cats=[...document.querySelectorAll('#cats-ck input:checked')].map(x=>x.value);
+  const outras=(document.getElementById('a7').value||'').split('\n').map(s=>s.trim()).filter(Boolean);
+
+  showLoad('A submeter notícia…');
+  try{
+    await apiPost({
+      action:'criar',
+      proponente, emailProponente:email, titulo,
+      categorias:cats, escola, corpo,
+      imgDestaque:document.getElementById('a6').value.trim(),
+      outrasFotos:outras,
+      video:document.getElementById('a8').value.trim(),
+      links:document.getElementById('a9').value.trim()
+    });
+    hideLoad();
+    toast('Notícia submetida com sucesso!','success');
+    ['a1','a1b','a2','a4','a5','a6','a7','a8','a9'].forEach(id=>document.getElementById(id).value='');
+    document.querySelectorAll('#cats-ck input').forEach(c=>c.checked=false);
+    updateCharAdd();
+    irPara('home');
+  }catch(e){
+    hideLoad();
+    toast('Erro ao submeter: '+e.message,'error');
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ÁREA: VALIDAR — Login
+// ═════════════════════════════════════════════════════════════════════════════
+function selecionarGrupo(g){
+  grupoSel=g;
+  document.querySelectorAll('.grupo-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('gbtn-'+g).classList.add('selected');
+}
+async function fazerLogin(){
+  const nome=document.getElementById('login-nome').value.trim();
+  if(!nome){toast('Escreve o teu nome completo','warning');return;}
+  if(!grupoSel){toast('Seleciona o teu grupo de ensino','warning');return;}
+  sessao={nome,grupo:grupoSel};
+  stepAtual=0;
+  document.getElementById('user-name-pill').textContent=nome;
+  document.getElementById('header-sub-validar').textContent=`${GRUPOS[grupoSel].label} · a validar notícias do teu grupo`;
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('screen-validar').style.display='block';
+  await carregarNoticias();
+  renderValidar();
+}
+function sairValidador(){
+  if(!confirm('Tens a certeza que queres sair?'))return;
+  sessao=null;grupoSel=null;stepAtual=0;
+  document.getElementById('login-nome').value='';
+  document.querySelectorAll('.grupo-btn').forEach(b=>b.classList.remove('selected'));
+  irPara('home');
+}
+
+function filaDoGrupo(){
+  return noticias.filter(n=>{
+    if(n.status==='aprovada'||n.status==='rejeitada') return false;
+    const g=escolaParaGrupo(n.escola);
+    return !g||g===sessao.grupo;
+  });
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// RENDER: STATS
+// ═════════════════════════════════════════════════════════════════════════════
+function renderStats(){
+  const minha=filaDoGrupo();
+  const meuHist=noticias.filter(n=>{
+    const g=escolaParaGrupo(n.escola);
+    return (!g||g===sessao.grupo) && (n.status==='aprovada'||n.status==='rejeitada'||n.status==='revisao');
+  });
+  const aprov=meuHist.filter(n=>n.status==='aprovada').length;
+  const rej=meuHist.filter(n=>n.status==='rejeitada'||n.status==='revisao').length;
+  document.getElementById('stats-row').innerHTML=`
+    <div class="sc"><div class="sv">${minha.length}</div><div class="sl">Por validar</div></div>
+    <div class="sc"><div class="sv" style="color:var(--green)">${aprov}</div><div class="sl">Aprovadas</div></div>
+    <div class="sc"><div class="sv" style="color:var(--red)">${rej}</div><div class="sl">Rejeit./Revisão</div></div>`;
+}
+
+function getNivelBadge(escola){
+  const g=escolaParaGrupo(escola);
+  if(g==='A')return `<span class="nivel-badge nivel-a">🏫 Pré-escolar / 1.º Ciclo</span>`;
+  if(g==='B')return `<span class="nivel-badge nivel-b">🎓 2.º/3.º Ciclo / Secundário</span>`;
+  return '';
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// RENDER: VALIDAR
+// ═════════════════════════════════════════════════════════════════════════════
+function buildListaEspera(minha,proximaId){
+  const outras = minha.filter(n=>n.id!==proximaId);
+  if(!outras.length) return '';
+  return `
+  <div class="card" style="padding:14px 18px">
+    <div style="font-size:11px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Em espera no teu grupo (${outras.length})</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      ${outras.map(n=>`
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border)">
+          <span style="flex:1;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${n.titulo}</span>
+          <span style="flex-shrink:0">${n.escola||'—'}</span>
+          ${n.validador?`<span style="flex-shrink:0;background:var(--blue-bg);color:var(--blue-text);padding:1px 8px;border-radius:20px;font-weight:700">${n.validador}</span>`:''}
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderValidar(){
+  renderStats();
+  const el=document.getElementById('main-content');
+  const minha=filaDoGrupo();
+
+  if(!minha.length){
+    el.innerHTML=`<div class="card"><div class="empty">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg>
+      <p>Não há notícias por validar para o teu grupo.</p>
+    </div></div>`;
+    return;
+  }
+
+  const proxima = minha.find(n=>!n.validador) || minha.find(n=>n.validador===sessao.nome);
+
+  if(!proxima){
+    el.innerHTML=buildListaEspera(minha,-1)+`<div class="card"><div class="empty">
+      <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <p>Todas as notícias do teu grupo já têm validador atribuído.</p>
+    </div></div>`;
+    return;
+  }
+
+  const listaHtml = buildListaEspera(minha,proxima.id);
+
+  if(!proxima.validador){
+    el.innerHTML = listaHtml + buildAceitacao(proxima);
+  } else {
+    if(!proxima._analiseFeita) analisarIA(proxima.id);
+    el.innerHTML = listaHtml + buildValidacaoCampoACampo(proxima);
+  }
+}
+
+function buildAceitacao(n){
+  return `
+  <div class="card">
+    <div class="ntitle">${n.titulo}</div>
+    ${getNivelBadge(n.escola)}
+    <div class="meta-row">
+      <div class="mi"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${n.proponente||'—'}</div>
+      <div class="mi"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>${n.escola||'—'}</div>
+      <div class="mi"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${(n.timestamp||'').slice(0,10)}</div>
+    </div>
+    <div class="resp-banner">
+      <strong>⚠️ Esta é a notícia mais antiga por validar no teu grupo</strong>
+      Vais confirmar campo a campo: título, categorias, estabelecimento, texto, imagem de destaque, outras fotos, vídeo e links. Onde houver problemas, poderás gerar uma mensagem para o proponente.
+    </div>
+    <button class="btn btn-apro btn-full" onclick="aceitarValidacao(${n.id})">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Começar a validar esta notícia
+    </button>
+  </div>`;
+}
+
+async function aceitarValidacao(id){
+  showLoad('A atribuir notícia…');
+  try{
+    await apiPost({action:'atualizar', id, fields:{validador:sessao.nome, status:'em_validacao'}});
+    const n=noticias.find(x=>x.id===id);
+    if(n){n.validador=sessao.nome;n.status='em_validacao';}
+    hideLoad();
+    stepAtual=0;
+    renderValidar();
+  }catch(e){
+    hideLoad();
+    toast('Erro: '+e.message,'error');
+  }
+}
+
+function buildValidacaoCampoACampo(n){
+  const total=CAMPOS.length;
+  const allDone = CAMPOS.every(c=>n.revisoes[c.key]&&n.revisoes[c.key].status);
+
+  const stepsHtml = CAMPOS.map((c,i)=>{
+    const rev=n.revisoes[c.key];
+    let cls='pstep';
+    if(rev&&rev.status==='ok')cls+=' done';
+    else if(rev&&rev.status==='flag')cls+=' flagged';
+    else if(i===stepAtual)cls+=' current';
+    return `<div class="${cls}" title="${c.label}">${i+1}</div>${i<total-1?'<div class="pstep-line"></div>':''}`;
+  }).join('');
+
+  if(allDone) return buildResumoFinal(n);
+
+  const campo=CAMPOS[stepAtual];
+  const rev=n.revisoes[campo.key]||{status:null,nota:''};
+
+  return `
+  <div class="card">
+    <div class="ntitle">${n.titulo}</div>
+    ${getNivelBadge(n.escola)}
+    <div class="meta-row">
+      <div class="mi"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${n.proponente||'—'}</div>
+      <div class="mi"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>${n.escola||'—'}</div>
+      <div class="mi"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${(n.timestamp||'').slice(0,10)}</div>
+    </div>
+    <div class="progress-steps">${stepsHtml}</div>
+    ${stepAtual===0?buildAIBlock(n):''}
+    ${buildFieldCard(n,campo,rev)}
+  </div>`;
+}
+
+function buildAIBlock(n){
+  const analiseHtml = n.analise
+    ? `<div class="ai-body">${n.analise.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`
+    : `<div class="ai-load"><div class="spinner"></div> A analisar com IA…</div>`;
+  return `<div class="ai-block">
+    <div class="ai-hd"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>Análise automática — IA</div>
+    <div id="ai-${n.id}">${analiseHtml}</div>
+  </div>`;
+}
+
+function buildFieldCard(n,campo,rev){
+  let contentHtml='';
+  const val=n[campo.key];
+
+  if(campo.tipo==='texto'){
+    contentHtml=`<div class="field-content ${!val?'empty-val':''}">${val||'(vazio)'}</div>`;
+  } else if(campo.tipo==='tags'){
+    contentHtml=(val&&val.length)
+      ?`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">${val.map(c=>`<span class="cat-pill">${c}</span>`).join('')}</div>`
+      :`<div class="field-content empty-val">(sem categorias)</div>`;
+  } else if(campo.tipo==='corpo'){
+    const chars=val?val.length:0;
+    const pct=Math.min(100,Math.round((chars/2200)*100));
+    const cc=chars>2200?'var(--red)':chars>1800?'var(--amber)':'var(--green)';
+    contentHtml=`<div class="field-content ${!val?'empty-val':''}">${val||'(vazio)'}</div>
+      <div class="field-char-info"><span>Comprimento</span><span style="color:${cc};font-weight:700">${chars} / 2200</span></div>
+      <div class="field-prog-wrap"><div class="field-prog-bar" style="width:${pct}%;background:${cc}"></div></div>`;
+  } else if(campo.tipo==='imagem'){
+    contentHtml=val
+      ?`<img class="dest-img" src="${val}" alt="Imagem de destaque" onclick="window.open('${val}','_blank')" onerror="this.style.display='none'">`
+      :`<div class="field-content empty-val">(sem imagem de destaque)</div>`;
+  } else if(campo.tipo==='fotos'){
+    contentHtml=(val&&val.length)
+      ?`<div class="media-grid">${val.map((f,i)=>`<div class="mpill"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Foto ${i+1}: <a href="${f}" target="_blank">${f.length>35?f.slice(0,35)+'…':f}</a></div>`).join('')}</div>`
+      :`<div class="field-content empty-val">(sem outras fotos)</div>`;
+  } else if(campo.tipo==='link'){
+    contentHtml=val
+      ?`<div class="mpill" style="margin-bottom:8px"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg><a href="${val}" target="_blank">${val.length>55?val.slice(0,55)+'…':val}</a></div>`
+      :`<div class="field-content empty-val">(vazio)</div>`;
+  }
+
+  const statusBadge = rev.status==='ok'
+    ?`<span class="field-status ok"><svg viewBox="0 0 24 24" width="11" height="11" style="stroke:currentColor;fill:none;stroke-width:3"><polyline points="20 6 9 17 4 12"/></svg>Confirmado</span>`
+    : rev.status==='flag'
+    ?`<span class="field-status flag"><svg viewBox="0 0 24 24" width="11" height="11" style="stroke:currentColor;fill:none;stroke-width:3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>A melhorar</span>`
+    :`<span class="field-status pending">Por verificar</span>`;
+
+  const blockCls = rev.status==='ok'?'field-ok':rev.status==='flag'?'field-flag':'';
+
+  return `
+  <div class="field-block ${blockCls}">
+    <div class="field-head"><span class="field-label">${campo.label}</span>${statusBadge}</div>
+    ${contentHtml}
+    <div class="field-btns">
+      <button class="fbtn fbtn-ok ${rev.status==='ok'?'active':''}" onclick="marcarCampo('${campo.key}','ok')">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirmar
+      </button>
+      <button class="fbtn fbtn-flag ${rev.status==='flag'?'active':''}" onclick="marcarCampo('${campo.key}','flag')">
+        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>Pedir melhoria
+      </button>
+    </div>
+    <textarea class="flag-note ${rev.status==='flag'?'show':''}" id="flagnote-${campo.key}" placeholder="Descreve o que precisa de ser melhorado neste campo…" onchange="saveFlagNote('${campo.key}',this.value)">${rev.nota||''}</textarea>
+    <div class="btn-row">
+      ${stepAtual>0?`<button class="btn btn-sec" onclick="voltarStep()"><svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Anterior</button>`:''}
+      <button class="btn btn-pri" onclick="avancarStep()" ${!rev.status?'disabled':''} style="flex:1;justify-content:center">
+        Próximo campo<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+  </div>`;
+}
+
+function getCurNoticia(){
+  return filaDoGrupo().find(n=>n.validador===sessao.nome);
+}
+
+let saveTimeout=null;
+function marcarCampo(key,status){
+  const n=getCurNoticia();
+  if(!n)return;
+  if(!n.revisoes)n.revisoes={};
+  if(!n.revisoes[key])n.revisoes[key]={status:null,nota:''};
+  n.revisoes[key].status=status;
+  persistRevisoes(n);
+  renderValidar();
+}
+function saveFlagNote(key,val){
+  const n=getCurNoticia();
+  if(!n)return;
+  if(!n.revisoes[key])n.revisoes[key]={status:'flag',nota:''};
+  n.revisoes[key].nota=val;
+  persistRevisoes(n);
+}
+function persistRevisoes(n){
+  clearTimeout(saveTimeout);
+  saveTimeout=setTimeout(()=>{
+    apiPost({action:'atualizar', id:n.id, fields:{revisoesJSON:n.revisoes}}).catch(e=>console.error(e));
+  },600);
+}
+function avancarStep(){
+  if(stepAtual<CAMPOS.length-1){stepAtual++;renderValidar();}
+  else renderValidar();
+}
+function voltarStep(){
+  if(stepAtual>0){stepAtual--;renderValidar();}
+}
+
+function buildResumoFinal(n){
+  const flagged=CAMPOS.filter(c=>n.revisoes[c.key]&&n.revisoes[c.key].status==='flag');
+  const tudoOk=flagged.length===0;
+
+  const pubHtml=['Site','Facebook','Instagram'].map(m=>{
+    const k=m.toLowerCase();
+    const on=n.pub&&n.pub[k];
+    return `<label class="pub-lbl ${on?'on':''}" id="pub-${n.id}-${k}">
+      <input type="checkbox" ${on?'checked':''} onchange="togglePub(${n.id},'${k}',this.checked)">${m}
+    </label>`;
+  }).join('');
+
+  return `
+  <div class="card">
+    <div class="ntitle">${n.titulo}</div>
+    ${getNivelBadge(n.escola)}
+    <div class="progress-steps">${CAMPOS.map((c,i)=>{
+      const rev=n.revisoes[c.key];
+      let cls='pstep done';
+      if(rev&&rev.status==='flag')cls='pstep flagged';
+      return `<div class="${cls}" title="${c.label}">${i+1}</div>${i<CAMPOS.length-1?'<div class="pstep-line"></div>':''}`;
+    }).join('')}</div>
+
+    ${tudoOk?`
+    <div class="final-summary ok">
+      <h3><svg viewBox="0 0 24 24" width="18" height="18" style="stroke:var(--green-text);fill:none;stroke-width:2.3"><polyline points="20 6 9 17 4 12"/></svg>Tudo confirmado!</h3>
+      <p>Todos os campos foram verificados e estão em conformidade. Esta notícia pode ser aprovada para publicação.</p>
+    </div>
+    <div style="font-size:10px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin:14px 0 8px">Publicar em</div>
+    <div class="pub-row">${pubHtml}</div>
+    <div class="btn-row">
+      <button class="btn btn-apro btn-full" onclick="aprovarFinal(${n.id})">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Aprovar — Pode publicar
+      </button>
+    </div>`:`
+    <div class="final-summary warn">
+      <h3><svg viewBox="0 0 24 24" width="18" height="18" style="stroke:var(--red-text);fill:none;stroke-width:2.3"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>${flagged.length} campo(s) a melhorar</h3>
+      <p>Identificaste os seguintes pontos a melhorar antes da publicação:</p>
+      <ul class="flagged-list">${flagged.map(c=>`<li><strong>${c.label}:</strong> ${n.revisoes[c.key].nota||'(sem nota)'}</li>`).join('')}</ul>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-sec" onclick="stepAtual=0;renderValidar()" style="flex:1;justify-content:center">
+        <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Revisar campos
+      </button>
+      <button class="btn btn-revi" onclick="abrirEmailModal(${n.id})" style="flex:1;justify-content:center">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>Gerar email para o proponente
+      </button>
+    </div>`}
+  </div>`;
+}
+
+function togglePub(id,k,v){
+  const n=noticias.find(x=>x.id===id);
+  if(!n)return;
+  if(!n.pub)n.pub={};
+  n.pub[k]=v;
+  apiPost({action:'atualizar', id, fields:{pub:n.pub}}).catch(e=>console.error(e));
+  const l=document.getElementById(`pub-${id}-${k}`);
+  if(l){v?l.classList.add('on'):l.classList.remove('on');}
+}
+
+async function aprovarFinal(id){
+  showLoad('A aprovar notícia…');
+  try{
+    const n=noticias.find(x=>x.id===id);
+    await apiPost({action:'atualizar', id, fields:{status:'aprovada', dataValidacao:new Date().toISOString(), pub:n.pub||{}}});
+    n.status='aprovada';
+    hideLoad();
+    stepAtual=0;
+    toast('Notícia aprovada — pode publicar!','success');
+    renderValidar();
+  }catch(e){
+    hideLoad();
+    toast('Erro: '+e.message,'error');
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// EMAIL MODAL
+// ═════════════════════════════════════════════════════════════════════════════
+let emailNoticiaId=null;
+function abrirEmailModal(id){
+  const n=noticias.find(x=>x.id===id);
+  if(!n)return;
+  emailNoticiaId=id;
+  const flagged=CAMPOS.filter(c=>n.revisoes[c.key]&&n.revisoes[c.key].status==='flag');
+
+  const assunto=`Notícia "${n.titulo}" — pequenos ajustes antes da publicação`;
+  const corpo=`Olá ${n.proponente||''},
+
+Obrigado/a pela submissão da notícia "${n.titulo}".
+
+Antes de podermos publicar, pedimos que reveja os seguintes pontos:
+
+${flagged.map(c=>`• ${c.label}:\n  ${n.revisoes[c.key].nota||'(adicionar nota)'}`).join('\n\n')}
+
+Após corrigir, pode submeter novamente através do formulário.
+
+Obrigado pela colaboração!
+${sessao.nome}
+Equipa de Comunicação — AET`;
+
+  document.getElementById('email-assunto').value=assunto;
+  document.getElementById('email-corpo').value=corpo;
+  document.getElementById('email-modal').classList.add('show');
+}
+function fecharEmailModal(){
+  document.getElementById('email-modal').classList.remove('show');
+  emailNoticiaId=null;
+}
+async function copiarEmail(){
+  const assunto=document.getElementById('email-assunto').value;
+  const corpo=document.getElementById('email-corpo').value;
+  const texto=`Assunto: ${assunto}\n\n${corpo}`;
+  try{
+    await navigator.clipboard.writeText(texto);
+    toast('Mensagem copiada! Cola no teu email.','success');
+    showLoad('A atualizar...');
+    const n=noticias.find(x=>x.id===emailNoticiaId);
+    await apiPost({action:'atualizar', id:emailNoticiaId, fields:{status:'revisao', dataValidacao:new Date().toISOString()}});
+    if(n)n.status='revisao';
+    hideLoad();
+    fecharEmailModal();
+    stepAtual=0;
+    renderValidar();
+  }catch(e){
+    hideLoad();
+    toast('Não foi possível copiar. Seleciona e copia manualmente.','warning');
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// AI
+// ═════════════════════════════════════════════════════════════════════════════
+async function analisarIA(id){
+  const n=noticias.find(x=>x.id===id);
+  if(!n||!n.corpo)return;
+  n._analiseFeita=true;
+  const el=document.getElementById('ai-'+id);
+  if(!el)return;
+  const prompt=`És um assistente editorial escolar. Usa sempre português europeu (Portugal).
+
+Analisa esta notícia submetida ao Agrupamento de Escolas Templários de Tomar:
+
+TÍTULO: ${n.titulo}
+ESCOLA: ${n.escola||'não indicada'}
+CATEGORIAS: ${(n.categorias||[]).join(', ')||'não indicadas'}
+
+TEXTO:
+${n.corpo}
+
+Responde com exatamente esta estrutura:
+
+**Verificação dos 5W**
+• Quê? ✅/❌ — [frase breve]
+• Quem? ✅/❌ — [frase breve]
+• Quando? ✅/❌ — [frase breve]
+• Onde? ✅/❌ — [frase breve]
+• Porquê/Como? ✅/❌ — [frase breve]
+
+**Qualidade do texto**
+[2–3 frases sobre clareza, tom e correção em português europeu.]
+
+**Sugestões de melhoria**
+[Máximo 3 sugestões numeradas e objetivas.]
+
+**Veredicto**
+✅ Pronto a publicar | ⚠️ Requer pequenas revisões | ❌ Requer revisão significativa — [justificação em 1 frase]`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:900,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    const text=data.content?.map(i=>i.text||'').join('\n')||'Sem resposta.';
+    n.analise=text;
+    if(el)el.innerHTML=`<div class="ai-body">${text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`;
+  }catch(e){
+    if(el)el.innerHTML=`<span style="font-size:12px;color:var(--red)">Erro na análise automática.</span>`;
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ÁREA: GESTÃO — VER TODAS
+// ═════════════════════════════════════════════════════════════════════════════
+async function renderGestao(){
+  showLoad('A carregar todas as notícias…');
+  await carregarNoticias();
+  hideLoad();
+
+  const total=noticias.length;
+  const pend=noticias.filter(n=>n.status==='pendente').length;
+  const emVal=noticias.filter(n=>n.status==='em_validacao').length;
+  const aprov=noticias.filter(n=>n.status==='aprovada').length;
+  const rej=noticias.filter(n=>n.status==='rejeitada'||n.status==='revisao').length;
+
+  document.getElementById('stats-gestao').innerHTML=`
+    <div class="sc"><div class="sv">${total}</div><div class="sl">Total</div></div>
+    <div class="sc"><div class="sv" style="color:var(--amber)">${pend+emVal}</div><div class="sl">Por validar</div></div>
+    <div class="sc"><div class="sv" style="color:var(--green)">${aprov}</div><div class="sl">Aprovadas</div></div>`;
+
+  document.getElementById('filter-row').innerHTML=`
+    <div class="filter-chip ${filtroGestao==='todas'?'active':''}" onclick="setFiltroGestao('todas')">Todas (${total})</div>
+    <div class="filter-chip ${filtroGestao==='pendente'?'active':''}" onclick="setFiltroGestao('pendente')">Pendentes (${pend+emVal})</div>
+    <div class="filter-chip ${filtroGestao==='aprovada'?'active':''}" onclick="setFiltroGestao('aprovada')">Aprovadas (${aprov})</div>
+    <div class="filter-chip ${filtroGestao==='revisao'?'active':''}" onclick="setFiltroGestao('revisao')">Revisão/Rejeitadas (${rej})</div>`;
+
+  renderListaGestao();
+}
+
+function setFiltroGestao(f){
+  filtroGestao=f;
+  renderGestao();
+}
+
+function renderListaGestao(){
+  const el=document.getElementById('lista-gestao');
+  let lista=noticias;
+  if(filtroGestao==='pendente') lista=noticias.filter(n=>n.status==='pendente'||n.status==='em_validacao');
+  else if(filtroGestao==='aprovada') lista=noticias.filter(n=>n.status==='aprovada');
+  else if(filtroGestao==='revisao') lista=noticias.filter(n=>n.status==='rejeitada'||n.status==='revisao');
+
+  if(!lista.length){
+    el.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24"><path d="M21 8v13H3V8"/><rect x="1" y="3" width="22" height="5" rx="1"/><line x1="10" y1="12" x2="14" y2="12"/></svg><p>Sem notícias nesta categoria.</p></div>`;
+    return;
+  }
+
+  const bmap={aprovada:'b-apro',rejeitada:'b-reje',revisao:'b-revi',pendente:'b-pend',em_validacao:'b-pend'};
+  const lmap={aprovada:'Aprovada',rejeitada:'Rejeitada',revisao:'Em revisão',pendente:'Pendente',em_validacao:'Em validação'};
+
+  el.innerHTML=[...lista].reverse().map(n=>`
+    <div class="li">
+      <div class="li-ico" style="background:var(--bg2)"><svg viewBox="0 0 24 24" width="16" height="16" style="stroke:var(--text2);fill:none;stroke-width:1.8"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/></svg></div>
+      <div class="li-b">
+        <div class="li-t">${n.titulo}</div>
+        <div class="li-s">${n.proponente||'—'} · ${n.escola||'—'} · ${(n.timestamp||'').slice(0,10)} ${n.validador?'· validado por '+n.validador:''}</div>
+      </div>
+      <div class="li-r">
+        <span class="badge ${bmap[n.status]||''}">${lmap[n.status]||n.status}</span>
+        ${n.pub?Object.entries(n.pub).filter(([,v])=>v).map(([k])=>`<span style="font-size:10px;background:var(--green-bg);color:var(--green-text);padding:1px 6px;border-radius:20px">${k}</span>`).join(''):''}
+      </div>
+    </div>`).join('');
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// HELPERS
+// ═════════════════════════════════════════════════════════════════════════════
+function showLoad(msg){document.getElementById('load-msg').textContent=msg;document.getElementById('loading').classList.add('show');}
+function hideLoad(){document.getElementById('loading').classList.remove('show');}
+function toast(msg,type='info'){
+  const t=document.getElementById('toast');
+  const s={success:`<svg viewBox="0 0 24 24" style="stroke:var(--green)"><polyline points="20 6 9 17 4 12"/></svg>`,
+    error:`<svg viewBox="0 0 24 24" style="stroke:var(--red)"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+    warning:`<svg viewBox="0 0 24 24" style="stroke:var(--amber)"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>`,
+    info:`<svg viewBox="0 0 24 24" style="stroke:var(--blue)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`};
+  t.innerHTML=(s[type]||s.info)+msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+</script>
+</body>
+</html>
