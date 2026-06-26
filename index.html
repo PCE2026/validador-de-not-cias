@@ -442,21 +442,9 @@ function jsonpFetch_(url){
   });
 }
 
-async function apiFetch_(url, forceJsonp=false){
-  // Apps Script redireciona GETs — fetch normal falha por CORS nas escritas
-  // Usar JSONP diretamente para guardar; tentar fetch para listar (mais rápido)
-  if(!forceJsonp){
-    try{
-      const res = await fetch(url, {redirect:'follow'});
-      if(res.ok) return await res.json();
-    }catch(_){}
-  }
-  // JSONP — contorna CORS sem licença Premium
-  try{
-    return await jsonpFetch_(url);
-  }catch(e){
-    throw new Error('Não foi possível ligar ao servidor.');
-  }
+async function apiFetch_(url){
+  // Apps Script bloqueia CORS — usar sempre JSONP
+  return await jsonpFetch_(url);
 }
 
 async function apiGuardar(n, estado, meios, nota){
@@ -473,7 +461,7 @@ async function apiGuardar(n, estado, meios, nota){
   };
   const url = API_URL+'?action=guardarValidacao&chave='+encodeURIComponent(dados.chave)
     +'&dados='+encodeURIComponent(JSON.stringify(dados))+'&t='+Date.now();
-  const data = await apiFetch_(url, true); // JSONP obrigatório para escritas
+  const data = await apiFetch_(url); // JSONP obrigatório para escritas
   validacoes[dados.chave] = dados;
   return data;
 }
@@ -494,7 +482,7 @@ async function apiGuardarNoticia(n){
     links: n.links||''
   };
   const url = API_URL+'?action=guardarNoticia&dados='+encodeURIComponent(JSON.stringify(dados))+'&t='+Date.now();
-  return await apiFetch_(url, true); // JSONP obrigatório para escritas
+  return await apiFetch_(url); // JSONP obrigatório para escritas
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1098,17 +1086,23 @@ async function sincronizarTudo(){
   const st=document.getElementById('import-status');
   showLoad('A sincronizar '+noticias.length+' notícias com Google Sheets…');
   let ok=0, err=0;
+  const detalhes=[];
   for(const n of noticias){
     try{
       const r=await apiGuardarNoticia(n);
-      if(r&&r.ok)ok++;
-      else err++;
-    }catch(e){err++;}
+      if(r&&r.ok){ ok++; detalhes.push('✅ '+n.titulo.slice(0,30)+' → '+r.acao); }
+      else { err++; detalhes.push('❌ '+n.titulo.slice(0,30)+' → '+(r&&r.error||'sem resposta')); }
+    }catch(e){ err++; detalhes.push('💥 '+n.titulo.slice(0,30)+' → '+e.message); }
   }
   hideLoad();
-  st.textContent=`✓ ${ok} sincronizadas · ${err} erros`;
-  if(ok>0) toast(`${ok} notícia(s) sincronizadas com Google Sheets!`,'success');
-  else toast('Não foi possível sincronizar. Verifica a ligação.','error');
+  // Mostrar resultado detalhado numa caixa visível
+  const log = detalhes.join('
+');
+  st.innerHTML = `<pre style="font-size:11px;background:#f5f5f5;border:1px solid #ddd;padding:10px;border-radius:8px;max-height:200px;overflow:auto;text-align:left;white-space:pre-wrap">${log}
+
+✓ ${ok} ok · ✗ ${err} erros</pre>`;
+  if(ok>0) toast(ok+' notícia(s) enviadas para o Sheets!','success');
+  else toast('Nenhuma chegou ao Sheets. Vê os detalhes abaixo.','error');
 }
 
 // ═══════════════════════════════════════════════════════════════
