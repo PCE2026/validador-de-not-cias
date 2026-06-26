@@ -276,9 +276,15 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
   <div class="header">
     <div class="logo"><svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg></div>
     <div class="hb"><h1>Validar Notícias</h1><p id="hdr-validar-sub"></p></div>
-    <div class="user-pill" onclick="sairValidador()">
-      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span id="user-pill-nome"></span>
+    <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+      <div class="user-pill" onclick="atualizarNoticiasValidador()" title="Atualizar notícias do servidor">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+        <span>Atualizar</span>
+      </div>
+      <div class="user-pill" onclick="sairValidador()">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span id="user-pill-nome"></span>
+      </div>
     </div>
   </div>
   <div class="stats" id="stats-validar"></div>
@@ -346,7 +352,7 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
 // ═══════════════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════════════
-const API_URL = 'https://script.google.com/macros/s/AKfycbwFxi003S3RIYSQJdJP1rgZZ_qvgtESIFE2nQWJZN1LU1CjtZG9vCN8mNu5MGLApBQ6AA/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzBDd9pyOyseQbInZLipl6K5DUK4SCj3KCOXrWDKPbYPR0dEQpuibWcgLYMBNNUYOhasg/exec';
 const PASS_GESTAO = 'templarios2027'; // mesma do projeto Cidadania
 
 const GRUPOS = {
@@ -515,34 +521,77 @@ async function fazerLogin(){
   document.getElementById('user-pill-nome').textContent=nome;
   document.getElementById('hdr-validar-sub').textContent=GRUPOS[grupoSel].label+' · a validar notícias do teu grupo';
   irPara('validar');
-  showLoad('A carregar notícias e estados…');
+  showLoad('A carregar notícias do servidor…');
   try{
     const data = await apiListar();
-    // Merge notícias do Sheets com locais (Sheets tem precedência para novos)
-    const chavesLocais = new Set(noticias.map(n=>chave(n)));
-    let nextId = Math.max(0,...noticias.map(n=>n._id||0))+1;
-    (data.noticias||[]).forEach(n=>{
+    // Sheets é a fonte de verdade — substituir lista completa preservando _meios e _analise locais
+    const localMap = {};
+    noticias.forEach(n=>{ localMap[chave(n)]={_meios:n._meios,_analise:n._analise}; });
+    let nextId = 1;
+    const noticiasDoSheets = (data.noticias||[]).map(n=>{
       const c = norm(n.titulo)+'|'+norm(n.proponente);
-      if(!chavesLocais.has(c)){
-        noticias.push({
-          _id: nextId++,
-          proponente: n.proponente, titulo: n.titulo,
-          categorias: (n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
-          escola: n.escola, data: (n.timestamp||'').slice(0,10),
-          corpo: n.corpo, imgDestaque: n.imgDestaque,
-          outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
-          video: n.video, links: n.links,
-          _meios:{site:false,fb:false,ig:false}, _analise:null
-        });
-        chavesLocais.add(c);
-      }
+      const local = localMap[c]||{};
+      return {
+        _id: nextId++,
+        proponente: n.proponente, titulo: n.titulo,
+        categorias: (n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
+        escola: n.escola, data: (n.timestamp||'').slice(0,10),
+        corpo: n.corpo, imgDestaque: n.imgDestaque,
+        outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
+        video: n.video, links: n.links,
+        _meios: local._meios||{site:false,fb:false,ig:false},
+        _analise: local._analise||null
+      };
     });
-    saveNoticias();
+    if(noticiasDoSheets.length > 0){
+      noticias = noticiasDoSheets;
+      saveNoticias();
+    }
     validacoes = data.validacoes || {};
     hideLoad();
+    if(noticias.length===0){
+      toast('O servidor não tem notícias ainda. Pede à gestão para importar o Excel.','warning');
+    } else {
+      toast(noticias.length+' notícia(s) carregada(s) do servidor.','success');
+    }
   }catch(e){
     hideLoad();
-    toast('Não foi possível ligar ao servidor. A usar dados locais.','warning');
+    toast('Sem ligação ao servidor. A mostrar dados locais.','warning');
+  }
+  renderValidar();
+}
+
+async function atualizarNoticiasValidador(){
+  if(!sessao)return;
+  noticiaAtual=null;decisaoAtual=null;
+  showLoad('A atualizar notícias do servidor…');
+  try{
+    const data = await apiListar();
+    const localMap = {};
+    noticias.forEach(n=>{ localMap[chave(n)]={_meios:n._meios,_analise:n._analise}; });
+    let nextId = 1;
+    const noticiasDoSheets = (data.noticias||[]).map(n=>{
+      const c = norm(n.titulo)+'|'+norm(n.proponente);
+      const local = localMap[c]||{};
+      return {
+        _id: nextId++,
+        proponente: n.proponente, titulo: n.titulo,
+        categorias: (n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
+        escola: n.escola, data: (n.timestamp||'').slice(0,10),
+        corpo: n.corpo, imgDestaque: n.imgDestaque,
+        outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
+        video: n.video, links: n.links,
+        _meios: local._meios||{site:false,fb:false,ig:false},
+        _analise: local._analise||null
+      };
+    });
+    if(noticiasDoSheets.length > 0){ noticias = noticiasDoSheets; saveNoticias(); }
+    validacoes = data.validacoes || {};
+    hideLoad();
+    toast(noticias.length+' notícia(s) carregada(s).','success');
+  }catch(e){
+    hideLoad();
+    toast('Erro ao atualizar: '+e.message,'warning');
   }
   renderValidar();
 }
@@ -742,41 +791,54 @@ function buildDetalhe(n){
     </div>`:''}
     <div style="font-size:13px;font-weight:700;margin-bottom:12px">Decisão de validação</div>
     <div class="decisao-grid">
-      <div class="dec-btn dec-pub ${decisaoAtual==='pode_publicar'?'selected':''}" onclick="selecionarDecisao('pode_publicar')">
+      <div class="dec-btn dec-pub" onclick="selecionarDecisao('pode_publicar')">
         <div class="di">✅</div>
         <div class="dt">Pode publicar</div>
         <div class="ds">A notícia está aprovada para publicação</div>
       </div>
-      <div class="dec-btn dec-corr ${decisaoAtual==='enviado_correcao'?'selected':''}" onclick="selecionarDecisao('enviado_correcao')">
+      <div class="dec-btn dec-corr" onclick="selecionarDecisao('enviado_correcao')">
         <div class="di">✉️</div>
         <div class="dt">Enviar para correção</div>
         <div class="ds">Notificar o autor com indicações</div>
       </div>
     </div>
 
-    ${decisaoAtual==='pode_publicar'?`
+    <div id="panel-pub" style="display:none">
     <div class="sec" style="margin-top:0">Publicar em</div>
     ${pubHtml}
     <div class="btn-row">
       <button class="btn btn-apro btn-full" onclick="submeterDecisao()">
         <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirmar — Pode publicar
       </button>
-    </div>`:''}
+    </div>
+    </div>
 
-    ${decisaoAtual==='enviado_correcao'?`
+    <div id="panel-corr" style="display:none">
     <div class="sec" style="margin-top:0">Nota para o proponente *</div>
     <textarea class="nota" id="nota-corr" placeholder="Descreve o que precisa de ser corrigido ou melhorado…"></textarea>
     <div class="btn-row">
       <button class="btn btn-corr btn-full" onclick="submeterDecisao()">
         <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>Gerar email e registar
       </button>
-    </div>`:''}
+    </div>
+    </div>
   </div>`;
 }
 
 function selecionarDecisao(d){
   decisaoAtual=d;
-  renderValidar();
+  // Atualizar apenas o painel de decisão sem re-render completo (evita re-trigger da IA)
+  const n=noticiaAtual;
+  if(!n)return;
+  // Atualizar visual dos botões
+  document.querySelectorAll('.dec-btn').forEach(b=>b.classList.remove('selected'));
+  const sel=document.querySelector('.dec-btn.dec-'+( d==='pode_publicar'?'pub':'corr'));
+  if(sel)sel.classList.add('selected');
+  // Mostrar/esconder painel de publicação ou nota
+  const panelPub=document.getElementById('panel-pub');
+  const panelCorr=document.getElementById('panel-corr');
+  if(panelPub)panelPub.style.display=d==='pode_publicar'?'block':'none';
+  if(panelCorr)panelCorr.style.display=d==='enviado_correcao'?'block':'none';
 }
 
 function toggleMeio(id,k,v){
@@ -849,7 +911,7 @@ Responde com esta estrutura:
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:prompt}]})
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,messages:[{role:'user',content:prompt}]})
     });
     const data=await res.json();
     n._analise=data.content?.map(i=>i.text||'').join('\n')||'Sem resposta.';
