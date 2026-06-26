@@ -310,6 +310,10 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
       Carregar Excel
       <input type="file" accept=".xlsx,.xls" onchange="importarExcel(this)">
     </label>
+    <button class="btn btn-pri" onclick="sincronizarTudo()" style="font-size:12px">
+      <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+      Sincronizar com Google Sheets
+    </button>
     <span id="import-status" style="font-size:12px;color:var(--text2)"></span>
   </div>
 
@@ -934,6 +938,27 @@ function importarExcel(input){
     }
   };
   reader.readAsArrayBuffer(file);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SINCRONIZAR TUDO
+// ═══════════════════════════════════════════════════════════════
+async function sincronizarTudo(){
+  if(!noticias.length){toast('Não há notícias para sincronizar.','warning');return;}
+  const st=document.getElementById('import-status');
+  showLoad('A sincronizar '+noticias.length+' notícias com Google Sheets…');
+  let ok=0, err=0;
+  for(const n of noticias){
+    try{
+      const r=await apiGuardarNoticia(n);
+      if(r&&r.ok)ok++;
+      else err++;
+    }catch(e){err++;}
+  }
+  hideLoad();
+  st.textContent=`✓ ${ok} sincronizadas · ${err} erros`;
+  if(ok>0) toast(`${ok} notícia(s) sincronizadas com Google Sheets!`,'success');
+  else toast('Não foi possível sincronizar. Verifica a ligação.','error');
 }
 
 // ═══════════════════════════════════════════════════════════════
