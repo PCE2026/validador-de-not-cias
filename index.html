@@ -304,6 +304,9 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
     </div>
   </div>
 
+  <!-- CONFIG APIKEY -->
+  <div id="cfg-apikey"></div>
+
   <!-- IMPORT BOX -->
   <div class="import-box">
     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
@@ -354,6 +357,10 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
 // ═══════════════════════════════════════════════════════════════
 const API_URL = 'https://script.google.com/macros/s/AKfycbzBDd9pyOyseQbInZLipl6K5DUK4SCj3KCOXrWDKPbYPR0dEQpuibWcgLYMBNNUYOhasg/exec';
 const PASS_GESTAO = 'templarios2027'; // mesma do projeto Cidadania
+
+// Chave Anthropic — guardada no localStorage, nunca no código
+function getApiKey(){ return localStorage.getItem('aet_anthropic_key')||''; }
+function setApiKey(k){ localStorage.setItem('aet_anthropic_key', k.trim()); }
 
 const GRUPOS = {
   A:{label:'Pré-escolar e 1.º Ciclo',
@@ -406,8 +413,7 @@ function toast(msg,type='info'){
 // ═══════════════════════════════════════════════════════════════
 async function apiListar(){
   const url = API_URL+'?action=listar&t='+Date.now();
-  const res = await fetch(url);
-  const data = await res.json();
+  const data = await apiFetch_(url); // com fallback JSONP automático
   if(!data.ok) throw new Error(data.error||'Erro');
   return data; // {noticias:[], validacoes:{}}
 }
@@ -436,18 +442,20 @@ function jsonpFetch_(url){
   });
 }
 
-async function apiFetch_(url){
-  try{
-    // Tenta fetch normal primeiro (funciona para GET/listar)
-    const res = await fetch(url);
-    return await res.json();
-  }catch(e){
-    // Fallback: JSONP para contornar CORS
+async function apiFetch_(url, forceJsonp=false){
+  // Apps Script redireciona GETs — fetch normal falha por CORS nas escritas
+  // Usar JSONP diretamente para guardar; tentar fetch para listar (mais rápido)
+  if(!forceJsonp){
     try{
-      return await jsonpFetch_(url);
-    }catch(e2){
-      throw new Error('Não foi possível ligar ao servidor.');
-    }
+      const res = await fetch(url, {redirect:'follow'});
+      if(res.ok) return await res.json();
+    }catch(_){}
+  }
+  // JSONP — contorna CORS sem licença Premium
+  try{
+    return await jsonpFetch_(url);
+  }catch(e){
+    throw new Error('Não foi possível ligar ao servidor.');
   }
 }
 
@@ -465,7 +473,7 @@ async function apiGuardar(n, estado, meios, nota){
   };
   const url = API_URL+'?action=guardarValidacao&chave='+encodeURIComponent(dados.chave)
     +'&dados='+encodeURIComponent(JSON.stringify(dados))+'&t='+Date.now();
-  const data = await apiFetch_(url);
+  const data = await apiFetch_(url, true); // JSONP obrigatório para escritas
   validacoes[dados.chave] = dados;
   return data;
 }
@@ -486,7 +494,7 @@ async function apiGuardarNoticia(n){
     links: n.links||''
   };
   const url = API_URL+'?action=guardarNoticia&dados='+encodeURIComponent(JSON.stringify(dados))+'&t='+Date.now();
-  return await apiFetch_(url);
+  return await apiFetch_(url, true); // JSONP obrigatório para escritas
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -909,10 +917,14 @@ Responde com esta estrutura:
 **Veredicto** ✅ Pronto | ⚠️ Pequenas revisões | ❌ Revisão significativa — [1 frase]`;
 
   try{
+    const apiKey = getApiKey();
+    if(!apiKey){ throw new Error('sem_chave'); }
     const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,messages:[{role:'user',content:prompt}]})
     });
+    if(!res.ok){ const err=await res.json().catch(()=>({})); throw new Error(err.error?.message||'HTTP '+res.status); }
     const data=await res.json();
     n._analise=data.content?.map(i=>i.text||'').join('\n')||'Sem resposta.';
     const el=document.getElementById('ai-'+n._id);
@@ -920,8 +932,48 @@ Responde com esta estrutura:
   }catch(e){
     n._analise='';
     const el=document.getElementById('ai-'+n._id);
-    if(el)el.innerHTML=`<span style="font-size:12px;color:var(--red)">Erro na análise.</span>`;
+    if(!el)return;
+    if(e.message==='sem_chave'){
+      el.innerHTML=`<div style="font-size:12px;color:var(--amber-text);background:var(--amber-bg);padding:10px 12px;border-radius:var(--r);line-height:1.6">
+        ⚠️ Chave de API Anthropic não configurada.<br>
+        <input type="password" id="inp-apikey" placeholder="sk-ant-..." style="width:100%;margin:8px 0 6px;padding:7px 10px;border:1px solid var(--border2);border-radius:6px;font-size:13px;font-family:var(--font)">
+        <button onclick="guardarApiKey(${n._id})" style="font-size:12px;padding:5px 12px;background:var(--blue-bg);color:var(--blue-text);border:1px solid #7aabdf;border-radius:6px;cursor:pointer;font-family:var(--font)">Guardar chave e analisar</button>
+      </div>`;
+    } else {
+      el.innerHTML=`<span style="font-size:12px;color:var(--red)">Erro na análise: ${e.message}</span>`;
+    }
   }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GESTÃO DE CHAVE API
+// ═══════════════════════════════════════════════════════════════
+function guardarApiKey(notId){
+  const inp=document.getElementById('inp-apikey');
+  if(!inp||!inp.value.trim()){toast('Cola a chave sk-ant-...','warning');return;}
+  setApiKey(inp.value.trim());
+  toast('Chave guardada! A analisar…','success');
+  const n=noticias.find(x=>x._id===notId);
+  if(n){ n._analise=null; analisarIA(n); }
+}
+
+// Configuração de chave na área de Gestão
+function mostrarConfApiKey(){
+  const k=getApiKey();
+  const area=document.getElementById('cfg-apikey');
+  if(!area)return;
+  area.innerHTML=`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);margin-bottom:12px">
+    <span style="font-size:12px;font-weight:700;color:var(--text2)">Chave Anthropic (IA):</span>
+    <input type="password" id="inp-apikey-gestao" value="${k}" placeholder="sk-ant-..." style="flex:1;min-width:180px;font-size:12px;padding:6px 9px;border:1px solid var(--border2);border-radius:6px;font-family:var(--font)">
+    <button onclick="guardarApiKeyGestao()" style="font-size:12px;padding:6px 12px;background:var(--blue-bg);color:var(--blue-text);border:1px solid #7aabdf;border-radius:6px;cursor:pointer;font-family:var(--font);white-space:nowrap">Guardar</button>
+    ${k?'<span style="font-size:11px;color:var(--green-text)">✓ Configurada</span>':'<span style="font-size:11px;color:var(--amber-text)">⚠ Não configurada</span>'}
+  </div>`;
+}
+function guardarApiKeyGestao(){
+  const v=(document.getElementById('inp-apikey-gestao')||{}).value||'';
+  setApiKey(v);
+  toast('Chave guardada!','success');
+  mostrarConfApiKey();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1063,6 +1115,7 @@ async function sincronizarTudo(){
 // GESTÃO
 // ═══════════════════════════════════════════════════════════════
 async function renderGestao(){
+  mostrarConfApiKey();
   showLoad('A carregar do Google Sheets…');
   try{
     const data = await apiListar();
