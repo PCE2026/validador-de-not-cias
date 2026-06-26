@@ -399,10 +399,7 @@ async function apiListar(){
   const res = await fetch(url);
   const data = await res.json();
   if(!data.ok) throw new Error(data.error||'Erro');
-  // Converte array em mapa chave→validação
-  const mapa = {};
-  (data.validacoes||[]).forEach(v=>{ mapa[v.chave]=v; });
-  return mapa;
+  return data; // {noticias:[], validacoes:{}}
 }
 
 async function apiGuardar(n, estado, meios, nota){
@@ -417,13 +414,33 @@ async function apiGuardar(n, estado, meios, nota){
     nota: nota||'',
     dataValidacao: new Date().toISOString().slice(0,10)
   };
-  const url = API_URL+'?action=guardar&chave='+encodeURIComponent(dados.chave)
+  const url = API_URL+'?action=guardarValidacao&chave='+encodeURIComponent(dados.chave)
     +'&dados='+encodeURIComponent(JSON.stringify(dados))+'&t='+Date.now();
   const res = await fetch(url);
   const data = await res.json();
   if(!data.ok) throw new Error(data.error||'Erro');
   validacoes[dados.chave] = dados;
   return data;
+}
+
+async function apiGuardarNoticia(n){
+  const dados = {
+    chave: chave(n),
+    timestamp: n.data||new Date().toISOString().slice(0,10),
+    proponente: n.proponente||'',
+    emailProponente: n.emailProponente||'',
+    titulo: n.titulo||'',
+    categorias: (n.categorias||[]).join(';'),
+    escola: n.escola||'',
+    corpo: n.corpo||'',
+    imgDestaque: n.imgDestaque||'',
+    outrasFotos: (n.outrasFotos||[]).join(';'),
+    video: n.video||'',
+    links: n.links||''
+  };
+  const url = API_URL+'?action=guardarNoticia&dados='+encodeURIComponent(JSON.stringify(dados))+'&t='+Date.now();
+  const res = await fetch(url);
+  return await res.json();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -458,13 +475,34 @@ async function fazerLogin(){
   document.getElementById('user-pill-nome').textContent=nome;
   document.getElementById('hdr-validar-sub').textContent=GRUPOS[grupoSel].label+' · a validar notícias do teu grupo';
   irPara('validar');
-  showLoad('A carregar estados de validação…');
+  showLoad('A carregar notícias e estados…');
   try{
-    validacoes = await apiListar();
+    const data = await apiListar();
+    // Merge notícias do Sheets com locais (Sheets tem precedência para novos)
+    const chavesLocais = new Set(noticias.map(n=>chave(n)));
+    let nextId = Math.max(0,...noticias.map(n=>n._id||0))+1;
+    (data.noticias||[]).forEach(n=>{
+      const c = norm(n.titulo)+'|'+norm(n.proponente);
+      if(!chavesLocais.has(c)){
+        noticias.push({
+          _id: nextId++,
+          proponente: n.proponente, titulo: n.titulo,
+          categorias: (n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
+          escola: n.escola, data: (n.timestamp||'').slice(0,10),
+          corpo: n.corpo, imgDestaque: n.imgDestaque,
+          outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
+          video: n.video, links: n.links,
+          _meios:{site:false,fb:false,ig:false}, _analise:null
+        });
+        chavesLocais.add(c);
+      }
+    });
+    saveNoticias();
+    validacoes = data.validacoes || {};
     hideLoad();
   }catch(e){
     hideLoad();
-    toast('Não foi possível ligar ao servidor. Os estados locais serão usados.','warning');
+    toast('Não foi possível ligar ao servidor. A usar dados locais.','warning');
   }
   renderValidar();
 }
@@ -875,8 +913,15 @@ function importarExcel(input){
 
       saveNoticias();hideLoad();input.value='';
       if(imported>0){
-        st.textContent=`✓ ${imported} notícia(s) importada(s)`;
-        toast(`${imported} notícia(s) importada(s)!`,'success');
+        st.textContent=`✓ ${imported} importada(s) — a sincronizar…`;
+        // Envia para Google Sheets em background
+        const novasNoticias = noticias.slice(-imported);
+        let sincOk=0;
+        for(const n of novasNoticias){
+          try{ const r=await apiGuardarNoticia(n); if(r.ok)sincOk++; }catch(_){}
+        }
+        st.textContent=`✓ ${imported} importada(s) · ${sincOk} sincronizadas com Google Sheets`;
+        toast(`${imported} notícia(s) importada(s) e sincronizadas!`,'success');
         renderGestao();
       } else {
         st.textContent='✓ Sem notícias novas';
@@ -895,11 +940,32 @@ function importarExcel(input){
 // GESTÃO
 // ═══════════════════════════════════════════════════════════════
 async function renderGestao(){
-  showLoad('A carregar estados…');
+  showLoad('A carregar do Google Sheets…');
   try{
-    validacoes=await apiListar();
+    const data = await apiListar();
+    // Merge notícias do Sheets
+    const chavesLocais = new Set(noticias.map(n=>chave(n)));
+    let nextId = Math.max(0,...noticias.map(n=>n._id||0))+1;
+    (data.noticias||[]).forEach(n=>{
+      const c = norm(n.titulo)+'|'+norm(n.proponente);
+      if(!chavesLocais.has(c)){
+        noticias.push({
+          _id: nextId++,
+          proponente: n.proponente, titulo: n.titulo,
+          categorias: (n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
+          escola: n.escola, data: (n.timestamp||'').slice(0,10),
+          corpo: n.corpo, imgDestaque: n.imgDestaque,
+          outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
+          video: n.video, links: n.links,
+          _meios:{site:false,fb:false,ig:false}, _analise:null
+        });
+        chavesLocais.add(c);
+      }
+    });
+    saveNoticias();
+    validacoes = data.validacoes || {};
   }catch(e){
-    // usa estados locais, não interrompe
+    // usa dados locais, não interrompe
   }
   hideLoad();
 
