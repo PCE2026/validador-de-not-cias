@@ -124,13 +124,8 @@ input.inp:focus{outline:none;border-color:var(--blue)}
 
 /* ── ai ── */
 .ai-block{background:linear-gradient(135deg,#f0f6ff,#f4f0ff);border:1px solid #c5d5f0;border-radius:var(--rl);padding:14px 16px;margin:14px 0}
-.ai-hd{font-size:10px;font-weight:800;color:#4a5a80;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.ai-hd svg{width:14px;height:14px;stroke:#4a5a80;fill:none;stroke-width:2}
-.ai-body{font-size:13px;color:var(--text);line-height:1.65}
-.ai-body strong{color:#2a3a5a}
 .spinner{display:inline-block;width:13px;height:13px;border:2px solid #c8d0e8;border-top-color:#5570c0;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.ai-load{font-size:12px;color:#4a5a80;display:flex;align-items:center;gap:8px;font-style:italic}
 
 /* ── decisão ── */
 .resp-banner{background:var(--amber-bg);border:1px solid #e8c070;border-radius:var(--r);padding:14px 16px;margin-bottom:16px;font-size:13px;color:var(--amber-text);line-height:1.65}
@@ -303,9 +298,6 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
       Sair
     </div>
   </div>
-
-  <!-- CONFIG APIKEY -->
-  <div id="cfg-apikey" style="margin-bottom:12px"></div>
 
   <!-- IMPORT BOX -->
   <div class="import-box">
@@ -516,7 +508,7 @@ async function fazerLogin(){
   try{
     const data=await apiListar();
     const localMap={};
-    noticias.forEach(n=>{ localMap[chave(n)]={_meios:n._meios,_analise:n._analise}; });
+    noticias.forEach(n=>{ localMap[chave(n)]={_meios:n._meios}; });
     let nextId=1;
     const fromSheets=(data.noticias||[]).map(n=>{
       const ck=norm(n.titulo)+'|'+norm(n.proponente);
@@ -529,7 +521,6 @@ async function fazerLogin(){
         outrasFotos:(n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
         video:n.video, links:n.links,
         _meios:loc._meios||{site:false,fb:false,ig:false,tiktok:false},
-        _analise:loc._analise||null
       };
     });
     if(fromSheets.length>0){ noticias=fromSheets; saveNoticias(); }
@@ -550,7 +541,7 @@ async function atualizarNoticiasValidador(){
   try{
     const data=await apiListar();
     const localMap={};
-    noticias.forEach(n=>{ localMap[chave(n)]={_meios:n._meios,_analise:n._analise}; });
+    noticias.forEach(n=>{ localMap[chave(n)]={_meios:n._meios}; });
     let nextId=1;
     const fromSheets=(data.noticias||[]).map(n=>{
       const ck=norm(n.titulo)+'|'+norm(n.proponente);
@@ -563,7 +554,6 @@ async function atualizarNoticiasValidador(){
         outrasFotos:(n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
         video:n.video, links:n.links,
         _meios:loc._meios||{site:false,fb:false,ig:false,tiktok:false},
-        _analise:loc._analise||null
       };
     });
     if(fromSheets.length>0){ noticias=fromSheets; saveNoticias(); }
@@ -574,35 +564,8 @@ async function atualizarNoticiasValidador(){
   renderValidar();
 }
 
-function getApiKey(){ return localStorage.getItem('aet_anthropic_key')||''; }
-function setApiKey(k){ localStorage.setItem('aet_anthropic_key',k.trim()); }
 
-function mostrarConfApiKey(){
-  const area=document.getElementById('cfg-apikey');
-  if(!area)return;
-  const k=getApiKey();
-  area.innerHTML=`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;background:#f9fafb;border-radius:10px;border:1px solid #e5e7eb;margin-bottom:4px">
-    <span style="font-size:12px;font-weight:700;color:#6b7280">Chave Anthropic (IA):</span>
-    <input type="password" id="inp-apikey-gestao" value="${k}" placeholder="sk-ant-..." style="flex:1;min-width:180px;font-size:12px;padding:6px 9px;border:1px solid #d1d5db;border-radius:6px;font-family:inherit">
-    <button onclick="guardarApiKeyGestao()" style="font-size:12px;padding:6px 14px;background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;border-radius:6px;cursor:pointer;white-space:nowrap">Guardar</button>
-    <span style="font-size:11px;color:${k?'#16a34a':'#d97706'}">${k?'✓ Configurada':'⚠ Não configurada'}</span>
-  </div>`;
-}
-function guardarApiKeyGestao(){
-  const v=(document.getElementById('inp-apikey-gestao')||{}).value||'';
-  setApiKey(v);
-  toast('Chave guardada!','success');
-  mostrarConfApiKey();
-}
 
-function guardarApiKey(notId){
-  const inp=document.getElementById('inp-apikey');
-  if(!inp||!inp.value.trim()){toast('Cola a chave sk-ant-...','warning');return;}
-  setApiKey(inp.value.trim());
-  toast('Chave guardada!','success');
-  const n=noticias.find(x=>x._id===notId);
-  if(n){ n._analise=null; analisarIA(n); }
-}
 
 function sairValidador(){
   if(!confirm('Tens a certeza que queres sair?'))return;
@@ -671,7 +634,6 @@ function renderValidar(){
 
   if(noticiaAtual){
     el.innerHTML=buildDetalhe(noticiaAtual);
-    if(!noticiaAtual._analise) analisarIA(noticiaAtual);
     return;
   }
 
@@ -886,59 +848,7 @@ async function submeterDecisao(){
 // ═══════════════════════════════════════════════════════════════
 // AI
 // ═══════════════════════════════════════════════════════════════
-async function analisarIA(n){
-  if(!n.corpo)return;
-  n._analise='loading';
-  const prompt=`És um assistente editorial escolar. Usa sempre português europeu (Portugal).
 
-Analisa esta notícia para o Agrupamento de Escolas Templários de Tomar:
-TÍTULO: ${n.titulo}
-ESCOLA: ${n.escola||'—'}
-TEXTO: ${n.corpo}
-
-Responde com esta estrutura:
-
-**Verificação dos 5W**
-• Quê? ✅/❌ — [frase]
-• Quem? ✅/❌ — [frase]
-• Quando? ✅/❌ — [frase]
-• Onde? ✅/❌ — [frase]
-• Porquê/Como? ✅/❌ — [frase]
-
-**Qualidade** [2 frases sobre clareza e correção em português europeu]
-
-**Sugestões** [máx. 3, numeradas]
-
-**Veredicto** ✅ Pronto | ⚠️ Pequenas revisões | ❌ Revisão significativa — [1 frase]`;
-
-  try{
-    const apiKey=getApiKey();
-    if(!apiKey) throw new Error('sem_chave');
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,messages:[{role:'user',content:prompt}]})
-    });
-    if(!res.ok){ const err=await res.json().catch(()=>({})); throw new Error(err.error?.message||'HTTP '+res.status); }
-    const data=await res.json();
-    n._analise=data.content?.map(i=>i.text||'').join('\n')||'Sem resposta.';
-    const el=document.getElementById('ai-'+n._id);
-    if(el)el.innerHTML=`<div class="ai-body">${n._analise.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`;
-  }catch(e){
-    n._analise='';
-    const el=document.getElementById('ai-'+n._id);
-    if(!el)return;
-    if(e.message==='sem_chave'){
-      el.innerHTML=`<div style="font-size:12px;color:#92400e;background:#fef3c7;padding:10px 12px;border-radius:8px;line-height:1.6">
-        ⚠️ Chave Anthropic não configurada.<br>
-        <input type="password" id="inp-apikey" placeholder="sk-ant-..." style="width:100%;margin:8px 0 6px;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px">
-        <button onclick="guardarApiKey(${n._id})" style="font-size:12px;padding:5px 12px;background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;border-radius:6px;cursor:pointer">Guardar e analisar</button>
-      </div>`;
-    } else {
-      el.innerHTML=`<span style="font-size:12px;color:var(--red)">Erro: ${e.message}</span>`;
-    }
-  }
-}
 
 // ═══════════════════════════════════════════════════════════════
 // EMAIL MODAL
@@ -1023,7 +933,7 @@ function importarExcel(input){
           imgDestaque:get(COL.img),
           outrasFotos:get(COL.fotos).split(/[;\n]/).map(s=>s.trim()).filter(Boolean),
           video:get(COL.vid),links:get(COL.lnk),
-          _meios:{site:false,fb:false,ig:false,tiktok:false},_analise:null
+          _meios:{site:false,fb:false,ig:false,tiktok:false}
         });
         existKeys.add(key);
         imported++;
@@ -1079,7 +989,6 @@ async function sincronizarTudo(){
 // GESTÃO
 // ═══════════════════════════════════════════════════════════════
 async function renderGestao(){
-  mostrarConfApiKey();
   showLoad('A carregar do Google Sheets…');
   try{
     const data = await apiListar();
@@ -1097,7 +1006,7 @@ async function renderGestao(){
           corpo: n.corpo, imgDestaque: n.imgDestaque,
           outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
           video: n.video, links: n.links,
-          _meios:{site:false,fb:false,ig:false,tiktok:false}, _analise:null
+          _meios:{site:false,fb:false,ig:false,tiktok:false}
         });
         chavesLocais.add(c);
       }
