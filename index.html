@@ -884,14 +884,15 @@ function importarExcel(input){
       const headers=Object.keys(rows[0]);
       const ci=pats=>headers.find(h=>pats.some(p=>h.toLowerCase().includes(p.toLowerCase())))||null;
       const COL={
-        ts:   ci(['hora de início','submission time','início']),
+        ts:   ci(['hora de início','hora da última','submission time','início']),
         prop: ci(['nome do proponente','proponente']),
-        tit:  ci(['título da notícia','titulo da noticia','título (sem']),
-        cats: ci(['pergunta','categoria']),
+        email:ci(['email','e-mail']),
+        tit:  ci(['título da notícia','titulo da noticia','título (sem','título da not']),
+        cats: ci(['categoria da notícia','categoria','pergunta']),
         esc:  ci(['estabelecimento']),
-        corp: ci(['notícia texto','noticia texto','texto do tipo']),
-        img:  ci(['imagem de destaque','destaque','capa']),
-        fotos:ci(['outras fotos']),
+        corp: ci(['texto do tipo','notícia texto','noticia texto','texto da not']),
+        img:  ci(['insira uma fotografia','imagem de destaque','fotografia (inserir 1','fotografia']),
+        fotos:ci(['outras fotos','inserir até']),
         vid:  ci(['vídeo','video','vídeos']),
         lnk:  ci(['links','formulários']),
       };
