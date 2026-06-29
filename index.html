@@ -304,6 +304,9 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
     </div>
   </div>
 
+  <!-- CONFIG APIKEY -->
+  <div id="cfg-apikey" style="margin-bottom:12px"></div>
+
   <!-- IMPORT BOX -->
   <div class="import-box">
     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
@@ -573,6 +576,24 @@ async function atualizarNoticiasValidador(){
 
 function getApiKey(){ return localStorage.getItem('aet_anthropic_key')||''; }
 function setApiKey(k){ localStorage.setItem('aet_anthropic_key',k.trim()); }
+
+function mostrarConfApiKey(){
+  const area=document.getElementById('cfg-apikey');
+  if(!area)return;
+  const k=getApiKey();
+  area.innerHTML=`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;background:#f9fafb;border-radius:10px;border:1px solid #e5e7eb;margin-bottom:4px">
+    <span style="font-size:12px;font-weight:700;color:#6b7280">Chave Anthropic (IA):</span>
+    <input type="password" id="inp-apikey-gestao" value="${k}" placeholder="sk-ant-..." style="flex:1;min-width:180px;font-size:12px;padding:6px 9px;border:1px solid #d1d5db;border-radius:6px;font-family:inherit">
+    <button onclick="guardarApiKeyGestao()" style="font-size:12px;padding:6px 14px;background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;border-radius:6px;cursor:pointer;white-space:nowrap">Guardar</button>
+    <span style="font-size:11px;color:${k?'#16a34a':'#d97706'}">${k?'✓ Configurada':'⚠ Não configurada'}</span>
+  </div>`;
+}
+function guardarApiKeyGestao(){
+  const v=(document.getElementById('inp-apikey-gestao')||{}).value||'';
+  setApiKey(v);
+  toast('Chave guardada!','success');
+  mostrarConfApiKey();
+}
 
 function guardarApiKey(notId){
   const inp=document.getElementById('inp-apikey');
@@ -1058,6 +1079,7 @@ async function sincronizarTudo(){
 // GESTÃO
 // ═══════════════════════════════════════════════════════════════
 async function renderGestao(){
+  mostrarConfApiKey();
   showLoad('A carregar do Google Sheets…');
   try{
     const data = await apiListar();
