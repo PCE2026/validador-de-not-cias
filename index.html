@@ -123,7 +123,6 @@ input.inp:focus{outline:none;border-color:var(--blue)}
 .dest-img:hover{opacity:.88}
 
 /* ── ai ── */
-.ai-block{background:linear-gradient(135deg,#f0f6ff,#f4f0ff);border:1px solid #c5d5f0;border-radius:var(--rl);padding:14px 16px;margin:14px 0}
 .spinner{display:inline-block;width:13px;height:13px;border:2px solid #c8d0e8;border-top-color:#5570c0;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
@@ -706,10 +705,6 @@ function buildDetalhe(n){
     ?`<div class="mpill" style="margin-bottom:8px"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg><a href="${n.links}" target="_blank">${n.links.length>55?n.links.slice(0,55)+'…':n.links}</a></div>`
     :'';
 
-  const analiseHtml=n._analise
-    ?`<div class="ai-body">${n._analise.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`
-    :`<div class="ai-load"><div class="spinner"></div> A analisar com IA…</div>`;
-
   // Decisão
   const meios=n._meios||{site:false,fb:false,ig:false,tiktok:false};
   const pubHtml=`<div class="pub-row">
@@ -747,10 +742,6 @@ function buildDetalhe(n){
     <div class="nbody ${!n.corpo?'empty':''}">${n.corpo||'(sem texto)'}</div>
     <div class="char-info"><span>Comprimento</span><span style="color:${cc};font-weight:700">${chars} / 2200</span></div>
     <div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${cc}"></div></div>
-
-    <div class="ai-block">
-      <div class="ai-hd"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>Análise automática — IA</div>
-      <div id="ai-${n._id}">${analiseHtml}</div>
     </div>
   </div>
 
