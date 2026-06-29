@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Validador de Notícias — AET</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--bg2:#f6f6f4;--bg3:#efefec;
+  --text:#171715;--text2:#65655f;--text3:#9a9a94;
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.17);
+  --blue:#1a6fc4;--blue-bg:#e8f1fb;--blue-text:#0c4a8a;
+  --green:#1a7a4a;--green-bg:#e5f3ec;--green-text:#0e5230;
+  --red:#c0392b;--red-bg:#fdecea;--red-text:#7d1f17;
+  --amber:#b06000;--amber-bg:#fef3e1;--amber-text:#7a4100;
+  --r:8px;--rl:12px;--font:'Segoe UI',system-ui,sans-serif;
+}
+body{font-family:var(--font);background:#ededeb;color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
+.wrap{max-width:820px;margin:0 auto;padding:24px 16px}
+
+/* ── home ── */
+.home-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.home-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:40px 36px;max-width:540px;width:100%;text-align:center}
+.home-logo{width:60px;height:60px;border-radius:var(--r);background:var(--blue-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.home-logo svg{width:30px;height:30px;stroke:var(--blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.home-box h1{font-size:22px;font-weight:800;margin-bottom:6px}
+.home-box>p{font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.6}
+.area-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.area-btn{display:flex;align-items:center;gap:14px;padding:16px 18px;border:1.5px solid var(--border);border-radius:var(--rl);background:var(--bg2);cursor:pointer;text-align:left;transition:all .15s;font-family:var(--font)}
+.area-btn:hover{border-color:#7aabdf;background:var(--blue-bg);transform:translateY(-1px)}
+.area-icon{width:44px;height:44px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px}
+.area-text .title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px}
+.area-text .sub{font-size:12px;color:var(--text2);line-height:1.4}
+
+/* ── login validar ── */
+.login-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:36px 32px;max-width:500px;width:100%;text-align:center}
+.login-box h2{font-size:18px;font-weight:800;margin-bottom:6px}
+.login-box>p{font-size:13px;color:var(--text2);margin-bottom:24px}
+.login-label{font-size:12px;font-weight:700;color:var(--text2);display:block;text-align:left;margin-bottom:5px;margin-top:14px}
+.login-label:first-of-type{margin-top:0}
+input.inp{width:100%;font-size:14px;padding:10px 12px;border:1.5px solid var(--border2);border-radius:var(--r);font-family:var(--font)}
+input.inp:focus{outline:none;border-color:var(--blue)}
+.grupo-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 20px}
+.grupo-btn{padding:14px 12px;border:2px solid var(--border);border-radius:var(--r);background:var(--bg2);cursor:pointer;text-align:center;transition:all .15s;font-family:var(--font)}
+.grupo-btn:hover{border-color:#7aabdf;background:var(--blue-bg)}
+.grupo-btn.selected{border-color:var(--blue);background:var(--blue-bg)}
+.gb-icon{font-size:22px;margin-bottom:5px}
+.gb-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px}
+.gb-sub{font-size:10px;color:var(--text2);line-height:1.4}
+
+/* ── gestão password ── */
+.gestao-pass{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:36px 32px;max-width:400px;width:100%;text-align:center}
+.gestao-pass h2{font-size:18px;font-weight:800;margin-bottom:6px}
+.gestao-pass p{font-size:13px;color:var(--text2);margin-bottom:20px}
+
+/* ── header ── */
+.header{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.logo{width:44px;height:44px;border-radius:var(--r);background:var(--blue-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo svg{width:22px;height:22px;stroke:var(--blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hb{flex:1}
+.hb h1{font-size:17px;font-weight:800;color:var(--text)}
+.hb p{font-size:12px;color:var(--text2);margin-top:1px}
+.user-pill{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.user-pill:hover{background:var(--bg3)}
+.user-pill svg{width:13px;height:13px;stroke:var(--text2);fill:none;stroke-width:2}
+
+/* ── stats ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.sc{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
+.sv{font-size:22px;font-weight:800;color:var(--text);line-height:1}
+.sl{font-size:11px;color:var(--text2);margin-top:4px}
+
+/* ── card ── */
+.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:20px;margin-bottom:14px}
+
+/* ── import box ── */
+.import-box{background:var(--bg);border:1.5px dashed #aab8cc;border-radius:var(--rl);padding:18px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.import-box svg{width:26px;height:26px;stroke:#7a9abc;fill:none;stroke-width:1.5;flex-shrink:0}
+.import-text h3{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
+.import-text p{font-size:12px;color:var(--text2)}
+.file-label{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:var(--blue-bg);color:var(--blue-text);border-radius:var(--r);font-size:12px;font-weight:700;cursor:pointer;border:1px solid #7aabdf;white-space:nowrap;flex-shrink:0}
+.file-label:hover{background:#d8ebf9}
+.file-label svg{width:14px;height:14px;stroke:var(--blue);fill:none;stroke-width:2}
+.file-label input{display:none}
+
+/* ── lista notícias ── */
+.li{padding:12px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:11px;cursor:pointer;transition:all .1s}
+.li:last-child{border-bottom:none;padding-bottom:0}
+.li:hover{background:var(--bg2);margin:0 -10px;padding:12px 10px;border-radius:var(--r)}
+.li:hover .li-t{color:var(--blue)}
+.li-ico{width:34px;height:34px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.li-b{flex:1;min-width:0}
+.li-t{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .15s}
+.li-s{font-size:11px;color:var(--text2)}
+.li-r{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 9px;border-radius:20px;font-weight:700;white-space:nowrap}
+.b-pend{background:var(--amber-bg);color:var(--amber-text)}
+.b-pub{background:var(--green-bg);color:var(--green-text)}
+.b-corr{background:var(--blue-bg);color:var(--blue-text)}
+.b-val{background:#f0e8ff;color:#5a1a8a}
+
+/* ── detalhe validação ── */
+.ntitle{font-size:19px;font-weight:800;color:var(--text);margin-bottom:8px;line-height:1.3}
+.meta-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;padding:10px 12px;background:var(--bg2);border-radius:var(--r)}
+.mi{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
+.mi svg{width:12px;height:12px;stroke:var(--text3);fill:none;stroke-width:2;flex-shrink:0}
+.nivel-badge{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;margin-bottom:10px}
+.nivel-a{background:#fff3e0;color:#7a4000;border:1px solid #f0c070}
+.nivel-b{background:#e8f0fe;color:#1a3a7a;border:1px solid #90b0e8}
+.cat-pill{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--text2)}
+.sec{font-size:10px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin:14px 0 7px}
+.nbody{font-size:14px;color:var(--text);line-height:1.75;white-space:pre-wrap;padding:14px;background:var(--bg2);border-radius:var(--r);margin-bottom:6px}
+.nbody.empty{color:var(--text2);font-style:italic}
+.prog-wrap{height:5px;background:var(--bg3);border-radius:3px;margin:5px 0 2px}
+.prog-bar{height:5px;border-radius:3px}
+.char-info{display:flex;justify-content:space-between;font-size:11px;color:var(--text2)}
+.mpill{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:5px 10px;font-size:12px;display:flex;align-items:center;gap:5px}
+.mpill svg{width:13px;height:13px;stroke:var(--text2);fill:none;stroke-width:2;flex-shrink:0}
+.mpill a{color:var(--blue);text-decoration:none}
+.dest-img{width:100%;max-height:220px;object-fit:cover;border-radius:var(--r);border:1px solid var(--border);display:block;margin-bottom:8px;cursor:pointer}
+.dest-img:hover{opacity:.88}
+
+/* ── ai ── */
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid #c8d0e8;border-top-color:#5570c0;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── decisão ── */
+.resp-banner{background:var(--amber-bg);border:1px solid #e8c070;border-radius:var(--r);padding:14px 16px;margin-bottom:16px;font-size:13px;color:var(--amber-text);line-height:1.65}
+.resp-banner strong{display:block;font-size:14px;margin-bottom:4px}
+.decisao-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.dec-btn{padding:14px 10px;border-radius:var(--rl);border:2px solid var(--border);background:var(--bg2);cursor:pointer;text-align:center;transition:all .15s;font-family:var(--font)}
+.dec-btn:hover{transform:translateY(-2px)}
+.dec-btn.selected{transform:translateY(-2px)}
+.dec-btn .di{font-size:24px;margin-bottom:6px}
+.dec-btn .dt{font-size:12px;font-weight:700;margin-bottom:2px}
+.dec-btn .ds{font-size:11px;color:var(--text2);line-height:1.3}
+.dec-pub{border-color:#90d4a8}.dec-pub.selected{background:var(--green-bg);border-color:var(--green)}
+.dec-corr{border-color:#90b0e8}.dec-corr.selected{background:var(--blue-bg);border-color:var(--blue)}
+
+.pub-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
+.pub-lbl{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer;padding:8px 16px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);transition:all .15s;user-select:none}
+.pub-lbl.on{border-color:var(--green);background:var(--green-bg);color:var(--green-text)}
+.pub-lbl input{width:14px;height:14px;accent-color:var(--green);cursor:pointer}
+
+textarea.obs,textarea.nota{width:100%;font-size:13px;resize:vertical;padding:9px 11px;border:1.5px solid var(--border2);border-radius:var(--r);font-family:var(--font)}
+textarea.obs:focus,textarea.nota:focus{outline:none;border-color:var(--blue)}
+.obs{min-height:65px}
+.nota{min-height:90px;border-color:#90b0e8}
+
+/* ── email modal ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg);border-radius:var(--rl);padding:26px;max-width:560px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.18);max-height:90vh;overflow-y:auto}
+.modal h2{font-size:16px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.modal h2 svg{width:18px;height:18px;stroke:var(--blue);fill:none;stroke-width:2}
+.modal .sub{font-size:12px;color:var(--text2);margin-bottom:14px}
+.ef{margin-bottom:12px}
+.ef label{font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:4px}
+.ef input,.ef textarea{width:100%;font-size:13px;padding:8px 11px;border:1px solid var(--border2);border-radius:var(--r);font-family:var(--font)}
+.ef textarea{min-height:220px;resize:vertical;line-height:1.6}
+.modal-btns{display:flex;gap:8px;margin-top:14px}
+
+/* ── buttons ── */
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+button.btn{padding:9px 16px;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;border:none;font-family:var(--font);transition:filter .15s}
+button.btn:hover{filter:brightness(.93)}
+button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.btn-full{width:100%;justify-content:center}
+.btn-apro{background:var(--green-bg);color:var(--green-text)}
+.btn-corr{background:var(--blue-bg);color:var(--blue-text)}
+.btn-sec{background:var(--bg2);color:var(--text2);border:1px solid var(--border2)!important}
+.btn-pri{background:var(--blue-bg);color:var(--blue-text)}
+
+/* ── filter chips ── */
+.filter-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.chip{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--text2);transition:all .15s}
+.chip.active{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue)}
+
+.empty{text-align:center;padding:36px 16px;color:var(--text2)}
+.empty svg{width:36px;height:36px;stroke:var(--text3);fill:none;stroke-width:1.5;margin:0 auto 10px;display:block}
+.empty p{font-size:13px;line-height:1.6}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bg);border:1px solid var(--border2);border-radius:var(--rl);padding:10px 14px;font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.13);z-index:9999;transform:translateY(60px);opacity:0;transition:all .25s;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast svg{width:16px;height:16px;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
+.loading{display:none;position:fixed;inset:0;background:rgba(255,255,255,.82);z-index:8888;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.loading.show{display:flex}
+.loading .sp{width:28px;height:28px;border:3px solid #dde;border-top-color:#5570c0;border-radius:50%;animation:spin .7s linear infinite}
+.loading p{font-size:13px;color:var(--text2)}
+@media(max-width:600px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .decisao-grid{grid-template-columns:1fr}
+  .tab span{display:none}
+  .grupo-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div class="home-screen" id="home-screen">
+  <div class="home-box">
+    <div class="home-logo">
+      <svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+    </div>
+    <h1>Validador de Notícias</h1>
+    <p>Agrupamento de Escolas Templários de Tomar</p>
+    <div class="area-grid">
+      <div class="area-btn" onclick="irPara('login-validar')">
+        <div class="area-icon" style="background:var(--amber-bg)">✅</div>
+        <div class="area-text"><div class="title">Validar Notícias</div><div class="sub">Área dos professores validadores</div></div>
+      </div>
+      <div class="area-btn" onclick="irPara('login-gestao')">
+        <div class="area-icon" style="background:var(--green-bg)">📊</div>
+        <div class="area-text"><div class="title">Gestão — Ver Todas</div><div class="sub">Panorama total e importação de notícias</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN VALIDAR -->
+<div class="home-screen" id="screen-login-validar" style="display:none">
+  <div class="login-box">
+    <h2>Área de Validação</h2>
+    <p>Identifica-te para ver as notícias do teu grupo.</p>
+    <label class="login-label">Nome completo *</label>
+    <input class="inp" type="text" id="login-nome" placeholder="Ex: Ana Martins" autocomplete="name">
+    <label class="login-label" style="margin-bottom:8px">Grupo de ensino *</label>
+    <div class="grupo-grid">
+      <div class="grupo-btn" id="gbtn-A" onclick="selecionarGrupo('A')">
+        <div class="gb-icon">🏫</div>
+        <div class="gb-title">Pré-escolar e 1.º Ciclo</div>
+        <div class="gb-sub">Escolas Básicas/JI e Centros Escolares</div>
+      </div>
+      <div class="grupo-btn" id="gbtn-B" onclick="selecionarGrupo('B')">
+        <div class="gb-icon">🎓</div>
+        <div class="gb-title">2.º/3.º Ciclo e Secundário</div>
+        <div class="gb-sub">EBI Santa Iria · EB Gualdim Pais · ES Jácome Ratton</div>
+      </div>
+    </div>
+    <button class="btn btn-apro btn-full" onclick="fazerLogin()">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Entrar
+    </button>
+    <button class="btn btn-sec btn-full" onclick="irPara('home')" style="margin-top:8px">Voltar</button>
+    <hr style="border:none;border-top:1px solid var(--border);margin:20px 0">
+    <button class="btn btn-sec btn-full" onclick="irPara('login-gestao')" style="font-size:12px">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Aceder à área de Gestão
+    </button>
+  </div>
+</div>
+
+<!-- LOGIN GESTÃO -->
+<div class="home-screen" id="screen-login-gestao" style="display:none">
+  <div class="gestao-pass">
+    <h2>Gestão</h2>
+    <p>Introduz a password de acesso.</p>
+    <input class="inp" type="password" id="gestao-pass" placeholder="Password" onkeydown="if(event.key==='Enter')entrarGestao()">
+    <button class="btn btn-apro btn-full" onclick="entrarGestao()" style="margin-top:12px">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Entrar
+    </button>
+    <button class="btn btn-sec btn-full" onclick="irPara('home')" style="margin-top:8px">Voltar</button>
+  </div>
+</div>
+
+<!-- ÁREA: VALIDAR -->
+<div id="screen-validar" style="display:none">
+<div class="wrap">
+  <div class="header">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg></div>
+    <div class="hb"><h1>Validar Notícias</h1><p id="hdr-validar-sub"></p></div>
+    <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+      <div class="user-pill" onclick="atualizarNoticiasValidador()" title="Atualizar">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+        <span>Atualizar</span>
+      </div>
+      <div class="user-pill" onclick="sairValidador()">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span id="user-pill-nome"></span>
+      </div>
+    </div>
+  </div>
+  <div class="stats" id="stats-validar"></div>
+  <div id="content-validar"></div>
+</div>
+</div>
+
+<!-- ÁREA: GESTÃO -->
+<div id="screen-gestao" style="display:none">
+<div class="wrap">
+  <div class="header">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg></div>
+    <div class="hb"><h1>Gestão — Ver Todas</h1><p>Panorama total · importação semanal do Excel</p></div>
+    <div class="user-pill" onclick="irPara('home')">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sair
+    </div>
+  </div>
+
+  <!-- IMPORT BOX -->
+  <div class="import-box">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+    <div class="import-text">
+      <h3>Importar respostas do Excel</h3>
+      <p>Descarrega o <a href="https://aetemplarios-my.sharepoint.com/:x:/g/personal/pce_aetemplarios_pt/IQDPMod9VEGtQ6p1W-YDsBBVASYZpvq_udqBDQrykQ0tcwA" target="_blank" style="color:var(--blue);font-weight:600">Notícias 1.xlsx</a> do OneDrive → Ficheiro → Transferir uma cópia → carrega aqui</p>
+    </div>
+    <label class="file-label">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Carregar Excel
+      <input type="file" accept=".xlsx,.xls" onchange="importarExcel(this)">
+    </label>
+    <button class="btn btn-pri" onclick="sincronizarTudo()" style="font-size:12px">
+      <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+      Sincronizar com Google Sheets
+    </button>
+    <span id="import-status" style="font-size:12px;color:var(--text2)"></span>
+  </div>
+
+  <div class="stats" id="stats-gestao"></div>
+  <div class="filter-row" id="filter-row-gestao"></div>
+  <div class="card"><div id="lista-gestao"></div></div>
+</div>
+</div>
+
+<!-- MODAL EMAIL -->
+<div class="modal-overlay" id="email-modal">
+  <div class="modal">
+    <h2><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>Email para o proponente</h2>
+    <p class="sub">Revê e ajusta antes de copiar.</p>
+    <div class="ef"><label>Assunto</label><input type="text" id="email-assunto"></div>
+    <div class="ef"><label>Mensagem</label><textarea id="email-corpo"></textarea></div>
+    <div class="modal-btns">
+      <button class="btn btn-pri" onclick="copiarEmail()" style="flex:1;justify-content:center">
+        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copiar mensagem
+      </button>
+      <button class="btn btn-sec" onclick="fecharEmailModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="loading" id="loading"><div class="sp"></div><p id="load-msg">A processar…</p></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════
+const API_URL = 'https://script.google.com/macros/s/AKfycbxbhxJiKUzRDCAZUOZxrh709EPPcineRZLUFgkwvOM4Xn93adzAd3AGNpUEUqmEY3qCmA/exec';
+const PASS_GESTAO = 'templarios2027'; // mesma do projeto Cidadania
+
+const GRUPOS = {
+  A:{label:'Pré-escolar e 1.º Ciclo',
+     esc:['valdonas','serra','carvalhos de figueiredo','curvaceiras','junceira','olalhas','templários','d. pedro iv','são pedro','casais']},
+  B:{label:'2.º/3.º Ciclo e Secundário',
+     esc:['santa iria','gualdim','jácome','jacome','ratton']}
+};
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let noticias   = JSON.parse(localStorage.getItem('aet_noticias5')||'[]');
+let validacoes = {}; // chave → {validador,estado,meios,nota,dataValidacao}
+let sessao     = null;
+let grupoSel   = null;
+let noticiaAtual = null;
+let decisaoAtual = null;
+let filtroGestao = 'todas';
+let emailNotId   = null;
+
+function saveNoticias(){ try{localStorage.setItem('aet_noticias5',JSON.stringify(noticias));}catch(e){} }
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+function norm(s){return(s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[,.]/g,'').trim();}
+function escolaGrupo(escola){
+  const e=norm(escola);
+  if(GRUPOS.B.esc.some(s=>e.includes(norm(s))))return 'B';
+  if(GRUPOS.A.esc.some(s=>e.includes(norm(s))))return 'A';
+  return null;
+}
+function chave(n){ return norm(n.titulo)+'|'+norm(n.proponente); }
+
+function showLoad(msg){document.getElementById('load-msg').textContent=msg||'A processar…';document.getElementById('loading').classList.add('show');}
+function hideLoad(){document.getElementById('loading').classList.remove('show');}
+function toast(msg,type='info'){
+  const t=document.getElementById('toast');
+  const s={success:`<svg viewBox="0 0 24 24" style="stroke:var(--green)"><polyline points="20 6 9 17 4 12"/></svg>`,
+    error:`<svg viewBox="0 0 24 24" style="stroke:var(--red)"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+    warning:`<svg viewBox="0 0 24 24" style="stroke:var(--amber)"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>`,
+    info:`<svg viewBox="0 0 24 24" style="stroke:var(--blue)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>`};
+  t.innerHTML=(s[type]||s.info)+msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// API — só GET (sem CORS)
+// ═══════════════════════════════════════════════════════════════
+async function apiListar(){
+  const url = API_URL+'?action=listar&t='+Date.now();
+  const data = await apiFetch_(url);
+  if(!data.ok) throw new Error(data.error||'Erro');
+  return data;
+}
+
+// JSONP — única forma de contornar CORS com Apps Script sem licença Premium
+function jsonpFetch_(url){
+  return new Promise((resolve, reject)=>{
+    const cbName = 'cb_'+Date.now()+'_'+Math.floor(Math.random()*9999);
+    const script = document.createElement('script');
+    const timer = setTimeout(()=>{
+      cleanup();
+      reject(new Error('Timeout'));
+    }, 10000);
+    function cleanup(){
+      clearTimeout(timer);
+      delete window[cbName];
+      if(script.parentNode) script.parentNode.removeChild(script);
+    }
+    window[cbName] = function(data){
+      cleanup();
+      resolve(data);
+    };
+    script.src = url + '&callback=' + cbName;
+    script.onerror = ()=>{ cleanup(); reject(new Error('Script error')); };
+    document.head.appendChild(script);
+  });
+}
+
+async function apiFetch_(url){
+  return await jsonpFetch_(url);
+}
+
+async function apiGuardar(n, estado, meios, nota){
+  const dados = {
+    chave: chave(n),
+    titulo: n.titulo,
+    proponente: n.proponente,
+    escola: n.escola||'',
+    validador: sessao.nome,
+    estado,
+    meios: Object.keys(meios).filter(k=>meios[k]).join(';'),
+    nota: nota||'',
+    dataValidacao: new Date().toISOString().slice(0,10)
+  };
+  const url = API_URL+'?action=guardarValidacao&chave='+encodeURIComponent(dados.chave)
+    +'&dados='+encodeURIComponent(JSON.stringify(dados))+'&t='+Date.now();
+  const data = await apiFetch_(url);
+  validacoes[dados.chave] = dados;
+  return data;
+}
+
+async function apiGuardarNoticia(n){
+  const dados = {
+    chave: chave(n),
+    timestamp: n.data||new Date().toISOString().slice(0,10),
+    proponente: n.proponente||'',
+    emailProponente: n.emailProponente||'',
+    titulo: n.titulo||'',
+    categorias: (n.categorias||[]).join(';'),
+    escola: n.escola||'',
+    corpo: n.corpo||'',
+    imgDestaque: n.imgDestaque||'',
+    outrasFotos: (n.outrasFotos||[]).join(';'),
+    video: n.video||'',
+    links: n.links||''
+  };
+  const url = API_URL+'?action=guardarNoticia&dados='+encodeURIComponent(JSON.stringify(dados))+'&t='+Date.now();
+  return await apiFetch_(url);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVEGAÇÃO
+// ═══════════════════════════════════════════════════════════════
+function irPara(area){
+  ['home-screen','screen-login-validar','screen-login-gestao','screen-validar','screen-gestao']
+    .forEach(id=>{ const el=document.getElementById(id); if(el)el.style.display='none'; });
+  const mapa = {
+    'home':'home-screen','login-validar':'screen-login-validar',
+    'login-gestao':'screen-login-gestao','validar':'screen-validar','gestao':'screen-gestao'
+  };
+  const el = document.getElementById(mapa[area]);
+  if(el) el.style.display = (area==='home'||area==='login-validar'||area==='login-gestao') ? 'flex' : 'block';
+  if(area==='gestao') renderGestao();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════════════════════════
+function selecionarGrupo(g){
+  grupoSel=g;
+  document.querySelectorAll('.grupo-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('gbtn-'+g).classList.add('selected');
+}
+
+async function fazerLogin(){
+  const nome=document.getElementById('login-nome').value.trim();
+  if(!nome){toast('Escreve o teu nome completo','warning');return;}
+  if(!grupoSel){toast('Seleciona o teu grupo','warning');return;}
+  sessao={nome,grupo:grupoSel};
+  document.getElementById('user-pill-nome').textContent=nome;
+  document.getElementById('hdr-validar-sub').textContent=GRUPOS[grupoSel].label+' · a validar notícias do teu grupo';
+  irPara('validar');
+  showLoad('A carregar notícias do servidor…');
+  try{
+    const data=await apiListar();
+    const localMap={};
+    noticias.forEach(n=>{ localMap[chave(n)]={_meios:n._meios}; });
+    let nextId=1;
+    const fromSheets=(data.noticias||[]).map(n=>{
+      const ck=norm(n.titulo)+'|'+norm(n.proponente);
+      const loc=localMap[ck]||{};
+      return {
+        _id:nextId++, proponente:n.proponente, titulo:n.titulo,
+        categorias:(n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
+        escola:n.escola, data:(n.timestamp||'').slice(0,10),
+        corpo:n.corpo, imgDestaque:n.imgDestaque,
+        outrasFotos:(n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
+        video:n.video, links:n.links,
+        _meios:loc._meios||{site:false,fb:false,ig:false,tiktok:false},
+      };
+    });
+    if(fromSheets.length>0){ noticias=fromSheets; saveNoticias(); }
+    validacoes=data.validacoes||{};
+    hideLoad();
+    toast((noticias.length||0)+' notícia(s) carregada(s).','success');
+  }catch(e){
+    hideLoad();
+    toast('Sem ligação ao servidor. A mostrar dados locais.','warning');
+  }
+  renderValidar();
+}
+
+async function atualizarNoticiasValidador(){
+  if(!sessao)return;
+  noticiaAtual=null; decisaoAtual=null;
+  showLoad('A atualizar…');
+  try{
+    const data=await apiListar();
+    const localMap={};
+    noticias.forEach(n=>{ localMap[chave(n)]={_meios:n._meios}; });
+    let nextId=1;
+    const fromSheets=(data.noticias||[]).map(n=>{
+      const ck=norm(n.titulo)+'|'+norm(n.proponente);
+      const loc=localMap[ck]||{};
+      return {
+        _id:nextId++, proponente:n.proponente, titulo:n.titulo,
+        categorias:(n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
+        escola:n.escola, data:(n.timestamp||'').slice(0,10),
+        corpo:n.corpo, imgDestaque:n.imgDestaque,
+        outrasFotos:(n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
+        video:n.video, links:n.links,
+        _meios:loc._meios||{site:false,fb:false,ig:false,tiktok:false},
+      };
+    });
+    if(fromSheets.length>0){ noticias=fromSheets; saveNoticias(); }
+    validacoes=data.validacoes||{};
+    hideLoad();
+    toast(noticias.length+' notícia(s) carregada(s).','success');
+  }catch(e){ hideLoad(); toast('Erro: '+e.message,'warning'); }
+  renderValidar();
+}
+
+
+
+
+function sairValidador(){
+  if(!confirm('Tens a certeza que queres sair?'))return;
+  sessao=null;grupoSel=null;noticiaAtual=null;decisaoAtual=null;
+  document.getElementById('login-nome').value='';
+  document.querySelectorAll('.grupo-btn').forEach(b=>b.classList.remove('selected'));
+  irPara('home');
+}
+
+function entrarGestao(){
+  const pass=document.getElementById('gestao-pass').value;
+  if(pass!==PASS_GESTAO){toast('Password incorreta','error');return;}
+  document.getElementById('gestao-pass').value='';
+  irPara('gestao');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER: VALIDAR
+// ═══════════════════════════════════════════════════════════════
+function filaGrupo(){
+  return noticias.filter(n=>{
+    const g=escolaGrupo(n.escola);
+    return !g||g===sessao.grupo;
+  });
+}
+
+function estadoNoticia(n){
+  const v=validacoes[chave(n)];
+  if(!v)return{estado:'pendente'};
+  return v;
+}
+
+function renderStats(){
+  const minha=filaGrupo();
+  const pend=minha.filter(n=>estadoNoticia(n).estado==='pendente').length;
+  const pub=minha.filter(n=>estadoNoticia(n).estado==='pode_publicar').length;
+  const corr=minha.filter(n=>estadoNoticia(n).estado==='enviado_correcao').length;
+  const val=minha.filter(n=>estadoNoticia(n).estado==='em_validacao').length;
+  document.getElementById('stats-validar').innerHTML=`
+    <div class="sc"><div class="sv">${minha.length}</div><div class="sl">Total</div></div>
+    <div class="sc"><div class="sv" style="color:var(--amber)">${pend}</div><div class="sl">Pendentes</div></div>
+    <div class="sc"><div class="sv" style="color:var(--green)">${pub}</div><div class="sl">A publicar</div></div>
+    <div class="sc"><div class="sv" style="color:var(--blue)">${corr+val}</div><div class="sl">Em processo</div></div>`;
+}
+
+function renderValidar(){
+  renderStats();
+  const el=document.getElementById('content-validar');
+  const minha=filaGrupo();
+
+  if(!noticias.length){
+    el.innerHTML=`<div class="card"><div class="empty">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg>
+      <p>Ainda não há notícias importadas.<br>Pede à gestão para importar o Excel do OneDrive.</p>
+    </div></div>`;
+    return;
+  }
+
+  if(!minha.length){
+    el.innerHTML=`<div class="card"><div class="empty">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg>
+      <p>Não há notícias para o teu grupo.</p>
+    </div></div>`;
+    return;
+  }
+
+  if(noticiaAtual){
+    el.innerHTML=buildDetalhe(noticiaAtual);
+    return;
+  }
+
+  // Lista de notícias do grupo
+  const listaHtml=minha.map(n=>{
+    const v=estadoNoticia(n);
+    const est=v.estado||'pendente';
+    const bmap={pendente:'b-pend',pode_publicar:'b-pub',enviado_correcao:'b-corr',em_validacao:'b-val'};
+    const lmap={pendente:'Pendente',pode_publicar:'✓ Pode publicar',enviado_correcao:'✉ Enviada para correção',em_validacao:'Em validação'};
+    const bgmap={pendente:'var(--bg2)',pode_publicar:'var(--green-bg)',enviado_correcao:'var(--blue-bg)',em_validacao:'#f0e8ff'};
+    const icmap={pendente:'var(--text2)',pode_publicar:'var(--green-text)',enviado_correcao:'var(--blue-text)',em_validacao:'#5a1a8a'};
+    return `<div class="li" onclick="abrirNoticia(${n._id})">
+      <div class="li-ico" style="background:${bgmap[est]}">
+        <svg viewBox="0 0 24 24" width="16" height="16" style="stroke:${icmap[est]};fill:none;stroke-width:1.8"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/></svg>
+      </div>
+      <div class="li-b">
+        <div class="li-t">${n.titulo}</div>
+        <div class="li-s">${n.proponente||'—'} · ${n.escola||'—'} · ${n.data||'—'}</div>
+      </div>
+      <div class="li-r">
+        <span class="badge ${bmap[est]||'b-pend'}">${lmap[est]||est}</span>
+        ${v.validador?`<span style="font-size:10px;color:var(--text2)">${v.validador}</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`<div class="card"><div>${listaHtml}</div></div>`;
+}
+
+function abrirNoticia(id){
+  noticiaAtual=noticias.find(n=>n._id===id)||null;
+  decisaoAtual=null;
+  renderValidar();
+}
+function voltarLista(){noticiaAtual=null;decisaoAtual=null;renderValidar();}
+
+// ═══════════════════════════════════════════════════════════════
+// DETALHE DA NOTÍCIA
+// ═══════════════════════════════════════════════════════════════
+function getNivelBadge(escola){
+  const g=escolaGrupo(escola);
+  if(g==='A')return`<span class="nivel-badge nivel-a">🏫 Pré-escolar / 1.º Ciclo</span>`;
+  if(g==='B')return`<span class="nivel-badge nivel-b">🎓 2.º/3.º Ciclo / Secundário</span>`;
+  return'';
+}
+
+function buildDetalhe(n){
+  const v=estadoNoticia(n);
+  const chars=n.corpo?n.corpo.length:0;
+  const pct=Math.min(100,Math.round((chars/2200)*100));
+  const cc=chars>2200?'var(--red)':chars>1800?'var(--amber)':'var(--green)';
+
+  const cats=(n.categorias||[]).length
+    ?(n.categorias||[]).map(c=>`<span class="cat-pill">${c}</span>`).join('')
+    :'';
+
+  const imgHtml=n.imgDestaque
+    ?`<img class="dest-img" src="${n.imgDestaque}" alt="Imagem de destaque" onclick="window.open('${n.imgDestaque}','_blank')" onerror="this.style.display='none'">`
+    :`<div style="background:var(--bg2);border-radius:var(--r);padding:10px 12px;font-size:12px;color:var(--text2);margin-bottom:8px">Sem imagem de destaque</div>`;
+
+  const outrosHtml=(n.outrasFotos&&n.outrasFotos.length)
+    ?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">${n.outrasFotos.map((f,i)=>`<div class="mpill"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Foto ${i+1}: <a href="${f}" target="_blank">${f.length>35?f.slice(0,35)+'…':f}</a></div>`).join('')}</div>`
+    :'';
+
+  const videoHtml=n.video
+    ?`<div class="mpill" style="margin-bottom:8px"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><a href="${n.video}" target="_blank">${n.video.length>45?n.video.slice(0,45)+'…':n.video}</a></div>`
+    :'';
+
+  const linksHtml=n.links
+    ?`<div class="mpill" style="margin-bottom:8px"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg><a href="${n.links}" target="_blank">${n.links.length>55?n.links.slice(0,55)+'…':n.links}</a></div>`
+    :'';
+
+  // Decisão
+  const meios=n._meios||{site:false,fb:false,ig:false,tiktok:false};
+  const pubHtml=`<div class="pub-row">
+    ${['Site','Facebook','Instagram','TikTok'].map(m=>{
+      const k=m.toLowerCase();
+      return`<label class="pub-lbl ${meios[k]?'on':''}" id="pub-${n._id}-${k}">
+        <input type="checkbox" ${meios[k]?'checked':''} onchange="toggleMeio(${n._id},'${k}',this.checked)">${m}
+      </label>`;
+    }).join('')}
+  </div>`;
+
+  const jaValidado=v.estado&&v.estado!=='pendente';
+
+  return`
+  <button class="btn btn-sec" onclick="voltarLista()" style="margin-bottom:14px;font-size:12px">
+    <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Voltar à lista
+  </button>
+
+  <div class="card">
+    <div class="ntitle">${n.titulo}</div>
+    ${getNivelBadge(n.escola)}
+    <div class="meta-row">
+      <div class="mi"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${n.proponente||'—'}</div>
+      <div class="mi"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>${n.escola||'—'}</div>
+      <div class="mi"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${n.data||'—'}</div>
+    </div>
+    ${cats?`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">${cats}</div>`:''}
+
+    <div class="sec">Imagem de destaque</div>
+    ${imgHtml}
+    ${outrosHtml}${videoHtml}
+    ${linksHtml?`<div class="sec">Links</div>${linksHtml}`:''}
+
+    <div class="sec">Texto da notícia</div>
+    <div class="nbody ${!n.corpo?'empty':''}">${n.corpo||'(sem texto)'}</div>
+    <div class="char-info"><span>Comprimento</span><span style="color:${cc};font-weight:700">${chars} / 2200</span></div>
+    <div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${cc}"></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    ${jaValidado?`
+    <div style="background:var(--bg2);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--text2)">
+      ✓ Já validado por <strong>${v.validador}</strong> em ${v.dataValidacao||'—'} — Estado: <strong>${{pode_publicar:'Pode publicar',enviado_correcao:'Enviado para correção',em_validacao:'Em validação'}[v.estado]||v.estado}</strong>
+    </div>`:''}
+    <div style="font-size:13px;font-weight:700;margin-bottom:12px">Decisão de validação</div>
+    <div class="decisao-grid">
+      <div class="dec-btn dec-pub" onclick="selecionarDecisao('pode_publicar')">
+        <div class="di">✅</div>
+        <div class="dt">Pode publicar</div>
+        <div class="ds">A notícia está aprovada para publicação</div>
+      </div>
+      <div class="dec-btn dec-corr" onclick="selecionarDecisao('enviado_correcao')">
+        <div class="di">✉️</div>
+        <div class="dt">Enviar para correção</div>
+        <div class="ds">Notificar o autor com indicações</div>
+      </div>
+    </div>
+
+    <div id="panel-pub" style="display:none">
+      <div class="sec" style="margin-top:0">Publicar em</div>
+      ${pubHtml}
+      <div class="btn-row">
+        <button class="btn btn-apro btn-full" onclick="submeterDecisao()">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirmar — Pode publicar
+        </button>
+      </div>
+    </div>
+
+    <div id="panel-corr" style="display:none">
+      <div class="sec" style="margin-top:0">Nota para o proponente *</div>
+      <textarea class="nota" id="nota-corr" placeholder="Descreve o que precisa de ser corrigido ou melhorado…"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-corr btn-full" onclick="submeterDecisao()">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>Gerar email e registar
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function selecionarDecisao(d){
+  decisaoAtual=d;
+  document.querySelectorAll('.dec-btn').forEach(b=>b.classList.remove('selected'));
+  const sel=document.querySelector('.dec-btn.dec-'+(d==='pode_publicar'?'pub':'corr'));
+  if(sel)sel.classList.add('selected');
+  const panelPub=document.getElementById('panel-pub');
+  const panelCorr=document.getElementById('panel-corr');
+  if(panelPub)panelPub.style.display=d==='pode_publicar'?'block':'none';
+  if(panelCorr)panelCorr.style.display=d==='enviado_correcao'?'block':'none';
+}
+
+function toggleMeio(id,k,v){
+  const n=noticias.find(x=>x._id===id);
+  if(!n)return;
+  if(!n._meios)n._meios={site:false,fb:false,ig:false,tiktok:false};
+  n._meios[k]=v;
+  const l=document.getElementById(`pub-${id}-${k}`);
+  if(l){v?l.classList.add('on'):l.classList.remove('on');}
+}
+
+async function submeterDecisao(){
+  const n=noticiaAtual;
+  if(!n||!decisaoAtual)return;
+  const meios=n._meios||{site:false,fb:false,ig:false,tiktok:false};
+  let nota='';
+
+  if(decisaoAtual==='enviado_correcao'){
+    nota=(document.getElementById('nota-corr')||{}).value||'';
+    if(!nota.trim()){toast('Escreve uma nota para o proponente','warning');return;}
+  }
+
+  showLoad('A guardar decisão…');
+  try{
+    await apiGuardar(n,decisaoAtual,meios,nota);
+    hideLoad();
+    if(decisaoAtual==='pode_publicar'){
+      toast('Notícia aprovada para publicação!','success');
+      noticiaAtual=null;decisaoAtual=null;
+      renderValidar();
+    } else {
+      // Abre modal de email
+      hideLoad();
+      abrirEmailModal(n,nota);
+    }
+  }catch(e){
+    hideLoad();
+    toast('Erro ao guardar: '+e.message,'error');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AI
+// ═══════════════════════════════════════════════════════════════
+
+
+// ═══════════════════════════════════════════════════════════════
+// EMAIL MODAL
+// ═══════════════════════════════════════════════════════════════
+function abrirEmailModal(n,nota){
+  emailNotId=n._id;
+  const assunto=`Notícia "${n.titulo}" — sugestões de melhoria antes da publicação`;
+  const corpo=`Olá ${n.proponente||''},\n\nObrigado/a pela submissão da notícia "${n.titulo}".\n\nApresentamos algumas sugestões de melhoria antes da publicação:\n\n${nota}\n\nApós realizar as correções, pedimos que nos envie a versão atualizada diretamente para este email.\n\nObrigado pela colaboração!\n${sessao.nome}\nEquipa de Comunicação — AET`;
+  document.getElementById('email-assunto').value=assunto;
+  document.getElementById('email-corpo').value=corpo;
+  document.getElementById('email-modal').classList.add('show');
+}
+function fecharEmailModal(){document.getElementById('email-modal').classList.remove('show');}
+async function copiarEmail(){
+  const texto='Assunto: '+document.getElementById('email-assunto').value+'\n\n'+document.getElementById('email-corpo').value;
+  try{
+    await navigator.clipboard.writeText(texto);
+    toast('Mensagem copiada! Cola no teu email.','success');
+    fecharEmailModal();
+    noticiaAtual=null;decisaoAtual=null;
+    renderValidar();
+  }catch(e){toast('Seleciona e copia manualmente.','warning');}
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXCEL IMPORT
+// ═══════════════════════════════════════════════════════════════
+function importarExcel(input){
+  const file=input.files[0];
+  if(!file)return;
+  const st=document.getElementById('import-status');
+  st.textContent='A ler ficheiro…';
+  showLoad('A importar notícias do Excel…');
+  const reader=new FileReader();
+  reader.onload=async function(e){
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});
+      if(!rows.length){hideLoad();st.textContent='Ficheiro sem dados.';return;}
+
+      const headers=Object.keys(rows[0]);
+      const ci=pats=>headers.find(h=>pats.some(p=>h.toLowerCase().includes(p.toLowerCase())))||null;
+      const COL={
+        ts:   ci(['hora de início','hora da última','submission time','início']),
+        prop: ci(['nome do proponente','proponente']),
+        email:ci(['email','e-mail']),
+        tit:  ci(['título da notícia','titulo da noticia','título (sem','título da not']),
+        cats: ci(['categoria da notícia','categoria','pergunta']),
+        esc:  ci(['estabelecimento']),
+        corp: ci(['texto do tipo','notícia texto','noticia texto','texto da not']),
+        img:  ci(['insira uma fotografia','imagem de destaque','fotografia (inserir 1','fotografia']),
+        fotos:ci(['outras fotos','inserir até']),
+        vid:  ci(['vídeo','video','vídeos']),
+        lnk:  ci(['links','formulários']),
+      };
+
+      const existKeys=new Set(noticias.map(n=>norm(n.titulo)+'|'+norm(n.proponente)));
+      let nextId=Math.max(0,...noticias.map(n=>n._id||0))+1;
+      let imported=0;
+
+      rows.forEach(row=>{
+        const get=col=>col?(row[col]||'').toString().trim():'';
+        const titulo=get(COL.tit);
+        const proponente=get(COL.prop);
+        if(!titulo)return;
+
+        // Ignora linhas que são cabeçalhos repetidos
+        if(headers.some(h=>norm(h)===norm(titulo)))return;
+
+        const key=norm(titulo)+'|'+norm(proponente);
+        if(existKeys.has(key))return;
+
+        let data=new Date().toISOString().slice(0,10);
+        const ts=get(COL.ts);
+        if(ts){try{const d=new Date(ts);if(!isNaN(d))data=d.toISOString().slice(0,10);}catch(_){}}
+
+        noticias.push({
+          _id:nextId++,
+          proponente,titulo,
+          categorias:get(COL.cats).split(/[;,]/).map(s=>s.trim()).filter(Boolean),
+          escola:get(COL.esc),data,corpo:get(COL.corp),
+          imgDestaque:get(COL.img),
+          outrasFotos:get(COL.fotos).split(/[;\n]/).map(s=>s.trim()).filter(Boolean),
+          video:get(COL.vid),links:get(COL.lnk),
+          _meios:{site:false,fb:false,ig:false,tiktok:false}
+        });
+        existKeys.add(key);
+        imported++;
+      });
+
+      saveNoticias();hideLoad();input.value='';
+      if(imported>0){
+        st.textContent=`✓ ${imported} importada(s) — a sincronizar…`;
+        // Envia para Google Sheets em background
+        const novasNoticias = noticias.slice(-imported);
+        let sincOk=0;
+        for(const n of novasNoticias){
+          try{ const r=await apiGuardarNoticia(n); if(r.ok)sincOk++; }catch(_){}
+        }
+        st.textContent=`✓ ${imported} importada(s) · ${sincOk} sincronizadas com Google Sheets`;
+        toast(`${imported} notícia(s) importada(s) e sincronizadas!`,'success');
+        renderGestao();
+      } else {
+        st.textContent='✓ Sem notícias novas';
+        toast('Sem notícias novas para importar.','info');
+      }
+    }catch(err){
+      hideLoad();
+      st.textContent='Erro: '+err.message;
+      toast('Erro ao ler ficheiro.','error');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SINCRONIZAR TUDO
+// ═══════════════════════════════════════════════════════════════
+async function sincronizarTudo(){
+  if(!noticias.length){toast('Não há notícias para sincronizar.','warning');return;}
+  const st=document.getElementById('import-status');
+  showLoad('A sincronizar '+noticias.length+' notícias com Google Sheets…');
+  let ok=0, err=0;
+  for(const n of noticias){
+    try{
+      const r=await apiGuardarNoticia(n);
+      if(r&&r.ok)ok++;
+      else err++;
+    }catch(e){err++;}
+  }
+  hideLoad();
+  st.textContent=`✓ ${ok} sincronizadas · ${err} erros`;
+  if(ok>0) toast(`${ok} notícia(s) sincronizadas com Google Sheets!`,'success');
+  else toast('Não foi possível sincronizar. Verifica a ligação.','error');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GESTÃO
+// ═══════════════════════════════════════════════════════════════
+async function renderGestao(){
+  showLoad('A carregar do Google Sheets…');
+  try{
+    const data = await apiListar();
+    // Merge notícias do Sheets
+    const chavesLocais = new Set(noticias.map(n=>chave(n)));
+    let nextId = Math.max(0,...noticias.map(n=>n._id||0))+1;
+    (data.noticias||[]).forEach(n=>{
+      const c = norm(n.titulo)+'|'+norm(n.proponente);
+      if(!chavesLocais.has(c)){
+        noticias.push({
+          _id: nextId++,
+          proponente: n.proponente, titulo: n.titulo,
+          categorias: (n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
+          escola: n.escola, data: (n.timestamp||'').slice(0,10),
+          corpo: n.corpo, imgDestaque: n.imgDestaque,
+          outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
+          video: n.video, links: n.links,
+          _meios:{site:false,fb:false,ig:false,tiktok:false}
+        });
+        chavesLocais.add(c);
+      }
+    });
+    saveNoticias();
+    validacoes = data.validacoes || {};
+  }catch(e){
+    // usa dados locais, não interrompe
+  }
+  hideLoad();
+
+  const total=noticias.length;
+  const pend=noticias.filter(n=>!validacoes[chave(n)]||validacoes[chave(n)].estado==='pendente').length;
+  const pub=noticias.filter(n=>(validacoes[chave(n)]||{}).estado==='pode_publicar').length;
+  const corr=noticias.filter(n=>(validacoes[chave(n)]||{}).estado==='enviado_correcao').length;
+
+  document.getElementById('stats-gestao').innerHTML=`
+    <div class="sc"><div class="sv">${total}</div><div class="sl">Total</div></div>
+    <div class="sc"><div class="sv" style="color:var(--amber)">${pend}</div><div class="sl">Pendentes</div></div>
+    <div class="sc"><div class="sv" style="color:var(--green)">${pub}</div><div class="sl">A publicar</div></div>
+    <div class="sc"><div class="sv" style="color:var(--blue)">${corr}</div><div class="sl">Para correção</div></div>`;
+
+  const filtros=['todas','pendente','pode_publicar','enviado_correcao'];
+  const fLabels={todas:`Todas (${total})`,pendente:`Pendentes (${pend})`,pode_publicar:`A publicar (${pub})`,enviado_correcao:`Para correção (${corr})`};
+  document.getElementById('filter-row-gestao').innerHTML=filtros.map(f=>
+    `<div class="chip ${filtroGestao===f?'active':''}" onclick="setFiltroGestao('${f}')">${fLabels[f]}</div>`
+  ).join('');
+
+  renderListaGestao();
+}
+
+function setFiltroGestao(f){filtroGestao=f;renderGestao();}
+
+function renderListaGestao(){
+  const el=document.getElementById('lista-gestao');
+  let lista=noticias;
+  if(filtroGestao!=='todas'){
+    lista=noticias.filter(n=>{
+      const est=(validacoes[chave(n)]||{}).estado||'pendente';
+      return est===filtroGestao;
+    });
+  }
+
+  if(!lista.length){
+    el.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24"><path d="M21 8v13H3V8"/><rect x="1" y="3" width="22" height="5" rx="1"/><line x1="10" y1="12" x2="14" y2="12"/></svg><p>Sem notícias nesta categoria.</p></div>`;
+    return;
+  }
+
+  const bmap={pendente:'b-pend',pode_publicar:'b-pub',enviado_correcao:'b-corr',em_validacao:'b-val'};
+  const lmap={pendente:'Pendente',pode_publicar:'✓ Pode publicar',enviado_correcao:'✉ Para correção',em_validacao:'Em validação'};
+
+  el.innerHTML=[...lista].reverse().map(n=>{
+    const v=validacoes[chave(n)]||{};
+    const est=v.estado||'pendente';
+    const meiosStr=v.meios?v.meios.split(';').filter(Boolean).map(m=>`<span style="font-size:10px;background:var(--green-bg);color:var(--green-text);padding:1px 6px;border-radius:20px">${m}</span>`).join(''):'';
+    return`<div class="li">
+      <div class="li-ico" style="background:var(--bg2)">
+        <svg viewBox="0 0 24 24" width="16" height="16" style="stroke:var(--text2);fill:none;stroke-width:1.8"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/></svg>
+      </div>
+      <div class="li-b">
+        <div class="li-t">${n.titulo}</div>
+        <div class="li-s">${n.proponente||'—'} · ${n.escola||'—'} · ${n.data||'—'}${v.validador?' · '+v.validador:''}</div>
+      </div>
+      <div class="li-r">
+        <span class="badge ${bmap[est]||'b-pend'}">${lmap[est]||est}</span>
+        <div style="display:flex;gap:3px;flex-wrap:wrap">${meiosStr}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
