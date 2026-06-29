@@ -535,7 +535,7 @@ async function fazerLogin(){
         corpo: n.corpo, imgDestaque: n.imgDestaque,
         outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
         video: n.video, links: n.links,
-        _meios: local._meios||{site:false,fb:false,ig:false},
+        _meios: local._meios||{site:false,fb:false,ig:false,tiktok:false},
         _analise: local._analise||null
       };
     });
@@ -577,7 +577,7 @@ async function atualizarNoticiasValidador(){
         corpo: n.corpo, imgDestaque: n.imgDestaque,
         outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
         video: n.video, links: n.links,
-        _meios: local._meios||{site:false,fb:false,ig:false},
+        _meios: local._meios||{site:false,fb:false,ig:false,tiktok:false},
         _analise: local._analise||null
       };
     });
@@ -737,9 +737,9 @@ function buildDetalhe(n){
     :`<div class="ai-load"><div class="spinner"></div> A analisar com IA…</div>`;
 
   // Decisão
-  const meios=n._meios||{site:false,fb:false,ig:false};
+  const meios=n._meios||{site:false,fb:false,ig:false,tiktok:false};
   const pubHtml=`<div class="pub-row">
-    ${['Site','Facebook','Instagram'].map(m=>{
+    ${['Site','Facebook','Instagram','TikTok'].map(m=>{
       const k=m.toLowerCase();
       return`<label class="pub-lbl ${meios[k]?'on':''}" id="pub-${n._id}-${k}">
         <input type="checkbox" ${meios[k]?'checked':''} onchange="toggleMeio(${n._id},'${k}',this.checked)">${m}
@@ -840,7 +840,7 @@ function selecionarDecisao(d){
 function toggleMeio(id,k,v){
   const n=noticias.find(x=>x._id===id);
   if(!n)return;
-  if(!n._meios)n._meios={site:false,fb:false,ig:false};
+  if(!n._meios)n._meios={site:false,fb:false,ig:false,tiktok:false};
   n._meios[k]=v;
   const l=document.getElementById(`pub-${id}-${k}`);
   if(l){v?l.classList.add('on'):l.classList.remove('on');}
@@ -848,8 +848,9 @@ function toggleMeio(id,k,v){
 
 async function submeterDecisao(){
   const n=noticiaAtual;
-  if(!n||!decisaoAtual)return;
-  const meios=n._meios||{site:false,fb:false,ig:false};
+  if(!n){toast('Sem notícia selecionada','warning');return;}
+  if(!decisaoAtual){toast('Seleciona uma decisão primeiro (Pode publicar ou Enviar para correção)','warning');return;}
+  const meios=n._meios||{site:false,fb:false,ig:false,tiktok:false};
   let nota='';
 
   if(decisaoAtual==='enviado_correcao'){
@@ -1047,7 +1048,7 @@ function importarExcel(input){
           imgDestaque:get(COL.img),
           outrasFotos:get(COL.fotos).split(/[;\n]/).map(s=>s.trim()).filter(Boolean),
           video:get(COL.vid),links:get(COL.lnk),
-          _meios:{site:false,fb:false,ig:false},_analise:null
+          _meios:{site:false,fb:false,ig:false,tiktok:false},_analise:null
         });
         existKeys.add(key);
         imported++;
@@ -1127,7 +1128,7 @@ async function renderGestao(){
           corpo: n.corpo, imgDestaque: n.imgDestaque,
           outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
           video: n.video, links: n.links,
-          _meios:{site:false,fb:false,ig:false}, _analise:null
+          _meios:{site:false,fb:false,ig:false,tiktok:false}, _analise:null
         });
         chavesLocais.add(c);
       }
