@@ -277,7 +277,7 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
     <div class="logo"><svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg></div>
     <div class="hb"><h1>Validar Notícias</h1><p id="hdr-validar-sub"></p></div>
     <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
-      <div class="user-pill" onclick="atualizarNoticiasValidador()" title="Atualizar notícias do servidor">
+      <div class="user-pill" onclick="atualizarNoticiasValidador()" title="Atualizar">
         <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
         <span>Atualizar</span>
       </div>
@@ -303,9 +303,6 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
       Sair
     </div>
   </div>
-
-  <!-- CONFIG APIKEY -->
-  <div id="cfg-apikey"></div>
 
   <!-- IMPORT BOX -->
   <div class="import-box">
@@ -358,10 +355,6 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
 const API_URL = 'https://script.google.com/macros/s/AKfycbxbhxJiKUzRDCAZUOZxrh709EPPcineRZLUFgkwvOM4Xn93adzAd3AGNpUEUqmEY3qCmA/exec';
 const PASS_GESTAO = 'templarios2027'; // mesma do projeto Cidadania
 
-// Chave Anthropic — guardada no localStorage, nunca no código
-function getApiKey(){ return localStorage.getItem('aet_anthropic_key')||''; }
-function setApiKey(k){ localStorage.setItem('aet_anthropic_key', k.trim()); }
-
 const GRUPOS = {
   A:{label:'Pré-escolar e 1.º Ciclo',
      esc:['valdonas','serra','carvalhos de figueiredo','curvaceiras','junceira','olalhas','templários','d. pedro iv','são pedro','casais']},
@@ -413,9 +406,9 @@ function toast(msg,type='info'){
 // ═══════════════════════════════════════════════════════════════
 async function apiListar(){
   const url = API_URL+'?action=listar&t='+Date.now();
-  const data = await apiFetch_(url); // com fallback JSONP automático
+  const data = await apiFetch_(url);
   if(!data.ok) throw new Error(data.error||'Erro');
-  return data; // {noticias:[], validacoes:{}}
+  return data;
 }
 
 // JSONP — única forma de contornar CORS com Apps Script sem licença Premium
@@ -443,7 +436,6 @@ function jsonpFetch_(url){
 }
 
 async function apiFetch_(url){
-  // Apps Script bloqueia CORS — usar sempre JSONP
   return await jsonpFetch_(url);
 }
 
@@ -461,7 +453,7 @@ async function apiGuardar(n, estado, meios, nota){
   };
   const url = API_URL+'?action=guardarValidacao&chave='+encodeURIComponent(dados.chave)
     +'&dados='+encodeURIComponent(JSON.stringify(dados))+'&t='+Date.now();
-  const data = await apiFetch_(url); // JSONP obrigatório para escritas
+  const data = await apiFetch_(url);
   validacoes[dados.chave] = dados;
   return data;
 }
@@ -482,7 +474,7 @@ async function apiGuardarNoticia(n){
     links: n.links||''
   };
   const url = API_URL+'?action=guardarNoticia&dados='+encodeURIComponent(JSON.stringify(dados))+'&t='+Date.now();
-  return await apiFetch_(url); // JSONP obrigatório para escritas
+  return await apiFetch_(url);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -519,37 +511,28 @@ async function fazerLogin(){
   irPara('validar');
   showLoad('A carregar notícias do servidor…');
   try{
-    const data = await apiListar();
-    // Sheets é a fonte de verdade — substituir lista completa preservando _meios e _analise locais
-    const localMap = {};
+    const data=await apiListar();
+    const localMap={};
     noticias.forEach(n=>{ localMap[chave(n)]={_meios:n._meios,_analise:n._analise}; });
-    let nextId = 1;
-    const noticiasDoSheets = (data.noticias||[]).map(n=>{
-      const c = norm(n.titulo)+'|'+norm(n.proponente);
-      const local = localMap[c]||{};
+    let nextId=1;
+    const fromSheets=(data.noticias||[]).map(n=>{
+      const ck=norm(n.titulo)+'|'+norm(n.proponente);
+      const loc=localMap[ck]||{};
       return {
-        _id: nextId++,
-        proponente: n.proponente, titulo: n.titulo,
-        categorias: (n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
-        escola: n.escola, data: (n.timestamp||'').slice(0,10),
-        corpo: n.corpo, imgDestaque: n.imgDestaque,
-        outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
-        video: n.video, links: n.links,
-        _meios: local._meios||{site:false,fb:false,ig:false,tiktok:false},
-        _analise: local._analise||null
+        _id:nextId++, proponente:n.proponente, titulo:n.titulo,
+        categorias:(n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
+        escola:n.escola, data:(n.timestamp||'').slice(0,10),
+        corpo:n.corpo, imgDestaque:n.imgDestaque,
+        outrasFotos:(n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
+        video:n.video, links:n.links,
+        _meios:loc._meios||{site:false,fb:false,ig:false,tiktok:false},
+        _analise:loc._analise||null
       };
     });
-    if(noticiasDoSheets.length > 0){
-      noticias = noticiasDoSheets;
-      saveNoticias();
-    }
-    validacoes = data.validacoes || {};
+    if(fromSheets.length>0){ noticias=fromSheets; saveNoticias(); }
+    validacoes=data.validacoes||{};
     hideLoad();
-    if(noticias.length===0){
-      toast('O servidor não tem notícias ainda. Pede à gestão para importar o Excel.','warning');
-    } else {
-      toast(noticias.length+' notícia(s) carregada(s) do servidor.','success');
-    }
+    toast((noticias.length||0)+' notícia(s) carregada(s).','success');
   }catch(e){
     hideLoad();
     toast('Sem ligação ao servidor. A mostrar dados locais.','warning');
@@ -559,37 +542,45 @@ async function fazerLogin(){
 
 async function atualizarNoticiasValidador(){
   if(!sessao)return;
-  noticiaAtual=null;decisaoAtual=null;
-  showLoad('A atualizar notícias do servidor…');
+  noticiaAtual=null; decisaoAtual=null;
+  showLoad('A atualizar…');
   try{
-    const data = await apiListar();
-    const localMap = {};
+    const data=await apiListar();
+    const localMap={};
     noticias.forEach(n=>{ localMap[chave(n)]={_meios:n._meios,_analise:n._analise}; });
-    let nextId = 1;
-    const noticiasDoSheets = (data.noticias||[]).map(n=>{
-      const c = norm(n.titulo)+'|'+norm(n.proponente);
-      const local = localMap[c]||{};
+    let nextId=1;
+    const fromSheets=(data.noticias||[]).map(n=>{
+      const ck=norm(n.titulo)+'|'+norm(n.proponente);
+      const loc=localMap[ck]||{};
       return {
-        _id: nextId++,
-        proponente: n.proponente, titulo: n.titulo,
-        categorias: (n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
-        escola: n.escola, data: (n.timestamp||'').slice(0,10),
-        corpo: n.corpo, imgDestaque: n.imgDestaque,
-        outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
-        video: n.video, links: n.links,
-        _meios: local._meios||{site:false,fb:false,ig:false,tiktok:false},
-        _analise: local._analise||null
+        _id:nextId++, proponente:n.proponente, titulo:n.titulo,
+        categorias:(n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
+        escola:n.escola, data:(n.timestamp||'').slice(0,10),
+        corpo:n.corpo, imgDestaque:n.imgDestaque,
+        outrasFotos:(n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
+        video:n.video, links:n.links,
+        _meios:loc._meios||{site:false,fb:false,ig:false,tiktok:false},
+        _analise:loc._analise||null
       };
     });
-    if(noticiasDoSheets.length > 0){ noticias = noticiasDoSheets; saveNoticias(); }
-    validacoes = data.validacoes || {};
+    if(fromSheets.length>0){ noticias=fromSheets; saveNoticias(); }
+    validacoes=data.validacoes||{};
     hideLoad();
     toast(noticias.length+' notícia(s) carregada(s).','success');
-  }catch(e){
-    hideLoad();
-    toast('Erro ao atualizar: '+e.message,'warning');
-  }
+  }catch(e){ hideLoad(); toast('Erro: '+e.message,'warning'); }
   renderValidar();
+}
+
+function getApiKey(){ return localStorage.getItem('aet_anthropic_key')||''; }
+function setApiKey(k){ localStorage.setItem('aet_anthropic_key',k.trim()); }
+
+function guardarApiKey(notId){
+  const inp=document.getElementById('inp-apikey');
+  if(!inp||!inp.value.trim()){toast('Cola a chave sk-ant-...','warning');return;}
+  setApiKey(inp.value.trim());
+  toast('Chave guardada!','success');
+  const n=noticias.find(x=>x._id===notId);
+  if(n){ n._analise=null; analisarIA(n); }
 }
 
 function sairValidador(){
@@ -800,37 +791,32 @@ function buildDetalhe(n){
     </div>
 
     <div id="panel-pub" style="display:none">
-    <div class="sec" style="margin-top:0">Publicar em</div>
-    ${pubHtml}
-    <div class="btn-row">
-      <button class="btn btn-apro btn-full" onclick="submeterDecisao()">
-        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirmar — Pode publicar
-      </button>
-    </div>
+      <div class="sec" style="margin-top:0">Publicar em</div>
+      ${pubHtml}
+      <div class="btn-row">
+        <button class="btn btn-apro btn-full" onclick="submeterDecisao()">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirmar — Pode publicar
+        </button>
+      </div>
     </div>
 
     <div id="panel-corr" style="display:none">
-    <div class="sec" style="margin-top:0">Nota para o proponente *</div>
-    <textarea class="nota" id="nota-corr" placeholder="Descreve o que precisa de ser corrigido ou melhorado…"></textarea>
-    <div class="btn-row">
-      <button class="btn btn-corr btn-full" onclick="submeterDecisao()">
-        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>Gerar email e registar
-      </button>
-    </div>
+      <div class="sec" style="margin-top:0">Nota para o proponente *</div>
+      <textarea class="nota" id="nota-corr" placeholder="Descreve o que precisa de ser corrigido ou melhorado…"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-corr btn-full" onclick="submeterDecisao()">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>Gerar email e registar
+        </button>
+      </div>
     </div>
   </div>`;
 }
 
 function selecionarDecisao(d){
   decisaoAtual=d;
-  // Atualizar apenas o painel de decisão sem re-render completo (evita re-trigger da IA)
-  const n=noticiaAtual;
-  if(!n)return;
-  // Atualizar visual dos botões
   document.querySelectorAll('.dec-btn').forEach(b=>b.classList.remove('selected'));
-  const sel=document.querySelector('.dec-btn.dec-'+( d==='pode_publicar'?'pub':'corr'));
+  const sel=document.querySelector('.dec-btn.dec-'+(d==='pode_publicar'?'pub':'corr'));
   if(sel)sel.classList.add('selected');
-  // Mostrar/esconder painel de publicação ou nota
   const panelPub=document.getElementById('panel-pub');
   const panelCorr=document.getElementById('panel-corr');
   if(panelPub)panelPub.style.display=d==='pode_publicar'?'block':'none';
@@ -848,8 +834,7 @@ function toggleMeio(id,k,v){
 
 async function submeterDecisao(){
   const n=noticiaAtual;
-  if(!n){toast('Sem notícia selecionada','warning');return;}
-  if(!decisaoAtual){toast('Seleciona uma decisão primeiro (Pode publicar ou Enviar para correção)','warning');return;}
+  if(!n||!decisaoAtual)return;
   const meios=n._meios||{site:false,fb:false,ig:false,tiktok:false};
   let nota='';
 
@@ -906,8 +891,8 @@ Responde com esta estrutura:
 **Veredicto** ✅ Pronto | ⚠️ Pequenas revisões | ❌ Revisão significativa — [1 frase]`;
 
   try{
-    const apiKey = getApiKey();
-    if(!apiKey){ throw new Error('sem_chave'); }
+    const apiKey=getApiKey();
+    if(!apiKey) throw new Error('sem_chave');
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
@@ -923,46 +908,15 @@ Responde com esta estrutura:
     const el=document.getElementById('ai-'+n._id);
     if(!el)return;
     if(e.message==='sem_chave'){
-      el.innerHTML=`<div style="font-size:12px;color:var(--amber-text);background:var(--amber-bg);padding:10px 12px;border-radius:var(--r);line-height:1.6">
-        ⚠️ Chave de API Anthropic não configurada.<br>
-        <input type="password" id="inp-apikey" placeholder="sk-ant-..." style="width:100%;margin:8px 0 6px;padding:7px 10px;border:1px solid var(--border2);border-radius:6px;font-size:13px;font-family:var(--font)">
-        <button onclick="guardarApiKey(${n._id})" style="font-size:12px;padding:5px 12px;background:var(--blue-bg);color:var(--blue-text);border:1px solid #7aabdf;border-radius:6px;cursor:pointer;font-family:var(--font)">Guardar chave e analisar</button>
+      el.innerHTML=`<div style="font-size:12px;color:#92400e;background:#fef3c7;padding:10px 12px;border-radius:8px;line-height:1.6">
+        ⚠️ Chave Anthropic não configurada.<br>
+        <input type="password" id="inp-apikey" placeholder="sk-ant-..." style="width:100%;margin:8px 0 6px;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px">
+        <button onclick="guardarApiKey(${n._id})" style="font-size:12px;padding:5px 12px;background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;border-radius:6px;cursor:pointer">Guardar e analisar</button>
       </div>`;
     } else {
-      el.innerHTML=`<span style="font-size:12px;color:var(--red)">Erro na análise: ${e.message}</span>`;
+      el.innerHTML=`<span style="font-size:12px;color:var(--red)">Erro: ${e.message}</span>`;
     }
   }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// GESTÃO DE CHAVE API
-// ═══════════════════════════════════════════════════════════════
-function guardarApiKey(notId){
-  const inp=document.getElementById('inp-apikey');
-  if(!inp||!inp.value.trim()){toast('Cola a chave sk-ant-...','warning');return;}
-  setApiKey(inp.value.trim());
-  toast('Chave guardada! A analisar…','success');
-  const n=noticias.find(x=>x._id===notId);
-  if(n){ n._analise=null; analisarIA(n); }
-}
-
-// Configuração de chave na área de Gestão
-function mostrarConfApiKey(){
-  const k=getApiKey();
-  const area=document.getElementById('cfg-apikey');
-  if(!area)return;
-  area.innerHTML=`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);margin-bottom:12px">
-    <span style="font-size:12px;font-weight:700;color:var(--text2)">Chave Anthropic (IA):</span>
-    <input type="password" id="inp-apikey-gestao" value="${k}" placeholder="sk-ant-..." style="flex:1;min-width:180px;font-size:12px;padding:6px 9px;border:1px solid var(--border2);border-radius:6px;font-family:var(--font)">
-    <button onclick="guardarApiKeyGestao()" style="font-size:12px;padding:6px 12px;background:var(--blue-bg);color:var(--blue-text);border:1px solid #7aabdf;border-radius:6px;cursor:pointer;font-family:var(--font);white-space:nowrap">Guardar</button>
-    ${k?'<span style="font-size:11px;color:var(--green-text)">✓ Configurada</span>':'<span style="font-size:11px;color:var(--amber-text)">⚠ Não configurada</span>'}
-  </div>`;
-}
-function guardarApiKeyGestao(){
-  const v=(document.getElementById('inp-apikey-gestao')||{}).value||'';
-  setApiKey(v);
-  toast('Chave guardada!','success');
-  mostrarConfApiKey();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1087,30 +1041,23 @@ async function sincronizarTudo(){
   const st=document.getElementById('import-status');
   showLoad('A sincronizar '+noticias.length+' notícias com Google Sheets…');
   let ok=0, err=0;
-  const detalhes=[];
   for(const n of noticias){
     try{
       const r=await apiGuardarNoticia(n);
-      if(r&&r.ok){ ok++; detalhes.push('✅ '+n.titulo.slice(0,30)+' → '+r.acao); }
-      else { err++; detalhes.push('❌ '+n.titulo.slice(0,30)+' → '+(r&&r.error||'sem resposta')); }
-    }catch(e){ err++; detalhes.push('💥 '+n.titulo.slice(0,30)+' → '+e.message); }
+      if(r&&r.ok)ok++;
+      else err++;
+    }catch(e){err++;}
   }
   hideLoad();
-  // Mostrar resultado detalhado numa caixa visível
-  const log = detalhes.join('
-');
-  st.innerHTML = `<pre style="font-size:11px;background:#f5f5f5;border:1px solid #ddd;padding:10px;border-radius:8px;max-height:200px;overflow:auto;text-align:left;white-space:pre-wrap">${log}
-
-✓ ${ok} ok · ✗ ${err} erros</pre>`;
-  if(ok>0) toast(ok+' notícia(s) enviadas para o Sheets!','success');
-  else toast('Nenhuma chegou ao Sheets. Vê os detalhes abaixo.','error');
+  st.textContent=`✓ ${ok} sincronizadas · ${err} erros`;
+  if(ok>0) toast(`${ok} notícia(s) sincronizadas com Google Sheets!`,'success');
+  else toast('Não foi possível sincronizar. Verifica a ligação.','error');
 }
 
 // ═══════════════════════════════════════════════════════════════
 // GESTÃO
 // ═══════════════════════════════════════════════════════════════
 async function renderGestao(){
-  mostrarConfApiKey();
   showLoad('A carregar do Google Sheets…');
   try{
     const data = await apiListar();
