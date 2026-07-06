@@ -123,8 +123,14 @@ input.inp:focus{outline:none;border-color:var(--blue)}
 .dest-img:hover{opacity:.88}
 
 /* ── ai ── */
+.ai-block{background:linear-gradient(135deg,#f0f6ff,#f4f0ff);border:1px solid #c5d5f0;border-radius:var(--rl);padding:14px 16px;margin:14px 0}
+.ai-hd{font-size:10px;font-weight:800;color:#4a5a80;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ai-hd svg{width:14px;height:14px;stroke:#4a5a80;fill:none;stroke-width:2}
+.ai-body{font-size:13px;color:var(--text);line-height:1.65}
+.ai-body strong{color:#2a3a5a}
 .spinner{display:inline-block;width:13px;height:13px;border:2px solid #c8d0e8;border-top-color:#5570c0;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+.ai-load{font-size:12px;color:#4a5a80;display:flex;align-items:center;gap:8px;font-style:italic}
 
 /* ── decisão ── */
 .resp-banner{background:var(--amber-bg);border:1px solid #e8c070;border-radius:var(--r);padding:14px 16px;margin-bottom:16px;font-size:13px;color:var(--amber-text);line-height:1.65}
@@ -270,15 +276,9 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
   <div class="header">
     <div class="logo"><svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg></div>
     <div class="hb"><h1>Validar Notícias</h1><p id="hdr-validar-sub"></p></div>
-    <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
-      <div class="user-pill" onclick="atualizarNoticiasValidador()" title="Atualizar">
-        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
-        <span>Atualizar</span>
-      </div>
-      <div class="user-pill" onclick="sairValidador()">
-        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span id="user-pill-nome"></span>
-      </div>
+    <div class="user-pill" onclick="sairValidador()">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span id="user-pill-nome"></span>
     </div>
   </div>
   <div class="stats" id="stats-validar"></div>
@@ -346,7 +346,7 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
 // ═══════════════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════════════
-const API_URL = 'https://script.google.com/macros/s/AKfycbxbhxJiKUzRDCAZUOZxrh709EPPcineRZLUFgkwvOM4Xn93adzAd3AGNpUEUqmEY3qCmA/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwFxi003S3RIYSQJdJP1rgZZ_qvgtESIFE2nQWJZN1LU1CjtZG9vCN8mNu5MGLApBQ6AA/exec';
 const PASS_GESTAO = 'templarios2027'; // mesma do projeto Cidadania
 
 const GRUPOS = {
@@ -400,9 +400,10 @@ function toast(msg,type='info'){
 // ═══════════════════════════════════════════════════════════════
 async function apiListar(){
   const url = API_URL+'?action=listar&t='+Date.now();
-  const data = await apiFetch_(url);
+  const res = await fetch(url);
+  const data = await res.json();
   if(!data.ok) throw new Error(data.error||'Erro');
-  return data;
+  return data; // {noticias:[], validacoes:{}}
 }
 
 // JSONP — única forma de contornar CORS com Apps Script sem licença Premium
@@ -430,7 +431,18 @@ function jsonpFetch_(url){
 }
 
 async function apiFetch_(url){
-  return await jsonpFetch_(url);
+  try{
+    // Tenta fetch normal primeiro (funciona para GET/listar)
+    const res = await fetch(url);
+    return await res.json();
+  }catch(e){
+    // Fallback: JSONP para contornar CORS
+    try{
+      return await jsonpFetch_(url);
+    }catch(e2){
+      throw new Error('Não foi possível ligar ao servidor.');
+    }
+  }
 }
 
 async function apiGuardar(n, estado, meios, nota){
@@ -503,68 +515,37 @@ async function fazerLogin(){
   document.getElementById('user-pill-nome').textContent=nome;
   document.getElementById('hdr-validar-sub').textContent=GRUPOS[grupoSel].label+' · a validar notícias do teu grupo';
   irPara('validar');
-  showLoad('A carregar notícias do servidor…');
+  showLoad('A carregar notícias e estados…');
   try{
-    const data=await apiListar();
-    const localMap={};
-    noticias.forEach(n=>{ localMap[chave(n)]={_meios:n._meios}; });
-    let nextId=1;
-    const fromSheets=(data.noticias||[]).map(n=>{
-      const ck=norm(n.titulo)+'|'+norm(n.proponente);
-      const loc=localMap[ck]||{};
-      return {
-        _id:nextId++, proponente:n.proponente, titulo:n.titulo,
-        categorias:(n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
-        escola:n.escola, data:(n.timestamp||'').slice(0,10),
-        corpo:n.corpo, imgDestaque:n.imgDestaque,
-        outrasFotos:(n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
-        video:n.video, links:n.links,
-        _meios:loc._meios||{site:false,fb:false,ig:false,tiktok:false},
-      };
+    const data = await apiListar();
+    // Merge notícias do Sheets com locais (Sheets tem precedência para novos)
+    const chavesLocais = new Set(noticias.map(n=>chave(n)));
+    let nextId = Math.max(0,...noticias.map(n=>n._id||0))+1;
+    (data.noticias||[]).forEach(n=>{
+      const c = norm(n.titulo)+'|'+norm(n.proponente);
+      if(!chavesLocais.has(c)){
+        noticias.push({
+          _id: nextId++,
+          proponente: n.proponente, titulo: n.titulo,
+          categorias: (n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
+          escola: n.escola, data: (n.timestamp||'').slice(0,10),
+          corpo: n.corpo, imgDestaque: n.imgDestaque,
+          outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
+          video: n.video, links: n.links,
+          _meios:{site:false,fb:false,ig:false}, _analise:null
+        });
+        chavesLocais.add(c);
+      }
     });
-    if(fromSheets.length>0){ noticias=fromSheets; saveNoticias(); }
-    validacoes=data.validacoes||{};
+    saveNoticias();
+    validacoes = data.validacoes || {};
     hideLoad();
-    toast((noticias.length||0)+' notícia(s) carregada(s).','success');
   }catch(e){
     hideLoad();
-    toast('Sem ligação ao servidor. A mostrar dados locais.','warning');
+    toast('Não foi possível ligar ao servidor. A usar dados locais.','warning');
   }
   renderValidar();
 }
-
-async function atualizarNoticiasValidador(){
-  if(!sessao)return;
-  noticiaAtual=null; decisaoAtual=null;
-  showLoad('A atualizar…');
-  try{
-    const data=await apiListar();
-    const localMap={};
-    noticias.forEach(n=>{ localMap[chave(n)]={_meios:n._meios}; });
-    let nextId=1;
-    const fromSheets=(data.noticias||[]).map(n=>{
-      const ck=norm(n.titulo)+'|'+norm(n.proponente);
-      const loc=localMap[ck]||{};
-      return {
-        _id:nextId++, proponente:n.proponente, titulo:n.titulo,
-        categorias:(n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
-        escola:n.escola, data:(n.timestamp||'').slice(0,10),
-        corpo:n.corpo, imgDestaque:n.imgDestaque,
-        outrasFotos:(n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
-        video:n.video, links:n.links,
-        _meios:loc._meios||{site:false,fb:false,ig:false,tiktok:false},
-      };
-    });
-    if(fromSheets.length>0){ noticias=fromSheets; saveNoticias(); }
-    validacoes=data.validacoes||{};
-    hideLoad();
-    toast(noticias.length+' notícia(s) carregada(s).','success');
-  }catch(e){ hideLoad(); toast('Erro: '+e.message,'warning'); }
-  renderValidar();
-}
-
-
-
 
 function sairValidador(){
   if(!confirm('Tens a certeza que queres sair?'))return;
@@ -633,6 +614,7 @@ function renderValidar(){
 
   if(noticiaAtual){
     el.innerHTML=buildDetalhe(noticiaAtual);
+    if(!noticiaAtual._analise) analisarIA(noticiaAtual);
     return;
   }
 
@@ -705,10 +687,14 @@ function buildDetalhe(n){
     ?`<div class="mpill" style="margin-bottom:8px"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg><a href="${n.links}" target="_blank">${n.links.length>55?n.links.slice(0,55)+'…':n.links}</a></div>`
     :'';
 
+  const analiseHtml=n._analise
+    ?`<div class="ai-body">${n._analise.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`
+    :`<div class="ai-load"><div class="spinner"></div> A analisar com IA…</div>`;
+
   // Decisão
-  const meios=n._meios||{site:false,fb:false,ig:false,tiktok:false};
+  const meios=n._meios||{site:false,fb:false,ig:false};
   const pubHtml=`<div class="pub-row">
-    ${['Site','Facebook','Instagram','TikTok'].map(m=>{
+    ${['Site','Facebook','Instagram'].map(m=>{
       const k=m.toLowerCase();
       return`<label class="pub-lbl ${meios[k]?'on':''}" id="pub-${n._id}-${k}">
         <input type="checkbox" ${meios[k]?'checked':''} onchange="toggleMeio(${n._id},'${k}',this.checked)">${m}
@@ -742,6 +728,10 @@ function buildDetalhe(n){
     <div class="nbody ${!n.corpo?'empty':''}">${n.corpo||'(sem texto)'}</div>
     <div class="char-info"><span>Comprimento</span><span style="color:${cc};font-weight:700">${chars} / 2200</span></div>
     <div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${cc}"></div></div>
+
+    <div class="ai-block">
+      <div class="ai-hd"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>Análise automática — IA</div>
+      <div id="ai-${n._id}">${analiseHtml}</div>
     </div>
   </div>
 
@@ -752,55 +742,47 @@ function buildDetalhe(n){
     </div>`:''}
     <div style="font-size:13px;font-weight:700;margin-bottom:12px">Decisão de validação</div>
     <div class="decisao-grid">
-      <div class="dec-btn dec-pub" onclick="selecionarDecisao('pode_publicar')">
+      <div class="dec-btn dec-pub ${decisaoAtual==='pode_publicar'?'selected':''}" onclick="selecionarDecisao('pode_publicar')">
         <div class="di">✅</div>
         <div class="dt">Pode publicar</div>
         <div class="ds">A notícia está aprovada para publicação</div>
       </div>
-      <div class="dec-btn dec-corr" onclick="selecionarDecisao('enviado_correcao')">
+      <div class="dec-btn dec-corr ${decisaoAtual==='enviado_correcao'?'selected':''}" onclick="selecionarDecisao('enviado_correcao')">
         <div class="di">✉️</div>
         <div class="dt">Enviar para correção</div>
         <div class="ds">Notificar o autor com indicações</div>
       </div>
     </div>
 
-    <div id="panel-pub" style="display:none">
-      <div class="sec" style="margin-top:0">Publicar em</div>
-      ${pubHtml}
-      <div class="btn-row">
-        <button class="btn btn-apro btn-full" onclick="submeterDecisao()">
-          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirmar — Pode publicar
-        </button>
-      </div>
-    </div>
+    ${decisaoAtual==='pode_publicar'?`
+    <div class="sec" style="margin-top:0">Publicar em</div>
+    ${pubHtml}
+    <div class="btn-row">
+      <button class="btn btn-apro btn-full" onclick="submeterDecisao()">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirmar — Pode publicar
+      </button>
+    </div>`:''}
 
-    <div id="panel-corr" style="display:none">
-      <div class="sec" style="margin-top:0">Nota para o proponente *</div>
-      <textarea class="nota" id="nota-corr" placeholder="Descreve o que precisa de ser corrigido ou melhorado…"></textarea>
-      <div class="btn-row">
-        <button class="btn btn-corr btn-full" onclick="submeterDecisao()">
-          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>Gerar email e registar
-        </button>
-      </div>
-    </div>
+    ${decisaoAtual==='enviado_correcao'?`
+    <div class="sec" style="margin-top:0">Nota para o proponente *</div>
+    <textarea class="nota" id="nota-corr" placeholder="Descreve o que precisa de ser corrigido ou melhorado…"></textarea>
+    <div class="btn-row">
+      <button class="btn btn-corr btn-full" onclick="submeterDecisao()">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>Gerar email e registar
+      </button>
+    </div>`:''}
   </div>`;
 }
 
 function selecionarDecisao(d){
   decisaoAtual=d;
-  document.querySelectorAll('.dec-btn').forEach(b=>b.classList.remove('selected'));
-  const sel=document.querySelector('.dec-btn.dec-'+(d==='pode_publicar'?'pub':'corr'));
-  if(sel)sel.classList.add('selected');
-  const panelPub=document.getElementById('panel-pub');
-  const panelCorr=document.getElementById('panel-corr');
-  if(panelPub)panelPub.style.display=d==='pode_publicar'?'block':'none';
-  if(panelCorr)panelCorr.style.display=d==='enviado_correcao'?'block':'none';
+  renderValidar();
 }
 
 function toggleMeio(id,k,v){
   const n=noticias.find(x=>x._id===id);
   if(!n)return;
-  if(!n._meios)n._meios={site:false,fb:false,ig:false,tiktok:false};
+  if(!n._meios)n._meios={site:false,fb:false,ig:false};
   n._meios[k]=v;
   const l=document.getElementById(`pub-${id}-${k}`);
   if(l){v?l.classList.add('on'):l.classList.remove('on');}
@@ -809,7 +791,7 @@ function toggleMeio(id,k,v){
 async function submeterDecisao(){
   const n=noticiaAtual;
   if(!n||!decisaoAtual)return;
-  const meios=n._meios||{site:false,fb:false,ig:false,tiktok:false};
+  const meios=n._meios||{site:false,fb:false,ig:false};
   let nota='';
 
   if(decisaoAtual==='enviado_correcao'){
@@ -839,15 +821,54 @@ async function submeterDecisao(){
 // ═══════════════════════════════════════════════════════════════
 // AI
 // ═══════════════════════════════════════════════════════════════
+async function analisarIA(n){
+  if(!n.corpo)return;
+  n._analise='loading';
+  const prompt=`És um assistente editorial escolar. Usa sempre português europeu (Portugal).
 
+Analisa esta notícia para o Agrupamento de Escolas Templários de Tomar:
+TÍTULO: ${n.titulo}
+ESCOLA: ${n.escola||'—'}
+TEXTO: ${n.corpo}
+
+Responde com esta estrutura:
+
+**Verificação dos 5W**
+• Quê? ✅/❌ — [frase]
+• Quem? ✅/❌ — [frase]
+• Quando? ✅/❌ — [frase]
+• Onde? ✅/❌ — [frase]
+• Porquê/Como? ✅/❌ — [frase]
+
+**Qualidade** [2 frases sobre clareza e correção em português europeu]
+
+**Sugestões** [máx. 3, numeradas]
+
+**Veredicto** ✅ Pronto | ⚠️ Pequenas revisões | ❌ Revisão significativa — [1 frase]`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    n._analise=data.content?.map(i=>i.text||'').join('\n')||'Sem resposta.';
+    const el=document.getElementById('ai-'+n._id);
+    if(el)el.innerHTML=`<div class="ai-body">${n._analise.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`;
+  }catch(e){
+    n._analise='';
+    const el=document.getElementById('ai-'+n._id);
+    if(el)el.innerHTML=`<span style="font-size:12px;color:var(--red)">Erro na análise.</span>`;
+  }
+}
 
 // ═══════════════════════════════════════════════════════════════
 // EMAIL MODAL
 // ═══════════════════════════════════════════════════════════════
 function abrirEmailModal(n,nota){
   emailNotId=n._id;
-  const assunto=`Notícia "${n.titulo}" — sugestões de melhoria antes da publicação`;
-  const corpo=`Olá ${n.proponente||''},\n\nObrigado/a pela submissão da notícia "${n.titulo}".\n\nApresentamos algumas sugestões de melhoria antes da publicação:\n\n${nota}\n\nApós realizar as correções, pedimos que nos envie a versão atualizada diretamente para este email.\n\nObrigado pela colaboração!\n${sessao.nome}\nEquipa de Comunicação — AET`;
+  const assunto=`Notícia "${n.titulo}" — correções antes da publicação`;
+  const corpo=`Olá ${n.proponente||''},\n\nObrigado/a pela submissão da notícia "${n.titulo}".\n\nAntes de podermos publicar, pedimos que reveja os seguintes pontos:\n\n${nota}\n\nApós corrigir, pode submeter novamente através do formulário.\n\nObrigado pela colaboração!\n${sessao.nome}\nEquipa de Comunicação — AET`;
   document.getElementById('email-assunto').value=assunto;
   document.getElementById('email-corpo').value=corpo;
   document.getElementById('email-modal').classList.add('show');
@@ -884,15 +905,14 @@ function importarExcel(input){
       const headers=Object.keys(rows[0]);
       const ci=pats=>headers.find(h=>pats.some(p=>h.toLowerCase().includes(p.toLowerCase())))||null;
       const COL={
-        ts:   ci(['hora de início','hora da última','submission time','início']),
+        ts:   ci(['hora de início','submission time','início']),
         prop: ci(['nome do proponente','proponente']),
-        email:ci(['email','e-mail']),
-        tit:  ci(['título da notícia','titulo da noticia','título (sem','título da not']),
-        cats: ci(['categoria da notícia','categoria','pergunta']),
+        tit:  ci(['título da notícia','titulo da noticia','título (sem']),
+        cats: ci(['pergunta','categoria']),
         esc:  ci(['estabelecimento']),
-        corp: ci(['texto do tipo','notícia texto','noticia texto','texto da not']),
-        img:  ci(['insira uma fotografia','imagem de destaque','fotografia (inserir 1','fotografia']),
-        fotos:ci(['outras fotos','inserir até']),
+        corp: ci(['notícia texto','noticia texto','texto do tipo']),
+        img:  ci(['imagem de destaque','destaque','capa']),
+        fotos:ci(['outras fotos']),
         vid:  ci(['vídeo','video','vídeos']),
         lnk:  ci(['links','formulários']),
       };
@@ -925,7 +945,7 @@ function importarExcel(input){
           imgDestaque:get(COL.img),
           outrasFotos:get(COL.fotos).split(/[;\n]/).map(s=>s.trim()).filter(Boolean),
           video:get(COL.vid),links:get(COL.lnk),
-          _meios:{site:false,fb:false,ig:false,tiktok:false}
+          _meios:{site:false,fb:false,ig:false},_analise:null
         });
         existKeys.add(key);
         imported++;
@@ -998,7 +1018,7 @@ async function renderGestao(){
           corpo: n.corpo, imgDestaque: n.imgDestaque,
           outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
           video: n.video, links: n.links,
-          _meios:{site:false,fb:false,ig:false,tiktok:false}
+          _meios:{site:false,fb:false,ig:false}, _analise:null
         });
         chavesLocais.add(c);
       }
