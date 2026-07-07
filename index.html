@@ -407,14 +407,14 @@ async function apiListar(){
 }
 
 // JSONP — única forma de contornar CORS com Apps Script sem licença Premium
-function jsonpFetch_(url){
+function jsonpFetch_(url, timeoutMs){
   return new Promise((resolve, reject)=>{
     const cbName = 'cb_'+Date.now()+'_'+Math.floor(Math.random()*9999);
     const script = document.createElement('script');
     const timer = setTimeout(()=>{
       cleanup();
       reject(new Error('Timeout'));
-    }, 10000);
+    }, timeoutMs||10000);
     function cleanup(){
       clearTimeout(timer);
       delete window[cbName];
@@ -430,7 +430,7 @@ function jsonpFetch_(url){
   });
 }
 
-async function apiFetch_(url){
+async function apiFetch_(url, timeoutMs){
   try{
     // Tenta fetch normal primeiro (funciona para GET/listar)
     const res = await fetch(url);
@@ -438,7 +438,7 @@ async function apiFetch_(url){
   }catch(e){
     // Fallback: JSONP para contornar CORS
     try{
-      return await jsonpFetch_(url);
+      return await jsonpFetch_(url, timeoutMs);
     }catch(e2){
       throw new Error('Não foi possível ligar ao servidor.');
     }
@@ -831,7 +831,7 @@ async function analisarIA(n){
       +'&escola='+encodeURIComponent(n.escola||'')
       +'&corpo='+encodeURIComponent(n.corpo||'')
       +'&t='+Date.now();
-    const data = await apiFetch_(url);
+    const data = await apiFetch_(url, 30000);
     if(!data.ok) throw new Error(data.error||'Erro');
     n._analise = data.analise || 'Sem resposta.';
     const el=document.getElementById('ai-'+n._id);
@@ -839,7 +839,7 @@ async function analisarIA(n){
   }catch(e){
     n._analise='';
     const el=document.getElementById('ai-'+n._id);
-    if(el)el.innerHTML=`<span style="font-size:12px;color:var(--red)">Erro na análise.</span>`;
+    if(el)el.innerHTML=`<span style="font-size:12px;color:var(--red)">Erro na análise: ${(e.message||'desconhecido')}</span>`;
   }
 }
 
