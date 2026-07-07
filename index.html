@@ -532,7 +532,7 @@ async function fazerLogin(){
           corpo: n.corpo, imgDestaque: n.imgDestaque,
           outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
           video: n.video, links: n.links,
-          _meios:{site:false,fb:false,ig:false}, _analise:null
+          _meios:{site:false,fb:false,ig:false,tk:false}, _analise:null
         });
         chavesLocais.add(c);
       }
@@ -692,9 +692,9 @@ function buildDetalhe(n){
     :`<div class="ai-load"><div class="spinner"></div> A analisar com IA…</div>`;
 
   // Decisão
-  const meios=n._meios||{site:false,fb:false,ig:false};
+  const meios=n._meios||{site:false,fb:false,ig:false,tk:false};
   const pubHtml=`<div class="pub-row">
-    ${['Site','Facebook','Instagram'].map(m=>{
+    ${['Site','Facebook','Instagram','TikTok'].map(m=>{
       const k=m.toLowerCase();
       return`<label class="pub-lbl ${meios[k]?'on':''}" id="pub-${n._id}-${k}">
         <input type="checkbox" ${meios[k]?'checked':''} onchange="toggleMeio(${n._id},'${k}',this.checked)">${m}
@@ -782,7 +782,7 @@ function selecionarDecisao(d){
 function toggleMeio(id,k,v){
   const n=noticias.find(x=>x._id===id);
   if(!n)return;
-  if(!n._meios)n._meios={site:false,fb:false,ig:false};
+  if(!n._meios)n._meios={site:false,fb:false,ig:false,tk:false};
   n._meios[k]=v;
   const l=document.getElementById(`pub-${id}-${k}`);
   if(l){v?l.classList.add('on'):l.classList.remove('on');}
@@ -791,7 +791,7 @@ function toggleMeio(id,k,v){
 async function submeterDecisao(){
   const n=noticiaAtual;
   if(!n||!decisaoAtual)return;
-  const meios=n._meios||{site:false,fb:false,ig:false};
+  const meios=n._meios||{site:false,fb:false,ig:false,tk:false};
   let nota='';
 
   if(decisaoAtual==='enviado_correcao'){
@@ -824,35 +824,16 @@ async function submeterDecisao(){
 async function analisarIA(n){
   if(!n.corpo)return;
   n._analise='loading';
-  const prompt=`És um assistente editorial escolar. Usa sempre português europeu (Portugal).
-
-Analisa esta notícia para o Agrupamento de Escolas Templários de Tomar:
-TÍTULO: ${n.titulo}
-ESCOLA: ${n.escola||'—'}
-TEXTO: ${n.corpo}
-
-Responde com esta estrutura:
-
-**Verificação dos 5W**
-• Quê? ✅/❌ — [frase]
-• Quem? ✅/❌ — [frase]
-• Quando? ✅/❌ — [frase]
-• Onde? ✅/❌ — [frase]
-• Porquê/Como? ✅/❌ — [frase]
-
-**Qualidade** [2 frases sobre clareza e correção em português europeu]
-
-**Sugestões** [máx. 3, numeradas]
-
-**Veredicto** ✅ Pronto | ⚠️ Pequenas revisões | ❌ Revisão significativa — [1 frase]`;
 
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:prompt}]})
-    });
-    const data=await res.json();
-    n._analise=data.content?.map(i=>i.text||'').join('\n')||'Sem resposta.';
+    const url = API_URL+'?action=analisarIA'
+      +'&titulo='+encodeURIComponent(n.titulo||'')
+      +'&escola='+encodeURIComponent(n.escola||'')
+      +'&corpo='+encodeURIComponent(n.corpo||'')
+      +'&t='+Date.now();
+    const data = await apiFetch_(url);
+    if(!data.ok) throw new Error(data.error||'Erro');
+    n._analise = data.analise || 'Sem resposta.';
     const el=document.getElementById('ai-'+n._id);
     if(el)el.innerHTML=`<div class="ai-body">${n._analise.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`;
   }catch(e){
@@ -945,7 +926,7 @@ function importarExcel(input){
           imgDestaque:get(COL.img),
           outrasFotos:get(COL.fotos).split(/[;\n]/).map(s=>s.trim()).filter(Boolean),
           video:get(COL.vid),links:get(COL.lnk),
-          _meios:{site:false,fb:false,ig:false},_analise:null
+          _meios:{site:false,fb:false,ig:false,tk:false},_analise:null
         });
         existKeys.add(key);
         imported++;
@@ -1018,7 +999,7 @@ async function renderGestao(){
           corpo: n.corpo, imgDestaque: n.imgDestaque,
           outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
           video: n.video, links: n.links,
-          _meios:{site:false,fb:false,ig:false}, _analise:null
+          _meios:{site:false,fb:false,ig:false,tk:false}, _analise:null
         });
         chavesLocais.add(c);
       }
