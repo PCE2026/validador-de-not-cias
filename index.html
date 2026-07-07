@@ -828,7 +828,7 @@ async function analisarIA(n){
   const requestId = 'ia_'+Date.now()+'_'+Math.floor(Math.random()*99999);
 
   try{
-    enviarAnaliseIA_(n, requestId);
+    await enviarAnaliseIA_(n, requestId);
     const resultado = await esperarResultadoIA_(requestId);
     if(!resultado.ok) throw new Error(resultado.error||'Erro');
     n._analise = resultado.analise || 'Sem resposta.';
@@ -841,34 +841,25 @@ async function analisarIA(n){
   }
 }
 
-// Envia os dados via formulário oculto (POST), para não haver limite de tamanho no URL
+// Envia os dados diretamente por POST (sem limite de tamanho do URL).
+// Usa mode:'no-cors' porque a Apps Script não devolve cabeçalhos CORS —
+// não conseguimos ler a resposta, mas não precisamos: vamos "perguntar" o
+// resultado depois, através do polling em esperarResultadoIA_.
 function enviarAnaliseIA_(n, requestId){
-  const iframeName = 'ia_frame_'+requestId;
-  const iframe = document.createElement('iframe');
-  iframe.name = iframeName;
-  iframe.style.display = 'none';
-  document.body.appendChild(iframe);
+  const body = new URLSearchParams({
+    action: 'analisarIA',
+    requestId: requestId,
+    titulo: n.titulo || '',
+    escola: n.escola || '',
+    corpo: n.corpo || ''
+  }).toString();
 
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = API_URL;
-  form.target = iframeName;
-  form.style.display = 'none';
-
-  const campos = { action:'analisarIA', requestId, titulo:n.titulo||'', escola:n.escola||'', corpo:n.corpo||'' };
-  Object.keys(campos).forEach(k=>{
-    const inp = document.createElement('input');
-    inp.type='hidden'; inp.name=k; inp.value=campos[k];
-    form.appendChild(inp);
-  });
-
-  document.body.appendChild(form);
-  form.submit();
-
-  setTimeout(()=>{
-    if(form.parentNode) form.parentNode.removeChild(form);
-    if(iframe.parentNode) iframe.parentNode.removeChild(iframe);
-  }, 60000);
+  return fetch(API_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body
+  }).catch(()=>{});
 }
 
 // Verifica periodicamente se a análise já está pronta
