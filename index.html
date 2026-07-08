@@ -74,6 +74,7 @@ input.inp:focus{outline:none;border-color:var(--blue)}
 
 /* ── card ── */
 .card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:20px;margin-bottom:14px}
+.presenca-banner{background:#fff8e1;border:1.5px solid #f0c14b;color:#7a5900;border-radius:var(--r);padding:10px 14px;font-size:13px;margin-bottom:12px;line-height:1.5}
 
 /* ── import box ── */
 .import-box{background:var(--bg);border:1.5px dashed #aab8cc;border-radius:var(--rl);padding:18px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
@@ -229,7 +230,7 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
 <div class="home-screen" id="screen-login-validar" style="display:none">
   <div class="login-box">
     <h2>Área de Validação</h2>
-    <p>Identifica-te para ver as notícias do teu grupo.</p>
+    <p>Identifica-te para ver as notícias do teu ciclo.</p>
     <label class="login-label">Nome completo *</label>
     <input class="inp" type="text" id="login-nome" placeholder="Ex: Ana Martins" autocomplete="name">
     <label class="login-label" style="margin-bottom:8px">Grupo de ensino *</label>
@@ -513,7 +514,7 @@ async function fazerLogin(){
   if(!grupoSel){toast('Seleciona o teu grupo','warning');return;}
   sessao={nome,grupo:grupoSel};
   document.getElementById('user-pill-nome').textContent=nome;
-  document.getElementById('hdr-validar-sub').textContent=GRUPOS[grupoSel].label+' · a validar notícias do teu grupo';
+  document.getElementById('hdr-validar-sub').textContent=GRUPOS[grupoSel].label+' · a validar notícias do teu ciclo';
   irPara('validar');
   showLoad('A carregar notícias e estados…');
   try{
@@ -607,7 +608,7 @@ function renderValidar(){
   if(!minha.length){
     el.innerHTML=`<div class="card"><div class="empty">
       <svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg>
-      <p>Não há notícias para o teu grupo.</p>
+      <p>Não há notícias para o teu ciclo.</p>
     </div></div>`;
     return;
   }
@@ -647,9 +648,39 @@ function renderValidar(){
 function abrirNoticia(id){
   noticiaAtual=noticias.find(n=>n._id===id)||null;
   decisaoAtual=null;
+  presencaAlheia=null;
   renderValidar();
+  if(noticiaAtual) iniciarPresenca_(noticiaAtual);
 }
-function voltarLista(){noticiaAtual=null;decisaoAtual=null;renderValidar();}
+function voltarLista(){pararPresenca_();noticiaAtual=null;decisaoAtual=null;renderValidar();}
+
+// ═══════════════════════════════════════════════════════════════
+// PRESENÇA — avisa se outro validador está a ver a mesma notícia
+// ═══════════════════════════════════════════════════════════════
+let presencaInterval=null;
+let presencaAlheia=null;
+
+function iniciarPresenca_(n){
+  pararPresenca_();
+  const c = chave(n);
+  const marcarEVerificar = async ()=>{
+    try{
+      await apiFetch_(API_URL+'?action=marcarPresenca&chave='+encodeURIComponent(c)+'&validador='+encodeURIComponent(sessao.nome||'')+'&t='+Date.now());
+      const r = await apiFetch_(API_URL+'?action=obterPresenca&chave='+encodeURIComponent(c)+'&validador='+encodeURIComponent(sessao.nome||'')+'&t='+Date.now());
+      const novo = (r&&r.ok)? (r.presenca||null) : null;
+      const mudou = JSON.stringify(novo)!==JSON.stringify(presencaAlheia);
+      presencaAlheia = novo;
+      if(mudou && noticiaAtual && chave(noticiaAtual)===c) renderValidar();
+    }catch(e){ /* silencioso — não interrompe a validação por causa disto */ }
+  };
+  marcarEVerificar();
+  presencaInterval = setInterval(marcarEVerificar, 20000);
+}
+
+function pararPresenca_(){
+  if(presencaInterval){clearInterval(presencaInterval);presencaInterval=null;}
+  presencaAlheia=null;
+}
 
 // ═══════════════════════════════════════════════════════════════
 // DETALHE DA NOTÍCIA
@@ -704,10 +735,16 @@ function buildDetalhe(n){
 
   const jaValidado=v.estado&&v.estado!=='pendente';
 
+  const presencaHtml = presencaAlheia
+    ? `<div class="presenca-banner">⚠️ <strong>${presencaAlheia.validador}</strong> está a validar esta notícia agora (visto há ${presencaAlheia.segundos}s). Combinem para não sobreporem decisões.</div>`
+    : '';
+
   return`
   <button class="btn btn-sec" onclick="voltarLista()" style="margin-bottom:14px;font-size:12px">
     <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Voltar à lista
   </button>
+
+  ${presencaHtml}
 
   <div class="card">
     <div class="ntitle">${n.titulo}</div>
@@ -802,6 +839,7 @@ async function submeterDecisao(){
   showLoad('A guardar decisão…');
   try{
     await apiGuardar(n,decisaoAtual,meios,nota);
+    pararPresenca_();
     hideLoad();
     if(decisaoAtual==='pode_publicar'){
       toast('Notícia aprovada para publicação!','success');
