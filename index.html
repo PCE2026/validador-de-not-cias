@@ -825,13 +825,11 @@ async function analisarIA(n){
   if(!n.corpo)return;
   n._analise='loading';
 
-  const requestId = 'ia_'+Date.now()+'_'+Math.floor(Math.random()*99999);
-
   try{
-    await enviarAnaliseIA_(n, requestId);
-    const resultado = await esperarResultadoIA_(requestId);
-    if(!resultado.ok) throw new Error(resultado.error||'Erro');
-    n._analise = resultado.analise || 'Sem resposta.';
+    const url = API_URL+'?action=analisarIA&chave='+encodeURIComponent(chave(n))+'&t='+Date.now();
+    const data = await apiFetch_(url, 30000);
+    if(!data.ok) throw new Error(data.error||'Erro');
+    n._analise = data.analise || 'Sem resposta.';
     const el=document.getElementById('ai-'+n._id);
     if(el)el.innerHTML=`<div class="ai-body">${n._analise.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`;
   }catch(e){
@@ -839,42 +837,6 @@ async function analisarIA(n){
     const el=document.getElementById('ai-'+n._id);
     if(el)el.innerHTML=`<span style="font-size:12px;color:var(--red)">Erro na análise: ${(e.message||'desconhecido')}</span>`;
   }
-}
-
-// Envia os dados diretamente por POST (sem limite de tamanho do URL).
-// Usa mode:'no-cors' porque a Apps Script não devolve cabeçalhos CORS —
-// não conseguimos ler a resposta, mas não precisamos: vamos "perguntar" o
-// resultado depois, através do polling em esperarResultadoIA_.
-function enviarAnaliseIA_(n, requestId){
-  const body = new URLSearchParams({
-    action: 'analisarIA',
-    requestId: requestId,
-    titulo: n.titulo || '',
-    escola: n.escola || '',
-    corpo: n.corpo || ''
-  }).toString();
-
-  return fetch(API_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: body
-  }).catch(()=>{});
-}
-
-// Verifica periodicamente se a análise já está pronta
-async function esperarResultadoIA_(requestId){
-  const inicio = Date.now();
-  const limiteMs = 45000;
-  while(Date.now()-inicio < limiteMs){
-    await new Promise(r=>setTimeout(r, 1500));
-    try{
-      const url = API_URL+'?action=obterResultadoIA&requestId='+encodeURIComponent(requestId)+'&t='+Date.now();
-      const data = await apiFetch_(url, 8000);
-      if(data.ok && data.pronto) return data;
-    }catch(e){ /* tenta novamente */ }
-  }
-  return { ok:false, error:'Tempo esgotado à espera da análise.' };
 }
 
 // ═══════════════════════════════════════════════════════════════
