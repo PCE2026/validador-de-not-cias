@@ -374,7 +374,7 @@ function saveNoticias(){ try{localStorage.setItem('aet_noticias5',JSON.stringify
 // ═══════════════════════════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════════════════════════
-function norm(s){return(s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[,.]/g,'').trim();}
+function norm(s){return(s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[,.]/g,'').replace(/\s+/g,' ').trim();}
 function escolaGrupo(escola){
   const e=norm(escola);
   if(GRUPOS.B.esc.some(s=>e.includes(norm(s))))return 'B';
@@ -624,7 +624,7 @@ function renderValidar(){
     const v=estadoNoticia(n);
     const est=v.estado||'pendente';
     const bmap={pendente:'b-pend',pode_publicar:'b-pub',enviado_correcao:'b-corr',em_validacao:'b-val'};
-    const lmap={pendente:'Pendente',pode_publicar:'✓ Pode publicar',enviado_correcao:'✉ Enviada para correção',em_validacao:'Em validação'};
+    const lmap={pendente:'Pendente',pode_publicar:'✓ Validada',enviado_correcao:'✉ Aguarda correção',em_validacao:'Em validação'};
     const bgmap={pendente:'var(--bg2)',pode_publicar:'var(--green-bg)',enviado_correcao:'var(--blue-bg)',em_validacao:'#f0e8ff'};
     const icmap={pendente:'var(--text2)',pode_publicar:'var(--green-text)',enviado_correcao:'var(--blue-text)',em_validacao:'#5a1a8a'};
     return `<div class="li" onclick="abrirNoticia(${n._id})">
@@ -775,7 +775,7 @@ function buildDetalhe(n){
   <div class="card">
     ${jaValidado?`
     <div style="background:var(--bg2);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--text2)">
-      ✓ Já validado por <strong>${v.validador}</strong> em ${v.dataValidacao||'—'} — Estado: <strong>${{pode_publicar:'Pode publicar',enviado_correcao:'Enviado para correção',em_validacao:'Em validação'}[v.estado]||v.estado}</strong>
+      ✓ Já validado por <strong>${v.validador}</strong> em ${v.dataValidacao||'—'} — Estado: <strong>${{pode_publicar:'Validada',enviado_correcao:'Aguarda correção',em_validacao:'Em validação'}[v.estado]||v.estado}</strong>
     </div>`:''}
     <div style="font-size:13px;font-weight:700;margin-bottom:12px">Decisão de validação</div>
     <div class="decisao-grid">
@@ -1083,7 +1083,7 @@ function renderListaGestao(){
   }
 
   const bmap={pendente:'b-pend',pode_publicar:'b-pub',enviado_correcao:'b-corr',em_validacao:'b-val'};
-  const lmap={pendente:'Pendente',pode_publicar:'✓ Pode publicar',enviado_correcao:'✉ Para correção',em_validacao:'Em validação'};
+  const lmap={pendente:'Pendente',pode_publicar:'✓ Validada',enviado_correcao:'✉ Aguarda correção',em_validacao:'Em validação'};
 
   el.innerHTML=[...lista].reverse().map(n=>{
     const v=validacoes[chave(n)]||{};
