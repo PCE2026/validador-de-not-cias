@@ -67,7 +67,7 @@ input.inp:focus{outline:none;border-color:var(--blue)}
 .user-pill:hover{background:var(--bg3)}
 
 /* ── stats ── */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
 .sc{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
 .sv{font-size:22px;font-weight:800;color:var(--text);line-height:1}
 .sl{font-size:11px;color:var(--text2);margin-top:4px}
@@ -199,8 +199,10 @@ button.btn:hover{filter:brightness(.93)}
 <div class="loading" id="loading"><div class="sp"></div><p id="loading-txt">A carregar notícias...</p></div>
 
 <script>
-// ⚠️ COLA AQUI O TEU URL DE WEB APP DO GOOGLE APPS SCRIPT
-const SCRIPT_URL = "AQUI_A_TUA_WEB_APP_URL";
+// ============================================================================
+// INSTRUÇÕES: Cole o seu URL do Google Apps Script entre as aspas abaixo:
+// ============================================================================
+const SCRIPT_URL = "https://script.google.com/macros/s/SEU_ID_DE_EXECECUCAO_AQUI/exec";
 
 let grupoSel = '';
 let noticiasData = [];
@@ -259,8 +261,8 @@ function JSONP(url, callbackParamName = 'callback') {
 }
 
 async function carregarDados(){
-  if(SCRIPT_URL.includes("AQUI_A_TUA_WEB_APP_URL")){
-    const errHtml = `<div class="empty"><p>⚠️ Por favor introduz a URL do teu Web App na variável <b>SCRIPT_URL</b> no ficheiro HTML.</p></div>`;
+  if(SCRIPT_URL.includes("SEU_ID_DE_EXECECUCAO_AQUI")){
+    const errHtml = `<div class="empty"><p>⚠️ Lembre-se de colar a URL do seu Web App na variável <b>SCRIPT_URL</b> dentro do código HTML.</p></div>`;
     document.getElementById('content-validar').innerHTML = errHtml;
     document.getElementById('content-gestao').innerHTML = errHtml;
     return;
