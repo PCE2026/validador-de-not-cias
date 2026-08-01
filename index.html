@@ -199,10 +199,8 @@ button.btn:hover{filter:brightness(.93)}
 <div class="loading" id="loading"><div class="sp"></div><p id="loading-txt">A carregar notícias...</p></div>
 
 <script>
-// ============================================================================
-// INSTRUÇÕES: Cole o seu URL do Google Apps Script entre as aspas abaixo:
-// ============================================================================
-const SCRIPT_URL = "https://script.google.com/macros/s/SEU_ID_DE_EXECECUCAO_AQUI/exec";
+// URL do Google Apps Script configurado
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwFxi003S3RIYSQJdJP1rgZZ_qvgtESIFE2nQWJZN1LU1CjtZG9vCN8mNu5MGLApBQ6AA/exec";
 
 let grupoSel = '';
 let noticiasData = [];
@@ -261,13 +259,6 @@ function JSONP(url, callbackParamName = 'callback') {
 }
 
 async function carregarDados(){
-  if(SCRIPT_URL.includes("SEU_ID_DE_EXECECUCAO_AQUI")){
-    const errHtml = `<div class="empty"><p>⚠️ Lembre-se de colar a URL do seu Web App na variável <b>SCRIPT_URL</b> dentro do código HTML.</p></div>`;
-    document.getElementById('content-validar').innerHTML = errHtml;
-    document.getElementById('content-gestao').innerHTML = errHtml;
-    return;
-  }
-  
   document.getElementById('loading').classList.add('show');
   try {
     const res = await JSONP(`${SCRIPT_URL}?action=listar`);
