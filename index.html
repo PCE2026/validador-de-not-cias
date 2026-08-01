@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Validador de Notícias — AET</title>
+<title>Agrupamento de Escolas Templários — Validador de Notícias</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -25,8 +25,8 @@ body{font-family:var(--font);background:#ededeb;color:var(--text);font-size:14px
 .home-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:40px 36px;max-width:540px;width:100%;text-align:center}
 .home-logo{width:60px;height:60px;border-radius:var(--r);background:var(--blue-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
 .home-logo svg{width:30px;height:30px;stroke:var(--blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.home-box h1{font-size:22px;font-weight:800;margin-bottom:6px}
-.home-box>p{font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.6}
+.home-box h1{font-size:22px;font-weight:800;margin-bottom:2px}
+.home-box .school-subtitle{font-size:14px;font-weight:600;color:var(--text2);margin-bottom:24px}
 .area-grid{display:grid;grid-template-columns:1fr;gap:10px}
 .area-btn{display:flex;align-items:center;gap:14px;padding:16px 18px;border:1.5px solid var(--border);border-radius:var(--rl);background:var(--bg2);cursor:pointer;text-align:left;transition:all .15s;font-family:var(--font)}
 .area-btn:hover{border-color:#7aabdf;background:var(--blue-bg);transform:translateY(-1px)}
@@ -60,11 +60,11 @@ input.inp:focus{outline:none;border-color:var(--blue)}
 .logo{width:44px;height:44px;border-radius:var(--r);background:var(--blue-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .logo svg{width:22px;height:22px;stroke:var(--blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .hb{flex:1}
+.hb .school-tag{font-size:11px;font-weight:700;color:var(--blue-text);text-transform:uppercase;letter-spacing:.05em}
 .hb h1{font-size:17px;font-weight:800;color:var(--text)}
 .hb p{font-size:12px;color:var(--text2);margin-top:1px}
 .user-pill{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;white-space:nowrap;flex-shrink:0}
 .user-pill:hover{background:var(--bg3)}
-.user-pill svg{width:13px;height:13px;stroke:var(--text2);fill:none;stroke-width:2}
 
 /* ── stats ── */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
@@ -72,135 +72,32 @@ input.inp:focus{outline:none;border-color:var(--blue)}
 .sv{font-size:22px;font-weight:800;color:var(--text);line-height:1}
 .sl{font-size:11px;color:var(--text2);margin-top:4px}
 
-/* ── card ── */
+/* ── card e lista ── */
 .card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:20px;margin-bottom:14px}
-.presenca-banner{background:#fff8e1;border:1.5px solid #f0c14b;color:#7a5900;border-radius:var(--r);padding:10px 14px;font-size:13px;margin-bottom:12px;line-height:1.5}
-
-/* ── import box ── */
-.import-box{background:var(--bg);border:1.5px dashed #aab8cc;border-radius:var(--rl);padding:18px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.import-box svg{width:26px;height:26px;stroke:#7a9abc;fill:none;stroke-width:1.5;flex-shrink:0}
-.import-text h3{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
-.import-text p{font-size:12px;color:var(--text2)}
-.file-label{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:var(--blue-bg);color:var(--blue-text);border-radius:var(--r);font-size:12px;font-weight:700;cursor:pointer;border:1px solid #7aabdf;white-space:nowrap;flex-shrink:0}
-.file-label:hover{background:#d8ebf9}
-.file-label svg{width:14px;height:14px;stroke:var(--blue);fill:none;stroke-width:2}
-.file-label input{display:none}
-
-/* ── lista notícias ── */
-.li{padding:12px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:11px;cursor:pointer;transition:all .1s}
+.li{padding:12px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:11px;cursor:pointer;transition:all .10s}
 .li:last-child{border-bottom:none;padding-bottom:0}
 .li:hover{background:var(--bg2);margin:0 -10px;padding:12px 10px;border-radius:var(--r)}
-.li:hover .li-t{color:var(--blue)}
 .li-ico{width:34px;height:34px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .li-b{flex:1;min-width:0}
-.li-t{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .15s}
+.li-t{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .li-s{font-size:11px;color:var(--text2)}
-.li-r{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
 .badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 9px;border-radius:20px;font-weight:700;white-space:nowrap}
 .b-pend{background:var(--amber-bg);color:var(--amber-text)}
 .b-pub{background:var(--green-bg);color:var(--green-text)}
 .b-corr{background:var(--blue-bg);color:var(--blue-text)}
-.b-val{background:#f0e8ff;color:#5a1a8a}
 
-/* ── detalhe validação ── */
-.ntitle{font-size:19px;font-weight:800;color:var(--text);margin-bottom:8px;line-height:1.3}
-.meta-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;padding:10px 12px;background:var(--bg2);border-radius:var(--r)}
-.mi{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
-.mi svg{width:12px;height:12px;stroke:var(--text3);fill:none;stroke-width:2;flex-shrink:0}
-.nivel-badge{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;margin-bottom:10px}
-.nivel-a{background:#fff3e0;color:#7a4000;border:1px solid #f0c070}
-.nivel-b{background:#e8f0fe;color:#1a3a7a;border:1px solid #90b0e8}
-.cat-pill{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--text2)}
-.sec{font-size:10px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin:14px 0 7px}
-.nbody{font-size:14px;color:var(--text);line-height:1.75;white-space:pre-wrap;padding:14px;background:var(--bg2);border-radius:var(--r);margin-bottom:6px}
-.nbody.empty{color:var(--text2);font-style:italic}
-.prog-wrap{height:5px;background:var(--bg3);border-radius:3px;margin:5px 0 2px}
-.prog-bar{height:5px;border-radius:3px}
-.char-info{display:flex;justify-content:space-between;font-size:11px;color:var(--text2)}
-.mpill{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:5px 10px;font-size:12px;display:flex;align-items:center;gap:5px}
-.mpill svg{width:13px;height:13px;stroke:var(--text2);fill:none;stroke-width:2;flex-shrink:0}
-.mpill a{color:var(--blue);text-decoration:none}
-.dest-img{width:100%;max-height:220px;object-fit:cover;border-radius:var(--r);border:1px solid var(--border);display:block;margin-bottom:8px;cursor:pointer}
-.dest-img:hover{opacity:.88}
-
-/* ── ai ── */
-.ai-block{background:linear-gradient(135deg,#f0f6ff,#f4f0ff);border:1px solid #c5d5f0;border-radius:var(--rl);padding:14px 16px;margin:14px 0}
-.ai-hd{font-size:10px;font-weight:800;color:#4a5a80;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.ai-hd svg{width:14px;height:14px;stroke:#4a5a80;fill:none;stroke-width:2}
-.ai-body{font-size:13px;color:var(--text);line-height:1.65}
-.ai-body strong{color:#2a3a5a}
-.spinner{display:inline-block;width:13px;height:13px;border:2px solid #c8d0e8;border-top-color:#5570c0;border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.ai-load{font-size:12px;color:#4a5a80;display:flex;align-items:center;gap:8px;font-style:italic}
-
-/* ── decisão ── */
-.resp-banner{background:var(--amber-bg);border:1px solid #e8c070;border-radius:var(--r);padding:14px 16px;margin-bottom:16px;font-size:13px;color:var(--amber-text);line-height:1.65}
-.resp-banner strong{display:block;font-size:14px;margin-bottom:4px}
-.decisao-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
-.dec-btn{padding:14px 10px;border-radius:var(--rl);border:2px solid var(--border);background:var(--bg2);cursor:pointer;text-align:center;transition:all .15s;font-family:var(--font)}
-.dec-btn:hover{transform:translateY(-2px)}
-.dec-btn.selected{transform:translateY(-2px)}
-.dec-btn .di{font-size:24px;margin-bottom:6px}
-.dec-btn .dt{font-size:12px;font-weight:700;margin-bottom:2px}
-.dec-btn .ds{font-size:11px;color:var(--text2);line-height:1.3}
-.dec-pub{border-color:#90d4a8}.dec-pub.selected{background:var(--green-bg);border-color:var(--green)}
-.dec-corr{border-color:#90b0e8}.dec-corr.selected{background:var(--blue-bg);border-color:var(--blue)}
-
-.pub-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
-.pub-lbl{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer;padding:8px 16px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);transition:all .15s;user-select:none}
-.pub-lbl.on{border-color:var(--green);background:var(--green-bg);color:var(--green-text)}
-.pub-lbl input{width:14px;height:14px;accent-color:var(--green);cursor:pointer}
-
-textarea.obs,textarea.nota{width:100%;font-size:13px;resize:vertical;padding:9px 11px;border:1.5px solid var(--border2);border-radius:var(--r);font-family:var(--font)}
-textarea.obs:focus,textarea.nota:focus{outline:none;border-color:var(--blue)}
-.obs{min-height:65px}
-.nota{min-height:90px;border-color:#90b0e8}
-
-/* ── email modal ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;align-items:center;justify-content:center;padding:16px}
-.modal-overlay.show{display:flex}
-.modal{background:var(--bg);border-radius:var(--rl);padding:26px;max-width:560px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.18);max-height:90vh;overflow-y:auto}
-.modal h2{font-size:16px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:8px}
-.modal h2 svg{width:18px;height:18px;stroke:var(--blue);fill:none;stroke-width:2}
-.modal .sub{font-size:12px;color:var(--text2);margin-bottom:14px}
-.ef{margin-bottom:12px}
-.ef label{font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:4px}
-.ef input,.ef textarea{width:100%;font-size:13px;padding:8px 11px;border:1px solid var(--border2);border-radius:var(--r);font-family:var(--font)}
-.ef textarea{min-height:220px;resize:vertical;line-height:1.6}
-.modal-btns{display:flex;gap:8px;margin-top:14px}
-
-/* ── buttons ── */
-.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+/* ── botões e utilitários ── */
 button.btn{padding:9px 16px;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;border:none;font-family:var(--font);transition:filter .15s}
 button.btn:hover{filter:brightness(.93)}
-button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 .btn-full{width:100%;justify-content:center}
 .btn-apro{background:var(--green-bg);color:var(--green-text)}
-.btn-corr{background:var(--blue-bg);color:var(--blue-text)}
 .btn-sec{background:var(--bg2);color:var(--text2);border:1px solid var(--border2)!important}
-.btn-pri{background:var(--blue-bg);color:var(--blue-text)}
-
-/* ── filter chips ── */
-.filter-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
-.chip{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--text2);transition:all .15s}
-.chip.active{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue)}
 
 .empty{text-align:center;padding:36px 16px;color:var(--text2)}
-.empty svg{width:36px;height:36px;stroke:var(--text3);fill:none;stroke-width:1.5;margin:0 auto 10px;display:block}
-.empty p{font-size:13px;line-height:1.6}
-.toast{position:fixed;bottom:20px;right:20px;background:var(--bg);border:1px solid var(--border2);border-radius:var(--rl);padding:10px 14px;font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.13);z-index:9999;transform:translateY(60px);opacity:0;transition:all .25s;max-width:320px}
-.toast.show{transform:translateY(0);opacity:1}
-.toast svg{width:16px;height:16px;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
 .loading{display:none;position:fixed;inset:0;background:rgba(255,255,255,.82);z-index:8888;flex-direction:column;align-items:center;justify-content:center;gap:12px}
 .loading.show{display:flex}
 .loading .sp{width:28px;height:28px;border:3px solid #dde;border-top-color:#5570c0;border-radius:50%;animation:spin .7s linear infinite}
-.loading p{font-size:13px;color:var(--text2)}
-@media(max-width:600px){
-  .stats{grid-template-columns:repeat(2,1fr)}
-  .decisao-grid{grid-template-columns:1fr}
-  .tab span{display:none}
-  .grupo-grid{grid-template-columns:1fr}
-}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -211,8 +108,8 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
     <div class="home-logo">
       <svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
     </div>
-    <h1>Validador de Notícias</h1>
-    <p>Agrupamento de Escolas Templários de Tomar</p>
+    <h1>Agrupamento de Escolas Templários</h1>
+    <p class="school-subtitle">Validador de Notícias — Centro de Apoio à Aprendizagem (CAA)</p>
     <div class="area-grid">
       <div class="area-btn" onclick="irPara('login-validar')">
         <div class="area-icon" style="background:var(--amber-bg)">✅</div>
@@ -246,15 +143,8 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
         <div class="gb-sub">EBI Santa Iria · EB Gualdim Pais · ES Jácome Ratton</div>
       </div>
     </div>
-    <button class="btn btn-apro btn-full" onclick="fazerLogin()">
-      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Entrar
-    </button>
+    <button class="btn btn-apro btn-full" onclick="fazerLogin()">Entrar</button>
     <button class="btn btn-sec btn-full" onclick="irPara('home')" style="margin-top:8px">Voltar</button>
-    <hr style="border:none;border-top:1px solid var(--border);margin:20px 0">
-    <button class="btn btn-sec btn-full" onclick="irPara('login-gestao')" style="font-size:12px">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Aceder à área de Gestão
-    </button>
   </div>
 </div>
 
@@ -264,9 +154,7 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
     <h2>Gestão</h2>
     <p>Introduz a password de acesso.</p>
     <input class="inp" type="password" id="gestao-pass" placeholder="Password" onkeydown="if(event.key==='Enter')entrarGestao()">
-    <button class="btn btn-apro btn-full" onclick="entrarGestao()" style="margin-top:12px">
-      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Entrar
-    </button>
+    <button class="btn btn-apro btn-full" onclick="entrarGestao()" style="margin-top:12px">Entrar</button>
     <button class="btn btn-sec btn-full" onclick="irPara('home')" style="margin-top:8px">Voltar</button>
   </div>
 </div>
@@ -276,14 +164,17 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
 <div class="wrap">
   <div class="header">
     <div class="logo"><svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg></div>
-    <div class="hb"><h1>Validar Notícias</h1><p id="hdr-validar-sub"></p></div>
+    <div class="hb">
+      <div class="school-tag">Agrupamento de Escolas Templários</div>
+      <h1>Validar Notícias</h1>
+      <p id="hdr-validar-sub"></p>
+    </div>
     <div class="user-pill" onclick="sairValidador()">
-      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       <span id="user-pill-nome"></span>
     </div>
   </div>
   <div class="stats" id="stats-validar"></div>
-  <div id="content-validar"></div>
+  <div class="card" id="content-validar"></div>
 </div>
 </div>
 
@@ -292,47 +183,44 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
 <div class="wrap">
   <div class="header">
     <div class="logo"><svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg></div>
-    <div class="hb"><h1>Gestão — Ver Todas</h1><p>Panorama total · importação semanal do Excel</p></div>
-    <div class="user-pill" onclick="irPara('home')">
-      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      Sair
+    <div class="hb">
+      <div class="school-tag">Agrupamento de Escolas Templários</div>
+      <h1>Gestão — Ver Todas</h1>
+      <p>Centro de Apoio à Aprendizagem (CAA)</p>
     </div>
+    <div class="user-pill" onclick="irPara('home')">Sair</div>
   </div>
-
-  <!-- IMPORT BOX -->
-  <div class="import-box">
-    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
-    <div class="import-text">
-      <h3>Importar respostas do Excel</h3>
-      <p>Descarrega o <a href="https://aetemplarios-my.sharepoint.com/:x:/g/personal/pce_aetemplarios_pt/IQDPMod9VEGtQ6p1W-YDsBBVASYZpvq_udqBDQrykQ0tcwA" target="_blank" style="color:var(--blue);font-weight:600">Notícias 1.xlsx</a> do OneDrive → Ficheiro → Transferir uma cópia → carrega aqui</p>
-    </div>
-    <label class="file-label">
-      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      Carregar Excel
-      <input type="file" id="excel-file" accept=".xlsx,.xls,.csv" onchange="processarExcel(event)">
-    </label>
-  </div>
-
   <div class="stats" id="stats-gestao"></div>
-  <div id="content-gestao"></div>
+  <div class="card" id="content-gestao"></div>
 </div>
 </div>
 
-<!-- LOADING & TOAST -->
-<div class="loading" id="loading"><div class="sp"></div><p id="loading-txt">A carregar...</p></div>
-<div class="toast" id="toast"></div>
+<!-- LOADING -->
+<div class="loading" id="loading"><div class="sp"></div><p id="loading-txt">A carregar notícias...</p></div>
 
 <script>
+// ⚠️ COLA AQUI O TEU URL DE WEB APP DO GOOGLE APPS SCRIPT
+const SCRIPT_URL = "AQUI_A_TUA_WEB_APP_URL";
+
+let grupoSel = '';
+let noticiasData = [];
+let validacoesData = {};
+
 function irPara(ecra){
   document.querySelectorAll('.home-screen, #screen-validar, #screen-gestao').forEach(e => e.style.display = 'none');
   if(ecra === 'home') document.getElementById('home-screen').style.display = 'flex';
   if(ecra === 'login-validar') document.getElementById('screen-login-validar').style.display = 'flex';
   if(ecra === 'login-gestao') document.getElementById('screen-login-gestao').style.display = 'flex';
-  if(ecra === 'validar') document.getElementById('screen-validar').style.display = 'block';
-  if(ecra === 'gestao') document.getElementById('screen-gestao').style.display = 'block';
+  if(ecra === 'validar') {
+    document.getElementById('screen-validar').style.display = 'block';
+    carregarDados();
+  }
+  if(ecra === 'gestao') {
+    document.getElementById('screen-gestao').style.display = 'block';
+    carregarDados();
+  }
 }
 
-let grupoSel = '';
 function selecionarGrupo(g){
   grupoSel = g;
   document.getElementById('gbtn-A').classList.toggle('selected', g === 'A');
@@ -355,10 +243,95 @@ function entrarGestao(){
   else { alert('Password incorreta.'); }
 }
 
-function processarExcel(e){
-  const file = e.target.files[0];
-  if(!file) return;
-  alert('Ficheiro selecionado: ' + file.name + '\nProcessamento pronto.');
+function JSONP(url, callbackParamName = 'callback') {
+  return new Promise((resolve, reject) => {
+    const callbackName = 'jsonp_cb_' + Math.round(100000 * Math.random());
+    window[callbackName] = function(data) {
+      delete window[callbackName];
+      document.body.removeChild(script);
+      resolve(data);
+    };
+    const script = document.createElement('script');
+    script.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + callbackParamName + '=' + callbackName;
+    script.onerror = () => reject(new Error('Erro ao carregar dados do Apps Script'));
+    document.body.appendChild(script);
+  });
+}
+
+async function carregarDados(){
+  if(SCRIPT_URL.includes("AQUI_A_TUA_WEB_APP_URL")){
+    const errHtml = `<div class="empty"><p>⚠️ Por favor introduz a URL do teu Web App na variável <b>SCRIPT_URL</b> no ficheiro HTML.</p></div>`;
+    document.getElementById('content-validar').innerHTML = errHtml;
+    document.getElementById('content-gestao').innerHTML = errHtml;
+    return;
+  }
+  
+  document.getElementById('loading').classList.add('show');
+  try {
+    const res = await JSONP(`${SCRIPT_URL}?action=listar`);
+    if(res && res.ok){
+      noticiasData = res.noticias || [];
+      validacoesData = res.validacoes || {};
+      renderizarListas();
+    } else {
+      alert("Erro ao carregar notícias: " + (res.error || "Desconhecido"));
+    }
+  } catch(e) {
+    console.error(e);
+    alert("Falha na ligação ao Apps Script.");
+  } finally {
+    document.getElementById('loading').classList.remove('show');
+  }
+}
+
+function renderizarListas(){
+  const containerVal = document.getElementById('content-validar');
+  const containerGes = document.getElementById('content-gestao');
+
+  if(noticiasData.length === 0){
+    const htmlVazio = `<div class="empty"><p>Nenhuma notícia registada até ao momento.</p></div>`;
+    if(containerVal) containerVal.innerHTML = htmlVazio;
+    if(containerGes) containerGes.innerHTML = htmlVazio;
+    return;
+  }
+
+  let htmlVal = '';
+  let htmlGes = '';
+  let pendentes = 0, validadas = 0;
+
+  noticiasData.forEach(n => {
+    const val = validacoesData[n.chave] || {};
+    const estado = val.estado || 'Pendente';
+    if(estado === 'Pendente') pendentes++; else validadas++;
+
+    const badgeClass = estado === 'Pendente' ? 'b-pend' : (estado === 'Publicado' ? 'b-pub' : 'b-corr');
+
+    const itemHtml = `
+      <div class="li">
+        <div class="li-ico" style="background:var(--bg2)">📰</div>
+        <div class="li-b">
+          <div class="li-t">${n.titulo || 'Sem título'}</div>
+          <div class="li-s">${n.proponente || 'Anónimo'} · ${n.escola || 'AET'}</div>
+        </div>
+        <div class="badge ${badgeClass}">${estado}</div>
+      </div>
+    `;
+
+    htmlVal += itemHtml;
+    htmlGes += itemHtml;
+  });
+
+  if(containerVal) containerVal.innerHTML = htmlVal;
+  if(containerGes) containerGes.innerHTML = htmlGes;
+
+  const total = noticiasData.length;
+  const statsHtml = `
+    <div class="sc"><div class="sv">${total}</div><div class="sl">Total Notícias</div></div>
+    <div class="sc"><div class="sv">${pendentes}</div><div class="sl">Pendentes</div></div>
+    <div class="sc"><div class="sv">${validadas}</div><div class="sl">Analisadas</div></div>
+  `;
+  document.getElementById('stats-validar').innerHTML = statsHtml;
+  document.getElementById('stats-gestao').innerHTML = statsHtml;
 }
 </script>
 </body>
