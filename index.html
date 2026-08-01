@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Validador de Notícias</title>
+  <title>Validador de Notícias — Comunicação</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <style>
@@ -16,6 +16,11 @@
       color: white;
       padding: 20px 0;
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .card-stat {
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     .card-noticia {
       transition: transform 0.2s, box-shadow 0.2s;
@@ -40,26 +45,65 @@
 </head>
 <body>
 
-  <!-- CABEÇALHO ATUALIZADO -->
+  <!-- CABEÇALHO -->
   <header class="header-bar mb-4">
     <div class="container text-center">
       <h2 class="fw-bold m-0">Agrupamento de Escolas Templários</h2>
-      <p class="mb-0 text-white-50">Comunicação</p>
+      <p class="mb-0 text-white-50">Comunicação — Validação de Notícias</p>
     </div>
   </header>
 
   <div class="container mb-5">
     
-    <!-- BARRA SUPERIOR DE AÇÕES -->
-    <div class="row mb-4 align-items-center bg-white p-3 rounded shadow-sm mx-0">
-      <div class="col-md-6 mb-2 mb-md-0">
+    <!-- ÁREA DE GESTÃO / RESUMO DE ESTATÍSTICAS -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="card card-stat bg-white p-3 text-center">
+          <small class="text-muted d-block fw-bold">TOTAL SUBMETIDAS</small>
+          <span id="statTotal" class="h3 fw-bold text-dark m-0">0</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card card-stat bg-white p-3 text-center">
+          <small class="text-muted d-block fw-bold">PENDENTES</small>
+          <span id="statPendentes" class="h3 fw-bold text-warning m-0">0</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card card-stat bg-white p-3 text-center">
+          <small class="text-muted d-block fw-bold">APROVADAS</small>
+          <span id="statAprovadas" class="h3 fw-bold text-success m-0">0</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card card-stat bg-white p-3 text-center">
+          <small class="text-muted d-block fw-bold">REJEITADAS / REVISÃO</small>
+          <span id="statOutras" class="h3 fw-bold text-danger m-0">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BARRA DE CONTROLO, PESQUISA E VISUALIZAÇÃO -->
+    <div class="row mb-4 align-items-center bg-white p-3 rounded shadow-sm mx-0 g-3">
+      <div class="col-md-4">
         <div class="input-group">
           <span class="input-group-text bg-light"><i class="bi bi-person-badge"></i></span>
           <input type="text" id="inputValidador" class="form-control" placeholder="O teu nome (Validador)..." onchange="salvarNomeValidador()">
         </div>
       </div>
-      <div class="col-md-6 text-md-end">
-        <button class="btn btn-outline-primary" onclick="carregarNoticias()">
+
+      <!-- BOTÕES DE FILTRO DE VISUALIZAÇÃO -->
+      <div class="col-md-5 text-center">
+        <div class="btn-group w-100" role="group">
+          <button type="button" class="btn btn-outline-secondary btn-sm active" id="btnFiltroTodas" onclick="filtrarVisualizacao('Todas')">Todas</button>
+          <button type="button" class="btn btn-outline-warning btn-sm" id="btnFiltroPendentes" onclick="filtrarVisualizacao('Pendente')">Pendentes</button>
+          <button type="button" class="btn btn-outline-success btn-sm" id="btnFiltroAprovadas" onclick="filtrarVisualizacao('Aprovado')">Aprovadas</button>
+          <button type="button" class="btn btn-outline-danger btn-sm" id="btnFiltroOutras" onclick="filtrarVisualizacao('Outras')">Outras</button>
+        </div>
+      </div>
+
+      <div class="col-md-3 text-md-end">
+        <button class="btn btn-primary w-100" onclick="carregarNoticias()">
           <i class="bi bi-arrow-clockwise me-1"></i> Atualizar Lista
         </button>
       </div>
@@ -73,7 +117,7 @@
       </div>
     </div>
 
-    <!-- GRELA DE NOTÍCIAS -->
+    <!-- GRELHA DE NOTÍCIAS -->
     <div id="listaNoticias" class="row g-4" style="display: none;"></div>
 
   </div>
@@ -161,12 +205,12 @@
   <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // URL LIMPO E CORRETO DO GOOGLE APPS SCRIPT
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFxi003S3RIYSQJdJP1rgZZ_qvgtESIFE2nQWJZN1LU1CjtZG9vCN8mNu5MGLApBQ6AA/exec';
 
     let listaGlobalNoticias = [];
     let noticiaSelecionada = null;
     let timerPresenca = null;
+    let filtroAtual = 'Todas';
 
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('inputValidador').value = localStorage.getItem('validador_nome') || '';
@@ -187,6 +231,7 @@
           document.getElementById('loader').style.display = 'none';
           if (res.ok) {
             listaGlobalNoticias = res.noticias;
+            atualizarEstatisticaAreaGestao(res.noticias);
             renderizarLista(res.noticias);
           } else {
             alert('Erro ao carregar dados: ' + res.error);
@@ -198,28 +243,63 @@
         });
     }
 
+    function atualizarEstatisticaAreaGestao(noticias) {
+      const total = noticias.length;
+      const pendentes = noticias.filter(n => !n.estadoValidade || n.estadoValidade === 'Pendente').length;
+      const aprovadas = noticias.filter(n => n.estadoValidade === 'Aprovado').length;
+      const outras = noticias.filter(n => n.estadoValidade === 'Rejeitado' || n.estadoValidade === 'Revisão').length;
+
+      document.getElementById('statTotal').innerText = total;
+      document.getElementById('statPendentes').innerText = pendentes;
+      document.getElementById('statAprovadas').innerText = aprovadas;
+      document.getElementById('statOutras').innerText = outras;
+    }
+
+    function filtrarVisualizacao(tipo) {
+      filtroAtual = tipo;
+      
+      // Atualizar botões ativos
+      document.querySelectorAll('.btn-group .btn').forEach(b => b.classList.remove('active'));
+      if(tipo === 'Todas') document.getElementById('btnFiltroTodas').classList.add('active');
+      if(tipo === 'Pendente') document.getElementById('btnFiltroPendentes').classList.add('active');
+      if(tipo === 'Aprovado') document.getElementById('btnFiltroAprovadas').classList.add('active');
+      if(tipo === 'Outras') document.getElementById('btnFiltroOutras').classList.add('active');
+
+      renderizarLista(listaGlobalNoticias);
+    }
+
     function renderizarLista(noticias) {
       const cont = document.getElementById('listaNoticias');
       cont.innerHTML = '';
       cont.style.display = 'flex';
 
-      if (noticias.length === 0) {
-        cont.innerHTML = '<div class="col-12 text-center text-muted py-5"><p>Nenhuma notícia encontrada.</p></div>';
+      let noticiasFiltradas = noticias;
+      if (filtroAtual === 'Pendente') {
+        noticiasFiltradas = noticias.filter(n => !n.estadoValidade || n.estadoValidade === 'Pendente');
+      } else if (filtroAtual === 'Aprovado') {
+        noticiasFiltradas = noticias.filter(n => n.estadoValidade === 'Aprovado');
+      } else if (filtroAtual === 'Outras') {
+        noticiasFiltradas = noticias.filter(n => n.estadoValidade === 'Rejeitado' || n.estadoValidade === 'Revisão');
+      }
+
+      if (noticiasFiltradas.length === 0) {
+        cont.innerHTML = '<div class="col-12 text-center text-muted py-5"><p>Nenhuma notícia encontrada para este filtro.</p></div>';
         return;
       }
 
-      noticias.forEach(n => {
+      noticiasFiltradas.forEach(n => {
+        let estado = n.estadoValidade || 'Pendente';
         let badgeClass = 'bg-secondary';
-        if (n.estadoValidade === 'Aprovado') badgeClass = 'bg-success';
-        if (n.estadoValidade === 'Revisão') badgeClass = 'bg-warning text-dark';
-        if (n.estadoValidade === 'Rejeitado') badgeClass = 'bg-danger';
+        if (estado === 'Aprovado') badgeClass = 'bg-success';
+        if (estado === 'Revisão') badgeClass = 'bg-warning text-dark';
+        if (estado === 'Rejeitado') badgeClass = 'bg-danger';
 
         const col = document.createElement('div');
         col.className = 'col-md-6 col-lg-4';
         col.innerHTML = `
           <div class="card card-noticia h-100 p-3">
             <div class="d-flex justify-content-between align-items-start mb-2">
-              <span class="badge badge-estado ${badgeClass}">${n.estadoValidade}</span>
+              <span class="badge badge-estado ${badgeClass}">${estado}</span>
               <small class="text-muted">${n.escola || ''}</small>
             </div>
             <h6 class="fw-bold mb-2">${n.titulo || 'Sem título'}</h6>
