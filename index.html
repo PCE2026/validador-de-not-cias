@@ -3,319 +3,359 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Validador de Notícias — Agrupamento de Escolas Templários</title>
+  <title>Validador de Notícias</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <style>
-    :root {
-      --primary-color: #0d6efd;
-      --bg-color: #f8f9fa;
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    body { background-color: var(--bg-color); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    .header-box { background: linear-gradient(135deg, #0d6efd, #0a58ca); color: white; padding: 20px; border-radius: 0 0 15px 15px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .card { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; }
-    .card-noticia:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-    .badge-estado { font-size: 0.85rem; padding: 6px 12px; border-radius: 20px; }
-    .presence-alert { font-size: 0.85rem; animation: pulse 2s infinite; }
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    .header-bar {
+      background-color: #0d3b66;
+      color: white;
+      padding: 20px 0;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .card-noticia {
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: none;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .card-noticia:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .badge-estado {
+      font-size: 0.8rem;
+      padding: 0.4em 0.8em;
+    }
+    .spinner-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 200px;
+    }
   </style>
 </head>
 <body>
 
-<div class="header-box text-center">
-  <h2 class="fw-bold mb-1">Agrupamento de Escolas Templários</h2>
-  <p class="mb-0 text-white-50">Validador Editorial de Notícias</p>
-</div>
-
-<div class="container pb-5">
-  <!-- BARRA DE AÇÕES -->
-  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-    <div class="d-flex align-items-center gap-2">
-      <label class="fw-semibold">Validador Atual:</label>
-      <input type="text" id="inputValidador" class="form-control form-control-sm" style="width: 200px;" placeholder="O teu nome..." onchange="salvarNomeValidador()">
+  <!-- CABEÇALHO -->
+  <header class="header-bar mb-4">
+    <div class="container text-center">
+      <h2 class="fw-bold m-0">Agrupamento de Escolas Templários</h2>
+      <p class="mb-0 text-white-50">Centro de Apoio à Aprendizagem (CAA) — Validação de Notícias</p>
     </div>
-    <button class="btn btn-outline-primary btn-sm" onclick="carregarNoticias()">
-      <i class="bi bi-arrow-clockwise me-1"></i> Atualizar Lista
-    </button>
-  </div>
+  </header>
 
-  <!-- LOADER -->
-  <div id="loader" class="text-center my-5">
-    <div class="spinner-border text-primary" role="status"></div>
-    <p class="mt-2 text-muted">A carregar notícias do servidor...</p>
-  </div>
-
-  <!-- LISTA DE NOTÍCIAS -->
-  <div id="listaNoticias" class="row g-3" style="display: none;"></div>
-</div>
-
-<!-- MODAL DE VALIDAÇÃO -->
-<div class="modal fade" id="modalValidar" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title fw-bold" id="modalTitulo">Validar Notícia</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        
-        <!-- AVISO DE OUTRO VALIDADOR PRESENTEMENTE A EDITAR -->
-        <div id="alertaOutroValidador" class="alert alert-warning presence-alert d-none" role="alert">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i>
-          Atenção: O validador <strong id="nomeOutroValidador">---</strong> está atualmente a analisar esta notícia!
+  <div class="container mb-5">
+    
+    <!-- BARRA SUPERIOR DE AÇÕES -->
+    <div class="row mb-4 align-items-center bg-white p-3 rounded shadow-sm mx-0">
+      <div class="col-md-6 mb-2 mb-md-0">
+        <div class="input-group">
+          <span class="input-group-text bg-light"><i class="bi bi-person-badge"></i></span>
+          <input type="text" id="inputValidador" class="form-control" placeholder="O teu nome (Validador)..." onchange="salvarNomeValidador()">
         </div>
+      </div>
+      <div class="col-md-6 text-md-end">
+        <button class="btn btn-outline-primary" onclick="carregarNoticias()">
+          <i class="bi bi-arrow-clockwise me-1"></i> Atualizar Lista
+        </button>
+      </div>
+    </div>
 
-        <div class="row g-3">
-          <!-- DETALHES DA NOTÍCIA -->
-          <div class="col-12 bg-light p-3 border-radius-8 rounded">
-            <h6 class="fw-bold text-primary mb-2" id="detalheTitulo">---</h6>
-            <p class="small text-muted mb-1"><strong>Proponente:</strong> <span id="detalheProponente">---</span> (<span id="detalheEmail">---</span>)</p>
-            <p class="small text-muted mb-2"><strong>Escola:</strong> <span id="detalheEscola">---</span></p>
-            <hr>
-            <div id="detalheCorpo" class="p-2 bg-white border rounded" style="white-space: pre-wrap; max-height: 250px; overflow-y: auto;">---</div>
+    <!-- CARREGADOR (SPINNER) -->
+    <div id="loader" class="spinner-container">
+      <div class="text-center">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted">A carregar notícias do servidor...</p>
+      </div>
+    </div>
+
+    <!-- GRELA DE NOTÍCIAS -->
+    <div id="listaNoticias" class="row g-4" style="display: none;"></div>
+
+  </div>
+
+  <!-- MODAL DE VALIDAÇÃO -->
+  <div class="modal fade" id="modalValidar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title fw-bold" id="detalheTitulo">Detalhes da Notícia</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          
+          <!-- ALERTA DE OUTRO VALIDADOR PRESENTE -->
+          <div id="alertaOutroValidador" class="alert alert-warning d-none d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"></i>
+            <div>
+              <strong>Atenção:</strong> O utilizador <span id="nomeOutroValidador" class="fw-bold"></span> também está a visualizar/editar esta notícia agora!
+            </div>
           </div>
 
-          <!-- BOTÃO IA GEMINI -->
-          <div class="col-12">
-            <button class="btn btn-sm btn-outline-secondary w-100" onclick="executarIA()">
-              <i class="bi bi-magic me-1"></i> Analisar Texto com IA (Gemini)
+          <!-- DETALHES DA SUBMISSÃO -->
+          <div class="mb-3 p-3 bg-light rounded">
+            <div class="row">
+              <div class="col-md-6 mb-2">
+                <small class="text-muted d-block">Proponente:</small>
+                <strong id="detalheProponente">—</strong> (<span id="detalheEmail">—</span>)
+              </div>
+              <div class="col-md-6 mb-2">
+                <small class="text-muted d-block">Escola / Origem:</small>
+                <strong id="detalheEscola">—</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <h6><strong>Corpo da Notícia:</strong></h6>
+            <div id="detalheCorpo" class="p-3 border rounded bg-white text-break" style="white-space: pre-wrap;">—</div>
+          </div>
+
+          <!-- ASSISTENTE IA -->
+          <div class="mb-4">
+            <button class="btn btn-outline-secondary btn-sm" onclick="executarIA()">
+              <i class="bi bi-robot me-1"></i> Analisar Texto com IA (Gemini)
             </button>
-            <div id="resIA" class="mt-2 p-3 bg-light border rounded small d-none" style="white-space: pre-wrap;"></div>
+            <div id="resIA" class="mt-2 p-3 alert alert-info d-none" style="white-space: pre-wrap;"></div>
           </div>
 
-          <hr class="my-3">
+          <hr>
 
           <!-- FORMULÁRIO DE VALIDAÇÃO -->
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">Estado da Validação</label>
+          <h6 class="fw-bold text-primary mb-3">Decisão de Validação</h6>
+          
+          <div class="mb-3">
+            <label class="form-label font-weight-bold">Estado da Notícia:</label>
             <select id="selectEstado" class="form-select">
-              <option value="Aprovado">✅ Aprovado</option>
-              <option value="Revisão">⚠️ Necessita Revisão</option>
-              <option value="Rejeitado">❌ Rejeitado</option>
+              <option value="Aprovado">Aprovado</option>
+              <option value="Revisão">Necessita Revisão</option>
+              <option value="Rejeitado">Rejeitado</option>
             </select>
           </div>
 
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">Meios de Difusão</label>
-            <input type="text" id="inputMeios" class="form-control" placeholder="ex: Site, Facebook, Newsletter">
+          <div class="mb-3">
+            <label class="form-label">Meios de Difusão Recomendados:</label>
+            <input type="text" id="inputMeios" class="form-control" placeholder="Ex: Site da Escola, Facebook, Newsletter">
           </div>
 
-          <div class="col-12">
-            <label class="form-label fw-semibold">Nota / Observações para o Proponente</label>
-            <textarea id="txtNota" class="form-rows-3 form-control" rows="3" placeholder="Escreve aqui notas relativas à revisão ou motivo de aprovação..."></textarea>
+          <div class="mb-3">
+            <label class="form-label">Notas / Observações / Sugestões:</label>
+            <textarea id="txtNota" class="form-control" rows="3" placeholder="Insere comentários ou justificações caso seja necessário rever/rejeitar..."></textarea>
           </div>
+
         </div>
-
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary" onclick="submeterValidacao()">Guardar Validação</button>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="submeterValidacao()">
+            <i class="bi bi-check-circle me-1"></i> Guardar Validação
+          </button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  // COLOQUE O SEU URL DO WEB APP AQUI
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFxi003S3RIYSQJdJP1rgZZ_qvgtESIFE2nQWJZN1LU1CjtZG9vCN8mNu5MGLApBQ6AA/exec';
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // URL LIMPO E CORRETO DO GOOGLE APPS SCRIPT
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFxi003S3RIYSQJdJP1rgZZ_qvgtESIFE2nQWJZN1LU1CjtZG9vCN8mNu5MGLApBQ6AA/exec';
 
-  let listaGlobalNoticias = [];
-  let noticiaSelecionada = null;
-  let timerPresenca = null;
+    let listaGlobalNoticias = [];
+    let noticiaSelecionada = null;
+    let timerPresenca = null;
 
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('inputValidador').value = localStorage.getItem('validador_nome') || '';
-    carregarNoticias();
-  });
-
-  function salvarNomeValidador() {
-    const nome = document.getElementById('inputValidador').value.trim();
-    localStorage.setItem('validador_nome', nome);
-  }
-
-  function carregarNoticias() {
-    document.getElementById('loader').style.display = 'block';
-    document.getElementById('listaNoticias').style.display = 'none';
-
-    fetchJsonp(`${SCRIPT_URL}?action=listar`)
-      .then(res => {
-        document.getElementById('loader').style.display = 'none';
-        if (res.ok) {
-          listaGlobalNoticias = res.noticias;
-          renderizarLista(res.noticias);
-        } else {
-          alert('Erro ao carregar dados: ' + res.error);
-        }
-      })
-      .catch(err => {
-        document.getElementById('loader').style.display = 'none';
-        alert('Erro de comunicação com o servidor: ' + err);
-      });
-  }
-
-  function renderizarLista(noticias) {
-    const cont = document.getElementById('listaNoticias');
-    cont.innerHTML = '';
-    cont.style.display = 'flex';
-
-    if (noticias.length === 0) {
-      cont.innerHTML = '<div class="col-12 text-center text-muted py-5"><p>Nenhuma notícia encontrada.</p></div>';
-      return;
-    }
-
-    noticias.forEach(n => {
-      let badgeClass = 'bg-secondary';
-      if (n.estadoValidade === 'Aprovado') badgeClass = 'bg-success';
-      if (n.estadoValidade === 'Revisão') badgeClass = 'bg-warning text-dark';
-      if (n.estadoValidade === 'Rejeitado') badgeClass = 'bg-danger';
-
-      const col = document.createElement('div');
-      col.className = 'col-md-6 col-lg-4';
-      col.innerHTML = `
-        <div class="card card-noticia h-100 p-3">
-          <div class="d-flex justify-content-between align-items-start mb-2">
-            <span class="badge badge-estado ${badgeClass}">${n.estadoValidade}</span>
-            <small class="text-muted">${n.escola || ''}</small>
-          </div>
-          <h6 class="fw-bold mb-2">${n.titulo || 'Sem título'}</h6>
-          <p class="small text-muted mb-3 flex-grow-1">${(n.corpo || '').substring(0, 100)}...</p>
-          <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-            <small class="text-muted"><i class="bi bi-person me-1"></i>${n.proponente || 'Anónimo'}</small>
-            <button class="btn btn-sm btn-outline-primary" onclick="abrirModal('${n.chave}')">Validar</button>
-          </div>
-        </div>
-      `;
-      cont.appendChild(col);
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('inputValidador').value = localStorage.getItem('validador_nome') || '';
+      carregarNoticias();
     });
-  }
 
-  function abrirModal(chave) {
-    noticiaSelecionada = listaGlobalNoticias.find(x => String(x.chave).trim() === String(chave).trim());
-    if (!noticiaSelecionada) return;
-
-    document.getElementById('detalheTitulo').innerText = noticiaSelecionada.titulo || '—';
-    document.getElementById('detalheProponente').innerText = noticiaSelecionada.proponente || '—';
-    document.getElementById('detalheEmail').innerText = noticiaSelecionada.emailProponente || '—';
-    document.getElementById('detalheEscola').innerText = noticiaSelecionada.escola || '—';
-    document.getElementById('detalheCorpo').innerText = noticiaSelecionada.corpo || '—';
-    document.getElementById('resIA').classList.add('d-none');
-    document.getElementById('resIA').innerText = '';
-
-    // Preenche campos de validação prévia se existirem
-    if (noticiaSelecionada.dadosValidacao) {
-      document.getElementById('selectEstado').value = noticiaSelecionada.dadosValidacao.estado || 'Aprovado';
-      document.getElementById('inputMeios').value = noticiaSelecionada.dadosValidacao.meios || '';
-      document.getElementById('txtNota').value = noticiaSelecionada.dadosValidacao.nota || '';
-    } else {
-      document.getElementById('selectEstado').value = 'Aprovado';
-      document.getElementById('inputMeios').value = '';
-      document.getElementById('txtNota').value = '';
+    function salvarNomeValidador() {
+      const nome = document.getElementById('inputValidador').value.trim();
+      localStorage.setItem('validador_nome', nome);
     }
 
-    iniciarSincronizacaoPresenca(noticiaSelecionada.chave);
+    function carregarNoticias() {
+      document.getElementById('loader').style.display = 'flex';
+      document.getElementById('listaNoticias').style.display = 'none';
 
-    const modal = new bootstrap.Modal(document.getElementById('modalValidar'));
-    modal.show();
-  }
-
-  function iniciarSincronizacaoPresenca(chave) {
-    if (timerPresenca) clearInterval(timerPresenca);
-    
-    const enviarELer = () => {
-      const meuNome = document.getElementById('inputValidador').value.trim() || 'Validador_Anonimo';
-      
-      // Marcar a minha presença
-      fetchJsonp(`${SCRIPT_URL}?action=marcarPresenca&chave=${encodeURIComponent(chave)}&validador=${encodeURIComponent(meuNome)}`);
-      
-      // Verificar se há outro validador
-      fetchJsonp(`${SCRIPT_URL}?action=obterPresenca&chave=${encodeURIComponent(chave)}&validador=${encodeURIComponent(meuNome)}`)
+      fetchJsonp(`${SCRIPT_URL}?action=listar`)
         .then(res => {
-          const alerta = document.getElementById('alertaOutroValidador');
-          if (res.ok && res.presenca) {
-            document.getElementById('nomeOutroValidador').innerText = res.presenca.validador;
-            alerta.classList.remove('d-none');
+          document.getElementById('loader').style.display = 'none';
+          if (res.ok) {
+            listaGlobalNoticias = res.noticias;
+            renderizarLista(res.noticias);
           } else {
-            alerta.classList.add('d-none');
+            alert('Erro ao carregar dados: ' + res.error);
           }
+        })
+        .catch(err => {
+          document.getElementById('loader').style.display = 'none';
+          alert('Erro de comunicação com o servidor: ' + err);
         });
-    };
+    }
 
-    enviarELer();
-    timerPresenca = setInterval(enviarELer, 15000); // Atualiza de 15 em 15 segundos
-  }
+    function renderizarLista(noticias) {
+      const cont = document.getElementById('listaNoticias');
+      cont.innerHTML = '';
+      cont.style.display = 'flex';
 
-  document.getElementById('modalValidar').addEventListener('hidden.bs.modal', () => {
-    if (timerPresenca) clearInterval(timerPresenca);
-  });
+      if (noticias.length === 0) {
+        cont.innerHTML = '<div class="col-12 text-center text-muted py-5"><p>Nenhuma notícia encontrada.</p></div>';
+        return;
+      }
 
-  function executarIA() {
-    if (!noticiaSelecionada) return;
-    const divRes = document.getElementById('resIA');
-    divRes.classList.remove('d-none');
-    divRes.innerText = 'A analisar texto com a IA Gemini...';
+      noticias.forEach(n => {
+        let badgeClass = 'bg-secondary';
+        if (n.estadoValidade === 'Aprovado') badgeClass = 'bg-success';
+        if (n.estadoValidade === 'Revisão') badgeClass = 'bg-warning text-dark';
+        if (n.estadoValidade === 'Rejeitado') badgeClass = 'bg-danger';
 
-    fetchJsonp(`${SCRIPT_URL}?action=analisarIA&chave=${encodeURIComponent(noticiaSelecionada.chave)}`)
-      .then(res => {
-        if (res.ok) {
-          divRes.innerText = res.analise;
-        } else {
-          divRes.innerText = 'Erro na IA: ' + res.error;
-        }
-      })
-      .catch(err => {
-        divRes.innerText = 'Erro ao contactar a IA: ' + err;
+        const col = document.createElement('div');
+        col.className = 'col-md-6 col-lg-4';
+        col.innerHTML = `
+          <div class="card card-noticia h-100 p-3">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="badge badge-estado ${badgeClass}">${n.estadoValidade}</span>
+              <small class="text-muted">${n.escola || ''}</small>
+            </div>
+            <h6 class="fw-bold mb-2">${n.titulo || 'Sem título'}</h6>
+            <p class="small text-muted mb-3 flex-grow-1">${(n.corpo || '').substring(0, 100)}...</p>
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+              <small class="text-muted"><i class="bi bi-person me-1"></i>${n.proponente || 'Anónimo'}</small>
+              <button class="btn btn-sm btn-outline-primary" onclick="abrirModal('${n.chave}')">Validar</button>
+            </div>
+          </div>
+        `;
+        cont.appendChild(col);
       });
-  }
+    }
 
-  function submeterValidacao() {
-    if (!noticiaSelecionada) return;
-    const meuNome = document.getElementById('inputValidador').value.trim() || 'Validador_Anonimo';
+    function abrirModal(chave) {
+      noticiaSelecionada = listaGlobalNoticias.find(x => String(x.chave).trim() === String(chave).trim());
+      if (!noticiaSelecionada) return;
 
-    const dados = {
-      chave: noticiaSelecionada.chave,
-      titulo: noticiaSelecionada.titulo,
-      proponente: noticiaSelecionada.proponente,
-      escola: noticiaSelecionada.escola,
-      validador: meuNome,
-      estado: document.getElementById('selectEstado').value,
-      meios: document.getElementById('inputMeios').value,
-      nota: document.getElementById('txtNota').value,
-      dataValidacao: new Date().toISOString()
-    };
+      document.getElementById('detalheTitulo').innerText = noticiaSelecionada.titulo || '—';
+      document.getElementById('detalheProponente').innerText = noticiaSelecionada.proponente || '—';
+      document.getElementById('detalheEmail').innerText = noticiaSelecionada.emailProponente || '—';
+      document.getElementById('detalheEscola').innerText = noticiaSelecionada.escola || '—';
+      document.getElementById('detalheCorpo').innerText = noticiaSelecionada.corpo || '—';
+      document.getElementById('resIA').classList.add('d-none');
+      document.getElementById('resIA').innerText = '';
 
-    fetchJsonp(`${SCRIPT_URL}?action=guardarValidacao&dados=${encodeURIComponent(JSON.stringify(dados))}`)
-      .then(res => {
-        if (res.ok) {
-          bootstrap.Modal.getInstance(document.getElementById('modalValidar')).hide();
-          carregarNoticias();
-        } else {
-          alert('Erro ao guardar validação: ' + res.error);
-        }
-      })
-      .catch(err => alert('Erro de ligação: ' + err));
-  }
+      if (noticiaSelecionada.dadosValidacao) {
+        document.getElementById('selectEstado').value = noticiaSelecionada.dadosValidacao.estado || 'Aprovado';
+        document.getElementById('inputMeios').value = noticiaSelecionada.dadosValidacao.meios || '';
+        document.getElementById('txtNota').value = noticiaSelecionada.dadosValidacao.nota || '';
+      } else {
+        document.getElementById('selectEstado').value = 'Aprovado';
+        document.getElementById('inputMeios').value = '';
+        document.getElementById('txtNota').value = '';
+      }
 
-  // Helper JSONP para contornar limitações CORS
-  function fetchJsonp(url) {
-    return new Promise((resolve, reject) => {
-      const callbackName = 'jsonp_cb_' + Math.round(100000 * Math.random());
-      window[callbackName] = function(data) {
-        delete window[callbackName];
-        document.body.removeChild(script);
-        resolve(data);
+      iniciarSincronizacaoPresenca(noticiaSelecionada.chave);
+
+      const modal = new bootstrap.Modal(document.getElementById('modalValidar'));
+      modal.show();
+    }
+
+    function iniciarSincronizacaoPresenca(chave) {
+      if (timerPresenca) clearInterval(timerPresenca);
+      
+      const enviarELer = () => {
+        const meuNome = document.getElementById('inputValidador').value.trim() || 'Validador_Anonimo';
+        
+        fetchJsonp(`${SCRIPT_URL}?action=marcarPresenca&chave=${encodeURIComponent(chave)}&validador=${encodeURIComponent(meuNome)}`);
+        
+        fetchJsonp(`${SCRIPT_URL}?action=obterPresenca&chave=${encodeURIComponent(chave)}&validador=${encodeURIComponent(meuNome)}`)
+          .then(res => {
+            const alerta = document.getElementById('alertaOutroValidador');
+            if (res.ok && res.presenca) {
+              document.getElementById('nomeOutroValidador').innerText = res.presenca.validador;
+              alerta.classList.remove('d-none');
+            } else {
+              alerta.classList.add('d-none');
+            }
+          });
       };
 
-      const script = document.createElement('script');
-      script.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + callbackName;
-      script.onerror = function() {
-        delete window[callbackName];
-        document.body.removeChild(script);
-        reject(new Error('Erro na requisição JSONP'));
-      };
-      document.body.appendChild(script);
+      enviarELer();
+      timerPresenca = setInterval(enviarELer, 15000);
+    }
+
+    document.getElementById('modalValidar').addEventListener('hidden.bs.modal', () => {
+      if (timerPresenca) clearInterval(timerPresenca);
     });
-  }
-</script>
+
+    function executarIA() {
+      if (!noticiaSelecionada) return;
+      const divRes = document.getElementById('resIA');
+      divRes.classList.remove('d-none');
+      divRes.innerText = 'A analisar texto com a IA Gemini...';
+
+      fetchJsonp(`${SCRIPT_URL}?action=analisarIA&chave=${encodeURIComponent(noticiaSelecionada.chave)}`)
+        .then(res => {
+          if (res.ok) {
+            divRes.innerText = res.analise;
+          } else {
+            divRes.innerText = 'Erro na IA: ' + res.error;
+          }
+        })
+        .catch(err => {
+          divRes.innerText = 'Erro ao contactar a IA: ' + err;
+        });
+    }
+
+    function submeterValidacao() {
+      if (!noticiaSelecionada) return;
+      const meuNome = document.getElementById('inputValidador').value.trim() || 'Validador_Anonimo';
+
+      const dados = {
+        chave: noticiaSelecionada.chave,
+        titulo: noticiaSelecionada.titulo,
+        proponente: noticiaSelecionada.proponente,
+        escola: noticiaSelecionada.escola,
+        validador: meuNome,
+        estado: document.getElementById('selectEstado').value,
+        meios: document.getElementById('inputMeios').value,
+        nota: document.getElementById('txtNota').value,
+        dataValidacao: new Date().toISOString()
+      };
+
+      fetchJsonp(`${SCRIPT_URL}?action=guardarValidacao&dados=${encodeURIComponent(JSON.stringify(dados))}`)
+        .then(res => {
+          if (res.ok) {
+            bootstrap.Modal.getInstance(document.getElementById('modalValidar')).hide();
+            carregarNoticias();
+          } else {
+            alert('Erro ao guardar validação: ' + res.error);
+          }
+        })
+        .catch(err => alert('Erro de ligação: ' + err));
+    }
+
+    function fetchJsonp(url) {
+      return new Promise((resolve, reject) => {
+        const callbackName = 'jsonp_cb_' + Math.round(100000 * Math.random());
+        window[callbackName] = function(data) {
+          delete window[callbackName];
+          document.body.removeChild(script);
+          resolve(data);
+        };
+
+        const script = document.createElement('script');
+        script.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + callbackName;
+        script.onerror = function() {
+          delete window[callbackName];
+          document.body.removeChild(script);
+          reject(new Error('Erro na requisição JSONP'));
+        };
+        document.body.appendChild(script);
+      });
+    }
+  </script>
 </body>
 </html>
