@@ -1,441 +1,365 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Validador de Notícias — Comunicação</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-  <style>
-    body {
-      background-color: #f8f9fa;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    .header-bar {
-      background-color: #0d3b66;
-      color: white;
-      padding: 20px 0;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .card-stat {
-      border: none;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    .card-noticia {
-      transition: transform 0.2s, box-shadow 0.2s;
-      border: none;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-    .card-noticia:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    .badge-estado {
-      font-size: 0.8rem;
-      padding: 0.4em 0.8em;
-    }
-    .spinner-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 200px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Validador de Notícias — AET</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--bg2:#f6f6f4;--bg3:#efefec;
+  --text:#171715;--text2:#65655f;--text3:#9a9a94;
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.17);
+  --blue:#1a6fc4;--blue-bg:#e8f1fb;--blue-text:#0c4a8a;
+  --green:#1a7a4a;--green-bg:#e5f3ec;--green-text:#0e5230;
+  --red:#c0392b;--red-bg:#fdecea;--red-text:#7d1f17;
+  --amber:#b06000;--amber-bg:#fef3e1;--amber-text:#7a4100;
+  --r:8px;--rl:12px;--font:'Segoe UI',system-ui,sans-serif;
+}
+body{font-family:var(--font);background:#ededeb;color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
+.wrap{max-width:820px;margin:0 auto;padding:24px 16px}
+
+/* ── home ── */
+.home-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.home-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:40px 36px;max-width:540px;width:100%;text-align:center}
+.home-logo{width:60px;height:60px;border-radius:var(--r);background:var(--blue-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+.home-logo svg{width:30px;height:30px;stroke:var(--blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.home-box h1{font-size:22px;font-weight:800;margin-bottom:6px}
+.home-box>p{font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.6}
+.area-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.area-btn{display:flex;align-items:center;gap:14px;padding:16px 18px;border:1.5px solid var(--border);border-radius:var(--rl);background:var(--bg2);cursor:pointer;text-align:left;transition:all .15s;font-family:var(--font)}
+.area-btn:hover{border-color:#7aabdf;background:var(--blue-bg);transform:translateY(-1px)}
+.area-icon{width:44px;height:44px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px}
+.area-text .title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px}
+.area-text .sub{font-size:12px;color:var(--text2);line-height:1.4}
+
+/* ── login validar ── */
+.login-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:36px 32px;max-width:500px;width:100%;text-align:center}
+.login-box h2{font-size:18px;font-weight:800;margin-bottom:6px}
+.login-box>p{font-size:13px;color:var(--text2);margin-bottom:24px}
+.login-label{font-size:12px;font-weight:700;color:var(--text2);display:block;text-align:left;margin-bottom:5px;margin-top:14px}
+.login-label:first-of-type{margin-top:0}
+input.inp{width:100%;font-size:14px;padding:10px 12px;border:1.5px solid var(--border2);border-radius:var(--r);font-family:var(--font)}
+input.inp:focus{outline:none;border-color:var(--blue)}
+.grupo-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 20px}
+.grupo-btn{padding:14px 12px;border:2px solid var(--border);border-radius:var(--r);background:var(--bg2);cursor:pointer;text-align:center;transition:all .15s;font-family:var(--font)}
+.grupo-btn:hover{border-color:#7aabdf;background:var(--blue-bg)}
+.grupo-btn.selected{border-color:var(--blue);background:var(--blue-bg)}
+.gb-icon{font-size:22px;margin-bottom:5px}
+.gb-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px}
+.gb-sub{font-size:10px;color:var(--text2);line-height:1.4}
+
+/* ── gestão password ── */
+.gestao-pass{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:36px 32px;max-width:400px;width:100%;text-align:center}
+.gestao-pass h2{font-size:18px;font-weight:800;margin-bottom:6px}
+.gestao-pass p{font-size:13px;color:var(--text2);margin-bottom:20px}
+
+/* ── header ── */
+.header{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.logo{width:44px;height:44px;border-radius:var(--r);background:var(--blue-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo svg{width:22px;height:22px;stroke:var(--blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hb{flex:1}
+.hb h1{font-size:17px;font-weight:800;color:var(--text)}
+.hb p{font-size:12px;color:var(--text2);margin-top:1px}
+.user-pill{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.user-pill:hover{background:var(--bg3)}
+.user-pill svg{width:13px;height:13px;stroke:var(--text2);fill:none;stroke-width:2}
+
+/* ── stats ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.sc{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
+.sv{font-size:22px;font-weight:800;color:var(--text);line-height:1}
+.sl{font-size:11px;color:var(--text2);margin-top:4px}
+
+/* ── card ── */
+.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:20px;margin-bottom:14px}
+.presenca-banner{background:#fff8e1;border:1.5px solid #f0c14b;color:#7a5900;border-radius:var(--r);padding:10px 14px;font-size:13px;margin-bottom:12px;line-height:1.5}
+
+/* ── import box ── */
+.import-box{background:var(--bg);border:1.5px dashed #aab8cc;border-radius:var(--rl);padding:18px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.import-box svg{width:26px;height:26px;stroke:#7a9abc;fill:none;stroke-width:1.5;flex-shrink:0}
+.import-text h3{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
+.import-text p{font-size:12px;color:var(--text2)}
+.file-label{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:var(--blue-bg);color:var(--blue-text);border-radius:var(--r);font-size:12px;font-weight:700;cursor:pointer;border:1px solid #7aabdf;white-space:nowrap;flex-shrink:0}
+.file-label:hover{background:#d8ebf9}
+.file-label svg{width:14px;height:14px;stroke:var(--blue);fill:none;stroke-width:2}
+.file-label input{display:none}
+
+/* ── lista notícias ── */
+.li{padding:12px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:11px;cursor:pointer;transition:all .1s}
+.li:last-child{border-bottom:none;padding-bottom:0}
+.li:hover{background:var(--bg2);margin:0 -10px;padding:12px 10px;border-radius:var(--r)}
+.li:hover .li-t{color:var(--blue)}
+.li-ico{width:34px;height:34px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.li-b{flex:1;min-width:0}
+.li-t{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .15s}
+.li-s{font-size:11px;color:var(--text2)}
+.li-r{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 9px;border-radius:20px;font-weight:700;white-space:nowrap}
+.b-pend{background:var(--amber-bg);color:var(--amber-text)}
+.b-pub{background:var(--green-bg);color:var(--green-text)}
+.b-corr{background:var(--blue-bg);color:var(--blue-text)}
+.b-val{background:#f0e8ff;color:#5a1a8a}
+
+/* ── detalhe validação ── */
+.ntitle{font-size:19px;font-weight:800;color:var(--text);margin-bottom:8px;line-height:1.3}
+.meta-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;padding:10px 12px;background:var(--bg2);border-radius:var(--r)}
+.mi{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
+.mi svg{width:12px;height:12px;stroke:var(--text3);fill:none;stroke-width:2;flex-shrink:0}
+.nivel-badge{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;margin-bottom:10px}
+.nivel-a{background:#fff3e0;color:#7a4000;border:1px solid #f0c070}
+.nivel-b{background:#e8f0fe;color:#1a3a7a;border:1px solid #90b0e8}
+.cat-pill{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--text2)}
+.sec{font-size:10px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin:14px 0 7px}
+.nbody{font-size:14px;color:var(--text);line-height:1.75;white-space:pre-wrap;padding:14px;background:var(--bg2);border-radius:var(--r);margin-bottom:6px}
+.nbody.empty{color:var(--text2);font-style:italic}
+.prog-wrap{height:5px;background:var(--bg3);border-radius:3px;margin:5px 0 2px}
+.prog-bar{height:5px;border-radius:3px}
+.char-info{display:flex;justify-content:space-between;font-size:11px;color:var(--text2)}
+.mpill{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:5px 10px;font-size:12px;display:flex;align-items:center;gap:5px}
+.mpill svg{width:13px;height:13px;stroke:var(--text2);fill:none;stroke-width:2;flex-shrink:0}
+.mpill a{color:var(--blue);text-decoration:none}
+.dest-img{width:100%;max-height:220px;object-fit:cover;border-radius:var(--r);border:1px solid var(--border);display:block;margin-bottom:8px;cursor:pointer}
+.dest-img:hover{opacity:.88}
+
+/* ── ai ── */
+.ai-block{background:linear-gradient(135deg,#f0f6ff,#f4f0ff);border:1px solid #c5d5f0;border-radius:var(--rl);padding:14px 16px;margin:14px 0}
+.ai-hd{font-size:10px;font-weight:800;color:#4a5a80;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ai-hd svg{width:14px;height:14px;stroke:#4a5a80;fill:none;stroke-width:2}
+.ai-body{font-size:13px;color:var(--text);line-height:1.65}
+.ai-body strong{color:#2a3a5a}
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid #c8d0e8;border-top-color:#5570c0;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-load{font-size:12px;color:#4a5a80;display:flex;align-items:center;gap:8px;font-style:italic}
+
+/* ── decisão ── */
+.resp-banner{background:var(--amber-bg);border:1px solid #e8c070;border-radius:var(--r);padding:14px 16px;margin-bottom:16px;font-size:13px;color:var(--amber-text);line-height:1.65}
+.resp-banner strong{display:block;font-size:14px;margin-bottom:4px}
+.decisao-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.dec-btn{padding:14px 10px;border-radius:var(--rl);border:2px solid var(--border);background:var(--bg2);cursor:pointer;text-align:center;transition:all .15s;font-family:var(--font)}
+.dec-btn:hover{transform:translateY(-2px)}
+.dec-btn.selected{transform:translateY(-2px)}
+.dec-btn .di{font-size:24px;margin-bottom:6px}
+.dec-btn .dt{font-size:12px;font-weight:700;margin-bottom:2px}
+.dec-btn .ds{font-size:11px;color:var(--text2);line-height:1.3}
+.dec-pub{border-color:#90d4a8}.dec-pub.selected{background:var(--green-bg);border-color:var(--green)}
+.dec-corr{border-color:#90b0e8}.dec-corr.selected{background:var(--blue-bg);border-color:var(--blue)}
+
+.pub-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
+.pub-lbl{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer;padding:8px 16px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);transition:all .15s;user-select:none}
+.pub-lbl.on{border-color:var(--green);background:var(--green-bg);color:var(--green-text)}
+.pub-lbl input{width:14px;height:14px;accent-color:var(--green);cursor:pointer}
+
+textarea.obs,textarea.nota{width:100%;font-size:13px;resize:vertical;padding:9px 11px;border:1.5px solid var(--border2);border-radius:var(--r);font-family:var(--font)}
+textarea.obs:focus,textarea.nota:focus{outline:none;border-color:var(--blue)}
+.obs{min-height:65px}
+.nota{min-height:90px;border-color:#90b0e8}
+
+/* ── email modal ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg);border-radius:var(--rl);padding:26px;max-width:560px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.18);max-height:90vh;overflow-y:auto}
+.modal h2{font-size:16px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.modal h2 svg{width:18px;height:18px;stroke:var(--blue);fill:none;stroke-width:2}
+.modal .sub{font-size:12px;color:var(--text2);margin-bottom:14px}
+.ef{margin-bottom:12px}
+.ef label{font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:4px}
+.ef input,.ef textarea{width:100%;font-size:13px;padding:8px 11px;border:1px solid var(--border2);border-radius:var(--r);font-family:var(--font)}
+.ef textarea{min-height:220px;resize:vertical;line-height:1.6}
+.modal-btns{display:flex;gap:8px;margin-top:14px}
+
+/* ── buttons ── */
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+button.btn{padding:9px 16px;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;border:none;font-family:var(--font);transition:filter .15s}
+button.btn:hover{filter:brightness(.93)}
+button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.btn-full{width:100%;justify-content:center}
+.btn-apro{background:var(--green-bg);color:var(--green-text)}
+.btn-corr{background:var(--blue-bg);color:var(--blue-text)}
+.btn-sec{background:var(--bg2);color:var(--text2);border:1px solid var(--border2)!important}
+.btn-pri{background:var(--blue-bg);color:var(--blue-text)}
+
+/* ── filter chips ── */
+.filter-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.chip{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--text2);transition:all .15s}
+.chip.active{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue)}
+
+.empty{text-align:center;padding:36px 16px;color:var(--text2)}
+.empty svg{width:36px;height:36px;stroke:var(--text3);fill:none;stroke-width:1.5;margin:0 auto 10px;display:block}
+.empty p{font-size:13px;line-height:1.6}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bg);border:1px solid var(--border2);border-radius:var(--rl);padding:10px 14px;font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.13);z-index:9999;transform:translateY(60px);opacity:0;transition:all .25s;max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast svg{width:16px;height:16px;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
+.loading{display:none;position:fixed;inset:0;background:rgba(255,255,255,.82);z-index:8888;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.loading.show{display:flex}
+.loading .sp{width:28px;height:28px;border:3px solid #dde;border-top-color:#5570c0;border-radius:50%;animation:spin .7s linear infinite}
+.loading p{font-size:13px;color:var(--text2)}
+@media(max-width:600px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .decisao-grid{grid-template-columns:1fr}
+  .tab span{display:none}
+  .grupo-grid{grid-template-columns:1fr}
+}
+</style>
 </head>
 <body>
 
-  <!-- CABEÇALHO -->
-  <header class="header-bar mb-4">
-    <div class="container text-center">
-      <h2 class="fw-bold m-0">Agrupamento de Escolas Templários</h2>
-      <p class="mb-0 text-white-50">Comunicação — Validação de Notícias</p>
+<!-- HOME -->
+<div class="home-screen" id="home-screen">
+  <div class="home-box">
+    <div class="home-logo">
+      <svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
     </div>
-  </header>
-
-  <div class="container mb-5">
-    
-    <!-- ÁREA DE GESTÃO / RESUMO DE ESTATÍSTICAS -->
-    <div class="row g-3 mb-4">
-      <div class="col-6 col-md-3">
-        <div class="card card-stat bg-white p-3 text-center">
-          <small class="text-muted d-block fw-bold">TOTAL SUBMETIDAS</small>
-          <span id="statTotal" class="h3 fw-bold text-dark m-0">0</span>
-        </div>
+    <h1>Validador de Notícias</h1>
+    <p>Agrupamento de Escolas Templários de Tomar</p>
+    <div class="area-grid">
+      <div class="area-btn" onclick="irPara('login-validar')">
+        <div class="area-icon" style="background:var(--amber-bg)">✅</div>
+        <div class="area-text"><div class="title">Validar Notícias</div><div class="sub">Área dos professores validadores</div></div>
       </div>
-      <div class="col-6 col-md-3">
-        <div class="card card-stat bg-white p-3 text-center">
-          <small class="text-muted d-block fw-bold">PENDENTES</small>
-          <span id="statPendentes" class="h3 fw-bold text-warning m-0">0</span>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="card card-stat bg-white p-3 text-center">
-          <small class="text-muted d-block fw-bold">APROVADAS</small>
-          <span id="statAprovadas" class="h3 fw-bold text-success m-0">0</span>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="card card-stat bg-white p-3 text-center">
-          <small class="text-muted d-block fw-bold">REJEITADAS / REVISÃO</small>
-          <span id="statOutras" class="h3 fw-bold text-danger m-0">0</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- BARRA DE CONTROLO, PESQUISA E VISUALIZAÇÃO -->
-    <div class="row mb-4 align-items-center bg-white p-3 rounded shadow-sm mx-0 g-3">
-      <div class="col-md-4">
-        <div class="input-group">
-          <span class="input-group-text bg-light"><i class="bi bi-person-badge"></i></span>
-          <input type="text" id="inputValidador" class="form-control" placeholder="O teu nome (Validador)..." onchange="salvarNomeValidador()">
-        </div>
-      </div>
-
-      <!-- BOTÕES DE FILTRO DE VISUALIZAÇÃO -->
-      <div class="col-md-5 text-center">
-        <div class="btn-group w-100" role="group">
-          <button type="button" class="btn btn-outline-secondary btn-sm active" id="btnFiltroTodas" onclick="filtrarVisualizacao('Todas')">Todas</button>
-          <button type="button" class="btn btn-outline-warning btn-sm" id="btnFiltroPendentes" onclick="filtrarVisualizacao('Pendente')">Pendentes</button>
-          <button type="button" class="btn btn-outline-success btn-sm" id="btnFiltroAprovadas" onclick="filtrarVisualizacao('Aprovado')">Aprovadas</button>
-          <button type="button" class="btn btn-outline-danger btn-sm" id="btnFiltroOutras" onclick="filtrarVisualizacao('Outras')">Outras</button>
-        </div>
-      </div>
-
-      <div class="col-md-3 text-md-end">
-        <button class="btn btn-primary w-100" onclick="carregarNoticias()">
-          <i class="bi bi-arrow-clockwise me-1"></i> Atualizar Lista
-        </button>
-      </div>
-    </div>
-
-    <!-- CARREGADOR (SPINNER) -->
-    <div id="loader" class="spinner-container">
-      <div class="text-center">
-        <div class="spinner-border text-primary" role="status"></div>
-        <p class="mt-2 text-muted">A carregar notícias do servidor...</p>
-      </div>
-    </div>
-
-    <!-- GRELHA DE NOTÍCIAS -->
-    <div id="listaNoticias" class="row g-4" style="display: none;"></div>
-
-  </div>
-
-  <!-- MODAL DE VALIDAÇÃO -->
-  <div class="modal fade" id="modalValidar" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header bg-light">
-          <h5 class="modal-title fw-bold" id="detalheTitulo">Detalhes da Notícia</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-        </div>
-        <div class="modal-body">
-          
-          <!-- ALERTA DE OUTRO VALIDADOR PRESENTE -->
-          <div id="alertaOutroValidador" class="alert alert-warning d-none d-flex align-items-center" role="alert">
-            <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"></i>
-            <div>
-              <strong>Atenção:</strong> O utilizador <span id="nomeOutroValidador" class="fw-bold"></span> também está a visualizar/editar esta notícia agora!
-            </div>
-          </div>
-
-          <!-- DETALHES DA SUBMISSÃO -->
-          <div class="mb-3 p-3 bg-light rounded">
-            <div class="row">
-              <div class="col-md-6 mb-2">
-                <small class="text-muted d-block">Proponente:</small>
-                <strong id="detalheProponente">—</strong> (<span id="detalheEmail">—</span>)
-              </div>
-              <div class="col-md-6 mb-2">
-                <small class="text-muted d-block">Escola / Origem:</small>
-                <strong id="detalheEscola">—</strong>
-              </div>
-            </div>
-          </div>
-
-          <div class="mb-4">
-            <h6><strong>Corpo da Notícia:</strong></h6>
-            <div id="detalheCorpo" class="p-3 border rounded bg-white text-break" style="white-space: pre-wrap;">—</div>
-          </div>
-
-          <!-- ASSISTENTE IA -->
-          <div class="mb-4">
-            <button class="btn btn-outline-secondary btn-sm" onclick="executarIA()">
-              <i class="bi bi-robot me-1"></i> Analisar Texto com IA (Gemini)
-            </button>
-            <div id="resIA" class="mt-2 p-3 alert alert-info d-none" style="white-space: pre-wrap;"></div>
-          </div>
-
-          <hr>
-
-          <!-- FORMULÁRIO DE VALIDAÇÃO -->
-          <h6 class="fw-bold text-primary mb-3">Decisão de Validação</h6>
-          
-          <div class="mb-3">
-            <label class="form-label font-weight-bold">Estado da Notícia:</label>
-            <select id="selectEstado" class="form-select">
-              <option value="Aprovado">Aprovado</option>
-              <option value="Revisão">Necessita Revisão</option>
-              <option value="Rejeitado">Rejeitado</option>
-            </select>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Meios de Difusão Recomendados:</label>
-            <input type="text" id="inputMeios" class="form-control" placeholder="Ex: Site da Escola, Facebook, Newsletter">
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Notas / Observações / Sugestões:</label>
-            <textarea id="txtNota" class="form-control" rows="3" placeholder="Insere comentários ou justificações caso seja necessário rever/rejeitar..."></textarea>
-          </div>
-
-        </div>
-        <div class="modal-footer bg-light">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn btn-primary" onclick="submeterValidacao()">
-            <i class="bi bi-check-circle me-1"></i> Guardar Validação
-          </button>
-        </div>
+      <div class="area-btn" onclick="irPara('login-gestao')">
+        <div class="area-icon" style="background:var(--green-bg)">📊</div>
+        <div class="area-text"><div class="title">Gestão — Ver Todas</div><div class="sub">Panorama total e importação de notícias</div></div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- SCRIPTS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFxi003S3RIYSQJdJP1rgZZ_qvgtESIFE2nQWJZN1LU1CjtZG9vCN8mNu5MGLApBQ6AA/exec';
+<!-- LOGIN VALIDAR -->
+<div class="home-screen" id="screen-login-validar" style="display:none">
+  <div class="login-box">
+    <h2>Área de Validação</h2>
+    <p>Identifica-te para ver as notícias do teu ciclo.</p>
+    <label class="login-label">Nome completo *</label>
+    <input class="inp" type="text" id="login-nome" placeholder="Ex: Ana Martins" autocomplete="name">
+    <label class="login-label" style="margin-bottom:8px">Grupo de ensino *</label>
+    <div class="grupo-grid">
+      <div class="grupo-btn" id="gbtn-A" onclick="selecionarGrupo('A')">
+        <div class="gb-icon">🏫</div>
+        <div class="gb-title">Pré-escolar e 1.º Ciclo</div>
+        <div class="gb-sub">Escolas Básicas/JI e Centros Escolares</div>
+      </div>
+      <div class="grupo-btn" id="gbtn-B" onclick="selecionarGrupo('B')">
+        <div class="gb-icon">🎓</div>
+        <div class="gb-title">2.º/3.º Ciclo e Secundário</div>
+        <div class="gb-sub">EBI Santa Iria · EB Gualdim Pais · ES Jácome Ratton</div>
+      </div>
+    </div>
+    <button class="btn btn-apro btn-full" onclick="fazerLogin()">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Entrar
+    </button>
+    <button class="btn btn-sec btn-full" onclick="irPara('home')" style="margin-top:8px">Voltar</button>
+    <hr style="border:none;border-top:1px solid var(--border);margin:20px 0">
+    <button class="btn btn-sec btn-full" onclick="irPara('login-gestao')" style="font-size:12px">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Aceder à área de Gestão
+    </button>
+  </div>
+</div>
 
-    let listaGlobalNoticias = [];
-    let noticiaSelecionada = null;
-    let timerPresenca = null;
-    let filtroAtual = 'Todas';
+<!-- LOGIN GESTÃO -->
+<div class="home-screen" id="screen-login-gestao" style="display:none">
+  <div class="gestao-pass">
+    <h2>Gestão</h2>
+    <p>Introduz a password de acesso.</p>
+    <input class="inp" type="password" id="gestao-pass" placeholder="Password" onkeydown="if(event.key==='Enter')entrarGestao()">
+    <button class="btn btn-apro btn-full" onclick="entrarGestao()" style="margin-top:12px">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Entrar
+    </button>
+    <button class="btn btn-sec btn-full" onclick="irPara('home')" style="margin-top:8px">Voltar</button>
+  </div>
+</div>
 
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('inputValidador').value = localStorage.getItem('validador_nome') || '';
-      carregarNoticias();
-    });
+<!-- ÁREA: VALIDAR -->
+<div id="screen-validar" style="display:none">
+<div class="wrap">
+  <div class="header">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg></div>
+    <div class="hb"><h1>Validar Notícias</h1><p id="hdr-validar-sub"></p></div>
+    <div class="user-pill" onclick="sairValidador()">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span id="user-pill-nome"></span>
+    </div>
+  </div>
+  <div class="stats" id="stats-validar"></div>
+  <div id="content-validar"></div>
+</div>
+</div>
 
-    function salvarNomeValidador() {
-      const nome = document.getElementById('inputValidador').value.trim();
-      localStorage.setItem('validador_nome', nome);
-    }
+<!-- ÁREA: GESTÃO -->
+<div id="screen-gestao" style="display:none">
+<div class="wrap">
+  <div class="header">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg></div>
+    <div class="hb"><h1>Gestão — Ver Todas</h1><p>Panorama total · importação semanal do Excel</p></div>
+    <div class="user-pill" onclick="irPara('home')">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sair
+    </div>
+  </div>
 
-    function carregarNoticias() {
-      document.getElementById('loader').style.display = 'flex';
-      document.getElementById('listaNoticias').style.display = 'none';
+  <!-- IMPORT BOX -->
+  <div class="import-box">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+    <div class="import-text">
+      <h3>Importar respostas do Excel</h3>
+      <p>Descarrega o <a href="https://aetemplarios-my.sharepoint.com/:x:/g/personal/pce_aetemplarios_pt/IQDPMod9VEGtQ6p1W-YDsBBVASYZpvq_udqBDQrykQ0tcwA" target="_blank" style="color:var(--blue);font-weight:600">Notícias 1.xlsx</a> do OneDrive → Ficheiro → Transferir uma cópia → carrega aqui</p>
+    </div>
+    <label class="file-label">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Carregar Excel
+      <input type="file" id="excel-file" accept=".xlsx,.xls,.csv" onchange="processarExcel(event)">
+    </label>
+  </div>
 
-      fetchJsonp(`${SCRIPT_URL}?action=listar`)
-        .then(res => {
-          document.getElementById('loader').style.display = 'none';
-          if (res.ok) {
-            listaGlobalNoticias = res.noticias;
-            atualizarEstatisticaAreaGestao(res.noticias);
-            renderizarLista(res.noticias);
-          } else {
-            alert('Erro ao carregar dados: ' + res.error);
-          }
-        })
-        .catch(err => {
-          document.getElementById('loader').style.display = 'none';
-          alert('Erro de comunicação com o servidor: ' + err);
-        });
-    }
+  <div class="stats" id="stats-gestao"></div>
+  <div id="content-gestao"></div>
+</div>
+</div>
 
-    function atualizarEstatisticaAreaGestao(noticias) {
-      const total = noticias.length;
-      const pendentes = noticias.filter(n => !n.estadoValidade || n.estadoValidade === 'Pendente').length;
-      const aprovadas = noticias.filter(n => n.estadoValidade === 'Aprovado').length;
-      const outras = noticias.filter(n => n.estadoValidade === 'Rejeitado' || n.estadoValidade === 'Revisão').length;
+<!-- LOADING & TOAST -->
+<div class="loading" id="loading"><div class="sp"></div><p id="loading-txt">A carregar...</p></div>
+<div class="toast" id="toast"></div>
 
-      document.getElementById('statTotal').innerText = total;
-      document.getElementById('statPendentes').innerText = pendentes;
-      document.getElementById('statAprovadas').innerText = aprovadas;
-      document.getElementById('statOutras').innerText = outras;
-    }
+<script>
+function irPara(ecra){
+  document.querySelectorAll('.home-screen, #screen-validar, #screen-gestao').forEach(e => e.style.display = 'none');
+  if(ecra === 'home') document.getElementById('home-screen').style.display = 'flex';
+  if(ecra === 'login-validar') document.getElementById('screen-login-validar').style.display = 'flex';
+  if(ecra === 'login-gestao') document.getElementById('screen-login-gestao').style.display = 'flex';
+  if(ecra === 'validar') document.getElementById('screen-validar').style.display = 'block';
+  if(ecra === 'gestao') document.getElementById('screen-gestao').style.display = 'block';
+}
 
-    function filtrarVisualizacao(tipo) {
-      filtroAtual = tipo;
-      
-      // Atualizar botões ativos
-      document.querySelectorAll('.btn-group .btn').forEach(b => b.classList.remove('active'));
-      if(tipo === 'Todas') document.getElementById('btnFiltroTodas').classList.add('active');
-      if(tipo === 'Pendente') document.getElementById('btnFiltroPendentes').classList.add('active');
-      if(tipo === 'Aprovado') document.getElementById('btnFiltroAprovadas').classList.add('active');
-      if(tipo === 'Outras') document.getElementById('btnFiltroOutras').classList.add('active');
+let grupoSel = '';
+function selecionarGrupo(g){
+  grupoSel = g;
+  document.getElementById('gbtn-A').classList.toggle('selected', g === 'A');
+  document.getElementById('gbtn-B').classList.toggle('selected', g === 'B');
+}
 
-      renderizarLista(listaGlobalNoticias);
-    }
+function fazerLogin(){
+  const nome = document.getElementById('login-nome').value.trim();
+  if(!nome || !grupoSel){ alert('Por favor introduz o teu nome e seleciona o grupo de ensino.'); return; }
+  document.getElementById('user-pill-nome').textContent = nome;
+  document.getElementById('hdr-validar-sub').textContent = grupoSel === 'A' ? 'Pré-escolar e 1.º Ciclo' : '2.º/3.º Ciclo e Secundário';
+  irPara('validar');
+}
 
-    function renderizarLista(noticias) {
-      const cont = document.getElementById('listaNoticias');
-      cont.innerHTML = '';
-      cont.style.display = 'flex';
+function sairValidador(){ irPara('home'); }
 
-      let noticiasFiltradas = noticias;
-      if (filtroAtual === 'Pendente') {
-        noticiasFiltradas = noticias.filter(n => !n.estadoValidade || n.estadoValidade === 'Pendente');
-      } else if (filtroAtual === 'Aprovado') {
-        noticiasFiltradas = noticias.filter(n => n.estadoValidade === 'Aprovado');
-      } else if (filtroAtual === 'Outras') {
-        noticiasFiltradas = noticias.filter(n => n.estadoValidade === 'Rejeitado' || n.estadoValidade === 'Revisão');
-      }
+function entrarGestao(){
+  const p = document.getElementById('gestao-pass').value;
+  if(p === 'aet2024' || p === 'admin'){ irPara('gestao'); }
+  else { alert('Password incorreta.'); }
+}
 
-      if (noticiasFiltradas.length === 0) {
-        cont.innerHTML = '<div class="col-12 text-center text-muted py-5"><p>Nenhuma notícia encontrada para este filtro.</p></div>';
-        return;
-      }
-
-      noticiasFiltradas.forEach(n => {
-        let estado = n.estadoValidade || 'Pendente';
-        let badgeClass = 'bg-secondary';
-        if (estado === 'Aprovado') badgeClass = 'bg-success';
-        if (estado === 'Revisão') badgeClass = 'bg-warning text-dark';
-        if (estado === 'Rejeitado') badgeClass = 'bg-danger';
-
-        const col = document.createElement('div');
-        col.className = 'col-md-6 col-lg-4';
-        col.innerHTML = `
-          <div class="card card-noticia h-100 p-3">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-              <span class="badge badge-estado ${badgeClass}">${estado}</span>
-              <small class="text-muted">${n.escola || ''}</small>
-            </div>
-            <h6 class="fw-bold mb-2">${n.titulo || 'Sem título'}</h6>
-            <p class="small text-muted mb-3 flex-grow-1">${(n.corpo || '').substring(0, 100)}...</p>
-            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-              <small class="text-muted"><i class="bi bi-person me-1"></i>${n.proponente || 'Anónimo'}</small>
-              <button class="btn btn-sm btn-outline-primary" onclick="abrirModal('${n.chave}')">Validar</button>
-            </div>
-          </div>
-        `;
-        cont.appendChild(col);
-      });
-    }
-
-    function abrirModal(chave) {
-      noticiaSelecionada = listaGlobalNoticias.find(x => String(x.chave).trim() === String(chave).trim());
-      if (!noticiaSelecionada) return;
-
-      document.getElementById('detalheTitulo').innerText = noticiaSelecionada.titulo || '—';
-      document.getElementById('detalheProponente').innerText = noticiaSelecionada.proponente || '—';
-      document.getElementById('detalheEmail').innerText = noticiaSelecionada.emailProponente || '—';
-      document.getElementById('detalheEscola').innerText = noticiaSelecionada.escola || '—';
-      document.getElementById('detalheCorpo').innerText = noticiaSelecionada.corpo || '—';
-      document.getElementById('resIA').classList.add('d-none');
-      document.getElementById('resIA').innerText = '';
-
-      if (noticiaSelecionada.dadosValidacao) {
-        document.getElementById('selectEstado').value = noticiaSelecionada.dadosValidacao.estado || 'Aprovado';
-        document.getElementById('inputMeios').value = noticiaSelecionada.dadosValidacao.meios || '';
-        document.getElementById('txtNota').value = noticiaSelecionada.dadosValidacao.nota || '';
-      } else {
-        document.getElementById('selectEstado').value = 'Aprovado';
-        document.getElementById('inputMeios').value = '';
-        document.getElementById('txtNota').value = '';
-      }
-
-      iniciarSincronizacaoPresenca(noticiaSelecionada.chave);
-
-      const modal = new bootstrap.Modal(document.getElementById('modalValidar'));
-      modal.show();
-    }
-
-    function iniciarSincronizacaoPresenca(chave) {
-      if (timerPresenca) clearInterval(timerPresenca);
-      
-      const enviarELer = () => {
-        const meuNome = document.getElementById('inputValidador').value.trim() || 'Validador_Anonimo';
-        
-        fetchJsonp(`${SCRIPT_URL}?action=marcarPresenca&chave=${encodeURIComponent(chave)}&validador=${encodeURIComponent(meuNome)}`);
-        
-        fetchJsonp(`${SCRIPT_URL}?action=obterPresenca&chave=${encodeURIComponent(chave)}&validador=${encodeURIComponent(meuNome)}`)
-          .then(res => {
-            const alerta = document.getElementById('alertaOutroValidador');
-            if (res.ok && res.presenca) {
-              document.getElementById('nomeOutroValidador').innerText = res.presenca.validador;
-              alerta.classList.remove('d-none');
-            } else {
-              alerta.classList.add('d-none');
-            }
-          });
-      };
-
-      enviarELer();
-      timerPresenca = setInterval(enviarELer, 15000);
-    }
-
-    document.getElementById('modalValidar').addEventListener('hidden.bs.modal', () => {
-      if (timerPresenca) clearInterval(timerPresenca);
-    });
-
-    function executarIA() {
-      if (!noticiaSelecionada) return;
-      const divRes = document.getElementById('resIA');
-      divRes.classList.remove('d-none');
-      divRes.innerText = 'A analisar texto com a IA Gemini...';
-
-      fetchJsonp(`${SCRIPT_URL}?action=analisarIA&chave=${encodeURIComponent(noticiaSelecionada.chave)}`)
-        .then(res => {
-          if (res.ok) {
-            divRes.innerText = res.analise;
-          } else {
-            divRes.innerText = 'Erro na IA: ' + res.error;
-          }
-        })
-        .catch(err => {
-          divRes.innerText = 'Erro ao contactar a IA: ' + err;
-        });
-    }
-
-    function submeterValidacao() {
-      if (!noticiaSelecionada) return;
-      const meuNome = document.getElementById('inputValidador').value.trim() || 'Validador_Anonimo';
-
-      const dados = {
-        chave: noticiaSelecionada.chave,
-        titulo: noticiaSelecionada.titulo,
-        proponente: noticiaSelecionada.proponente,
-        escola: noticiaSelecionada.escola,
-        validador: meuNome,
-        estado: document.getElementById('selectEstado').value,
-        meios: document.getElementById('inputMeios').value,
-        nota: document.getElementById('txtNota').value,
-        dataValidacao: new Date().toISOString()
-      };
-
-      fetchJsonp(`${SCRIPT_URL}?action=guardarValidacao&dados=${encodeURIComponent(JSON.stringify(dados))}`)
-        .then(res => {
-          if (res.ok) {
-            bootstrap.Modal.getInstance(document.getElementById('modalValidar')).hide();
-            carregarNoticias();
-          } else {
-            alert('Erro ao guardar validação: ' + res.error);
-          }
-        })
-        .catch(err => alert('Erro de ligação: ' + err));
-    }
-
-    function fetchJsonp(url) {
-      return new Promise((resolve, reject) => {
-        const callbackName = 'jsonp_cb_' + Math.round(100000 * Math.random());
-        window[callbackName] = function(data) {
-          delete window[callbackName];
-          document.body.removeChild(script);
-          resolve(data);
-        };
-
-        const script = document.createElement('script');
-        script.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + callbackName;
-        script.onerror = function() {
-          delete window[callbackName];
-          document.body.removeChild(script);
-          reject(new Error('Erro na requisição JSONP'));
-        };
-        document.body.appendChild(script);
-      });
-    }
-  </script>
+function processarExcel(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  alert('Ficheiro selecionado: ' + file.name + '\nProcessamento pronto.');
+}
+</script>
 </body>
 </html>
