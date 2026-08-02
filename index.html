@@ -381,7 +381,7 @@ function escolaGrupo(escola){
   if(GRUPOS.A.esc.some(s=>e.includes(norm(s))))return 'A';
   return null;
 }
-function chave(n){ return norm(n.titulo)+'|'+norm(n.proponente); }
+function chave(n){ return (n&&n.chave) ? n.chave : (norm(n.titulo)+'|'+norm(n.proponente)); }
 
 function showLoad(msg){document.getElementById('load-msg').textContent=msg||'A processar…';document.getElementById('loading').classList.add('show');}
 function hideLoad(){document.getElementById('loading').classList.remove('show');}
