@@ -348,7 +348,7 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
 // CONFIG
 // ═══════════════════════════════════════════════════════════════
 const API_URL = 'https://script.google.com/macros/s/AKfycbwFxi003S3RIYSQJdJP1rgZZ_qvgtESIFE2nQWJZN1LU1CjtZG9vCN8mNu5MGLApBQ6AA/exec';
-const PASS_GESTAO = 'templarios2027'; // mesma do projeto Cidadania
+const PASS_GESTAO = 'templarios2027';
 
 const GRUPOS = {
   A:{label:'Pré-escolar e 1.º Ciclo',
@@ -361,7 +361,7 @@ const GRUPOS = {
 // STATE
 // ═══════════════════════════════════════════════════════════════
 let noticias   = JSON.parse(localStorage.getItem('aet_noticias5')||'[]');
-let validacoes = {}; // chave → {validador,estado,meios,nota,dataValidacao}
+let validacoes = {};
 let sessao     = null;
 let grupoSel   = null;
 let noticiaAtual = null;
@@ -397,25 +397,16 @@ function toast(msg,type='info'){
 }
 
 // ═══════════════════════════════════════════════════════════════
-// API — só GET (sem CORS)
+// API — COMUNICAÇÃO JSONP (CONTORNA CORS TOTALMENTE)
 // ═══════════════════════════════════════════════════════════════
-async function apiListar(){
-  const url = API_URL+'?action=listar&t='+Date.now();
-  const res = await fetch(url);
-  const data = await res.json();
-  if(!data.ok) throw new Error(data.error||'Erro');
-  return data; // {noticias:[], validacoes:{}}
-}
-
-// JSONP — única forma de contornar CORS com Apps Script sem licença Premium
 function jsonpFetch_(url, timeoutMs){
   return new Promise((resolve, reject)=>{
     const cbName = 'cb_'+Date.now()+'_'+Math.floor(Math.random()*9999);
     const script = document.createElement('script');
     const timer = setTimeout(()=>{
       cleanup();
-      reject(new Error('Timeout'));
-    }, timeoutMs||10000);
+      reject(new Error('Timeout na comunicação com o servidor'));
+    }, timeoutMs||15000);
     function cleanup(){
       clearTimeout(timer);
       delete window[cbName];
@@ -426,24 +417,20 @@ function jsonpFetch_(url, timeoutMs){
       resolve(data);
     };
     script.src = url + '&callback=' + cbName;
-    script.onerror = ()=>{ cleanup(); reject(new Error('Script error')); };
+    script.onerror = ()=>{ cleanup(); reject(new Error('Erro de ligação')); };
     document.head.appendChild(script);
   });
 }
 
-async function apiFetch_(url, timeoutMs){
-  try{
-    // Tenta fetch normal primeiro (funciona para GET/listar)
-    const res = await fetch(url);
-    return await res.json();
-  }catch(e){
-    // Fallback: JSONP para contornar CORS
-    try{
-      return await jsonpFetch_(url, timeoutMs);
-    }catch(e2){
-      throw new Error('Não foi possível ligar ao servidor.');
-    }
-  }
+async function apiFetch_(url){
+  return await jsonpFetch_(url, 20000);
+}
+
+async function apiListar(){
+  const url = API_URL+'?action=listar&t='+Date.now();
+  const data = await apiFetch_(url);
+  if(!data.ok) throw new Error(data.error||'Erro ao listar notícias');
+  return data;
 }
 
 async function apiGuardar(n, estado, meios, nota){
@@ -485,7 +472,7 @@ async function apiGuardarNoticia(n){
 }
 
 // ═══════════════════════════════════════════════════════════════
-// NAVEGAÇÃO
+// NAVEGAÇÃO E LOGIN
 // ═══════════════════════════════════════════════════════════════
 function irPara(area){
   ['home-screen','screen-login-validar','screen-login-gestao','screen-validar','screen-gestao']
@@ -499,9 +486,6 @@ function irPara(area){
   if(area==='gestao') renderGestao();
 }
 
-// ═══════════════════════════════════════════════════════════════
-// LOGIN
-// ═══════════════════════════════════════════════════════════════
 function selecionarGrupo(g){
   grupoSel=g;
   document.querySelectorAll('.grupo-btn').forEach(b=>b.classList.remove('selected'));
@@ -519,7 +503,6 @@ async function fazerLogin(){
   showLoad('A carregar notícias e estados…');
   try{
     const data = await apiListar();
-    // Merge notícias do Sheets com locais (Sheets tem precedência para novos)
     const chavesLocais = new Set(noticias.map(n=>chave(n)));
     let nextId = Math.max(0,...noticias.map(n=>n._id||0))+1;
     (data.noticias||[]).forEach(n=>{
@@ -532,7 +515,7 @@ async function fazerLogin(){
           escola: n.escola, data: (n.timestamp||'').slice(0,10),
           corpo: n.corpo, imgDestaque: n.imgDestaque,
           outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
-          video: n.video, links: n.links,
+          video: n.video, links: n.links, emailProponente: n.emailProponente||'',
           _meios:{site:false,fb:false,ig:false,tk:false}, _analise:null
         });
         chavesLocais.add(c);
@@ -543,7 +526,7 @@ async function fazerLogin(){
     hideLoad();
   }catch(e){
     hideLoad();
-    toast('Não foi possível ligar ao servidor. A usar dados locais.','warning');
+    toast('Servidor indisponível. A usar dados locais.','warning');
   }
   renderValidar();
 }
@@ -564,7 +547,7 @@ function entrarGestao(){
 }
 
 // ═══════════════════════════════════════════════════════════════
-// RENDER: VALIDAR
+// RENDER: VALIDAR & GESTÃO
 // ═══════════════════════════════════════════════════════════════
 function filaGrupo(){
   return noticias.filter(n=>{
@@ -583,526 +566,371 @@ function renderStats(){
   const minha=filaGrupo();
   const pend=minha.filter(n=>estadoNoticia(n).estado==='pendente').length;
   const pub=minha.filter(n=>estadoNoticia(n).estado==='pode_publicar').length;
-  const corr=minha.filter(n=>estadoNoticia(n).estado==='enviado_correcao').length;
-  const val=minha.filter(n=>estadoNoticia(n).estado==='em_validacao').length;
+  const corr=minha.filter(n=>estadoNoticia(n).estado==='precisa_correcao').length;
   document.getElementById('stats-validar').innerHTML=`
-    <div class="sc"><div class="sv">${minha.length}</div><div class="sl">Total</div></div>
+    <div class="sc"><div class="sv">${minha.length}</div><div class="sl">Notícias no teu ciclo</div></div>
     <div class="sc"><div class="sv" style="color:var(--amber)">${pend}</div><div class="sl">Pendentes</div></div>
-    <div class="sc"><div class="sv" style="color:var(--green)">${pub}</div><div class="sl">A publicar</div></div>
-    <div class="sc"><div class="sv" style="color:var(--blue)">${corr+val}</div><div class="sl">Em processo</div></div>`;
+    <div class="sc"><div class="sv" style="color:var(--green)">${pub}</div><div class="sl">Prontas para publicar</div></div>
+    <div class="sc"><div class="sv" style="color:var(--blue)">${corr}</div><div class="sl">Pedida correção</div></div>
+  `;
 }
 
 function renderValidar(){
   renderStats();
-  const el=document.getElementById('content-validar');
-  const minha=filaGrupo();
-
-  if(!noticias.length){
-    el.innerHTML=`<div class="card"><div class="empty">
-      <svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg>
-      <p>Ainda não há notícias importadas.<br>Pede à gestão para importar o Excel do OneDrive.</p>
-    </div></div>`;
-    return;
-  }
-
-  if(!minha.length){
-    el.innerHTML=`<div class="card"><div class="empty">
-      <svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg>
-      <p>Não há notícias para o teu ciclo.</p>
-    </div></div>`;
-    return;
-  }
-
+  const container = document.getElementById('content-validar');
   if(noticiaAtual){
-    el.innerHTML=buildDetalhe(noticiaAtual);
-    if(!noticiaAtual._analise) analisarIA(noticiaAtual);
+    renderDetalheNoticia(noticiaAtual, container);
     return;
   }
-
-  // Lista de notícias do grupo
-  const listaHtml=minha.map(n=>{
-    const v=estadoNoticia(n);
-    const est=v.estado||'pendente';
-    const bmap={pendente:'b-pend',pode_publicar:'b-pub',enviado_correcao:'b-corr',em_validacao:'b-val'};
-    const lmap={pendente:'Pendente',pode_publicar:'✓ Validada',enviado_correcao:'✉ Aguarda correção',em_validacao:'Em validação'};
-    const bgmap={pendente:'var(--bg2)',pode_publicar:'var(--green-bg)',enviado_correcao:'var(--blue-bg)',em_validacao:'#f0e8ff'};
-    const icmap={pendente:'var(--text2)',pode_publicar:'var(--green-text)',enviado_correcao:'var(--blue-text)',em_validacao:'#5a1a8a'};
-    return `<div class="li" onclick="abrirNoticia(${n._id})">
-      <div class="li-ico" style="background:${bgmap[est]}">
-        <svg viewBox="0 0 24 24" width="16" height="16" style="stroke:${icmap[est]};fill:none;stroke-width:1.8"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/></svg>
-      </div>
-      <div class="li-b">
-        <div class="li-t">${n.titulo}</div>
-        <div class="li-s">${n.proponente||'—'} · ${n.escola||'—'} · ${n.data||'—'}</div>
-      </div>
-      <div class="li-r">
-        <span class="badge ${bmap[est]||'b-pend'}">${lmap[est]||est}</span>
-        ${v.validador?`<span style="font-size:10px;color:var(--text2)">${v.validador}</span>`:''}
-      </div>
-    </div>`;
-  }).join('');
-
-  el.innerHTML=`<div class="card"><div>${listaHtml}</div></div>`;
-}
-
-function abrirNoticia(id){
-  noticiaAtual=noticias.find(n=>n._id===id)||null;
-  decisaoAtual=null;
-  presencaAlheia=null;
-  renderValidar();
-  if(noticiaAtual) iniciarPresenca_(noticiaAtual);
-}
-function voltarLista(){pararPresenca_();noticiaAtual=null;decisaoAtual=null;renderValidar();}
-
-// ═══════════════════════════════════════════════════════════════
-// PRESENÇA — avisa se outro validador está a ver a mesma notícia
-// ═══════════════════════════════════════════════════════════════
-let presencaInterval=null;
-let presencaAlheia=null;
-
-function iniciarPresenca_(n){
-  pararPresenca_();
-  const c = chave(n);
-  const marcarEVerificar = async ()=>{
-    try{
-      await apiFetch_(API_URL+'?action=marcarPresenca&chave='+encodeURIComponent(c)+'&validador='+encodeURIComponent(sessao.nome||'')+'&t='+Date.now());
-      const r = await apiFetch_(API_URL+'?action=obterPresenca&chave='+encodeURIComponent(c)+'&validador='+encodeURIComponent(sessao.nome||'')+'&t='+Date.now());
-      const novo = (r&&r.ok)? (r.presenca||null) : null;
-      const mudou = JSON.stringify(novo)!==JSON.stringify(presencaAlheia);
-      presencaAlheia = novo;
-      if(mudou && noticiaAtual && chave(noticiaAtual)===c) renderValidar();
-    }catch(e){ /* silencioso — não interrompe a validação por causa disto */ }
-  };
-  marcarEVerificar();
-  presencaInterval = setInterval(marcarEVerificar, 20000);
-}
-
-function pararPresenca_(){
-  if(presencaInterval){clearInterval(presencaInterval);presencaInterval=null;}
-  presencaAlheia=null;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// DETALHE DA NOTÍCIA
-// ═══════════════════════════════════════════════════════════════
-function getNivelBadge(escola){
-  const g=escolaGrupo(escola);
-  if(g==='A')return`<span class="nivel-badge nivel-a">🏫 Pré-escolar / 1.º Ciclo</span>`;
-  if(g==='B')return`<span class="nivel-badge nivel-b">🎓 2.º/3.º Ciclo / Secundário</span>`;
-  return'';
-}
-
-function buildDetalhe(n){
-  const v=estadoNoticia(n);
-  const chars=n.corpo?n.corpo.length:0;
-  const pct=Math.min(100,Math.round((chars/2200)*100));
-  const cc=chars>2200?'var(--red)':chars>1800?'var(--amber)':'var(--green)';
-
-  const cats=(n.categorias||[]).length
-    ?(n.categorias||[]).map(c=>`<span class="cat-pill">${c}</span>`).join('')
-    :'';
-
-  const imgHtml=n.imgDestaque
-    ?`<img class="dest-img" src="${n.imgDestaque}" alt="Imagem de destaque" onclick="window.open('${n.imgDestaque}','_blank')" onerror="this.style.display='none'">`
-    :`<div style="background:var(--bg2);border-radius:var(--r);padding:10px 12px;font-size:12px;color:var(--text2);margin-bottom:8px">Sem imagem de destaque</div>`;
-
-  const outrosHtml=(n.outrasFotos&&n.outrasFotos.length)
-    ?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">${n.outrasFotos.map((f,i)=>`<div class="mpill"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Foto ${i+1}: <a href="${f}" target="_blank">${f.length>35?f.slice(0,35)+'…':f}</a></div>`).join('')}</div>`
-    :'';
-
-  const videoHtml=n.video
-    ?`<div class="mpill" style="margin-bottom:8px"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><a href="${n.video}" target="_blank">${n.video.length>45?n.video.slice(0,45)+'…':n.video}</a></div>`
-    :'';
-
-  const linksHtml=n.links
-    ?`<div class="mpill" style="margin-bottom:8px"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg><a href="${n.links}" target="_blank">${n.links.length>55?n.links.slice(0,55)+'…':n.links}</a></div>`
-    :'';
-
-  const analiseHtml=n._analise
-    ?`<div class="ai-body">${n._analise.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`
-    :`<div class="ai-load"><div class="spinner"></div> A analisar com IA…</div>`;
-
-  // Decisão
-  const meios=n._meios||{site:false,fb:false,ig:false,tk:false};
-  const pubHtml=`<div class="pub-row">
-    ${['Site','Facebook','Instagram','TikTok'].map(m=>{
-      const k=m.toLowerCase();
-      return`<label class="pub-lbl ${meios[k]?'on':''}" id="pub-${n._id}-${k}">
-        <input type="checkbox" ${meios[k]?'checked':''} onchange="toggleMeio(${n._id},'${k}',this.checked)">${m}
-      </label>`;
-    }).join('')}
-  </div>`;
-
-  const jaValidado=v.estado&&v.estado!=='pendente';
-
-  const presencaHtml = presencaAlheia
-    ? `<div class="presenca-banner">⚠️ <strong>${presencaAlheia.validador}</strong> está a validar esta notícia agora (visto há ${presencaAlheia.segundos}s). Combinem para não sobreporem decisões.</div>`
-    : '';
-
-  return`
-  <button class="btn btn-sec" onclick="voltarLista()" style="margin-bottom:14px;font-size:12px">
-    <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Voltar à lista
-  </button>
-
-  ${presencaHtml}
-
-  <div class="card">
-    <div class="ntitle">${n.titulo}</div>
-    ${getNivelBadge(n.escola)}
-    <div class="meta-row">
-      <div class="mi"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${n.proponente||'—'}</div>
-      <div class="mi"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>${n.escola||'—'}</div>
-      <div class="mi"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${n.data||'—'}</div>
-    </div>
-    ${cats?`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">${cats}</div>`:''}
-
-    <div class="sec">Imagem de destaque</div>
-    ${imgHtml}
-    ${outrosHtml}${videoHtml}
-    ${linksHtml?`<div class="sec">Links</div>${linksHtml}`:''}
-
-    <div class="sec">Texto da notícia</div>
-    <div class="nbody ${!n.corpo?'empty':''}">${n.corpo||'(sem texto)'}</div>
-    <div class="char-info"><span>Comprimento</span><span style="color:${cc};font-weight:700">${chars} / 2200</span></div>
-    <div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${cc}"></div></div>
-
-    <div class="ai-block">
-      <div class="ai-hd"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg>Análise automática — IA</div>
-      <div id="ai-${n._id}">${analiseHtml}</div>
-    </div>
-  </div>
-
-  <div class="card">
-    ${jaValidado?`
-    <div style="background:var(--bg2);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--text2)">
-      ✓ Já validado por <strong>${v.validador}</strong> em ${v.dataValidacao||'—'} — Estado: <strong>${{pode_publicar:'Validada',enviado_correcao:'Aguarda correção',em_validacao:'Em validação'}[v.estado]||v.estado}</strong>
-    </div>`:''}
-    <div style="font-size:13px;font-weight:700;margin-bottom:12px">Decisão de validação</div>
-    <div class="decisao-grid">
-      <div class="dec-btn dec-pub ${decisaoAtual==='pode_publicar'?'selected':''}" onclick="selecionarDecisao('pode_publicar')">
-        <div class="di">✅</div>
-        <div class="dt">Pode publicar</div>
-        <div class="ds">A notícia está aprovada para publicação</div>
-      </div>
-      <div class="dec-btn dec-corr ${decisaoAtual==='enviado_correcao'?'selected':''}" onclick="selecionarDecisao('enviado_correcao')">
-        <div class="di">✉️</div>
-        <div class="dt">Enviar para correção</div>
-        <div class="ds">Notificar o autor com indicações</div>
-      </div>
-    </div>
-
-    ${decisaoAtual==='pode_publicar'?`
-    <div class="sec" style="margin-top:0">Publicar em</div>
-    ${pubHtml}
-    <div class="btn-row">
-      <button class="btn btn-apro btn-full" onclick="submeterDecisao()">
-        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirmar — Pode publicar
-      </button>
-    </div>`:''}
-
-    ${decisaoAtual==='enviado_correcao'?`
-    <div class="sec" style="margin-top:0">Nota para o proponente *</div>
-    <textarea class="nota" id="nota-corr" placeholder="Descreve o que precisa de ser corrigido ou melhorado…"></textarea>
-    <div class="btn-row">
-      <button class="btn btn-corr btn-full" onclick="submeterDecisao()">
-        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>Gerar email e registar
-      </button>
-    </div>`:''}
-  </div>`;
-}
-
-function selecionarDecisao(d){
-  decisaoAtual=d;
-  renderValidar();
-}
-
-function toggleMeio(id,k,v){
-  const n=noticias.find(x=>x._id===id);
-  if(!n)return;
-  if(!n._meios)n._meios={site:false,fb:false,ig:false,tk:false};
-  n._meios[k]=v;
-  const l=document.getElementById(`pub-${id}-${k}`);
-  if(l){v?l.classList.add('on'):l.classList.remove('on');}
-}
-
-async function submeterDecisao(){
-  const n=noticiaAtual;
-  if(!n||!decisaoAtual)return;
-  const meios=n._meios||{site:false,fb:false,ig:false,tk:false};
-  let nota='';
-
-  if(decisaoAtual==='enviado_correcao'){
-    nota=(document.getElementById('nota-corr')||{}).value||'';
-    if(!nota.trim()){toast('Escreve uma nota para o proponente','warning');return;}
+  const lista = filaGrupo();
+  if(!lista.length){
+    container.innerHTML=`<div class="card empty"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><p>Sem notícias atribuídas a este ciclo.</p></div>`;
+    return;
   }
+  let html = `<div class="card">`;
+  lista.forEach(n=>{
+    const v = estadoNoticia(n);
+    let badgeClass = 'b-pend', badgeTxt = 'Pendente';
+    if(v.estado==='pode_publicar'){ badgeClass='b-pub'; badgeTxt='Pronta a publicar'; }
+    if(v.estado==='precisa_correcao'){ badgeClass='b-corr'; badgeTxt='Correção pedida'; }
 
-  showLoad('A guardar decisão…');
+    html += `
+      <div class="li" onclick="abrirNoticia(${n._id})">
+        <div class="li-ico" style="background:var(--blue-bg)">📄</div>
+        <div class="li-b">
+          <div class="li-t">${n.titulo}</div>
+          <div class="li-s">${n.escola || 'Escola não indicada'} · ${n.proponente}</div>
+        </div>
+        <div class="li-r">
+          <span class="badge ${badgeClass}">${badgeTxt}</span>
+        </div>
+      </div>
+    `;
+  });
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+async function abrirNoticia(id){
+  noticiaAtual = noticias.find(n=>n._id===id);
+  decisaoAtual = null;
+  renderValidar();
+  if(noticiaAtual && sessao){
+    try {
+      const url = API_URL+'?action=marcarPresenca&chave='+encodeURIComponent(chave(noticiaAtual))+'&validador='+encodeURIComponent(sessao.nome);
+      await apiFetch_(url);
+      const urlPres = API_URL+'?action=obterPresenca&chave='+encodeURIComponent(chave(noticiaAtual))+'&validador='+encodeURIComponent(sessao.nome);
+      const res = await apiFetch_(urlPres);
+      if(res.ok && res.presenca){
+        toast(`Atenção: ${res.presenca.validador} também está a ver esta notícia!`, 'warning');
+      }
+    } catch(e){}
+  }
+}
+
+function renderDetalheNoticia(n, container){
+  const v = estadoNoticia(n);
+  const len = (n.corpo||'').length;
+  
+  let html = `
+    <button class="btn btn-sec" onclick="noticiaAtual=null;renderValidar()" style="margin-bottom:14px">
+      <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Voltar à lista
+    </button>
+    
+    <div id="presenca-banner-container"></div>
+
+    <div class="card">
+      <h2 class="ntitle">${n.titulo}</h2>
+      <div class="meta-row">
+        <div class="mi">👤 ${n.proponente}</div>
+        <div class="mi">🏫 ${n.escola||'—'}</div>
+        <div class="mi">📅 ${n.data||'—'}</div>
+      </div>
+      
+      ${n.imgDestaque ? `<img src="${n.imgDestaque}" class="dest-img" onclick="window.open('${n.imgDestaque}')">` : ''}
+
+      <div class="sec">Texto da notícia</div>
+      <div class="nbody ${!n.corpo?'empty':''}">${n.corpo || 'Sem texto.'}</div>
+      <div class="char-info"><span>${len} caracteres</span></div>
+
+      ${n.video || n.links ? `
+        <div class="sec">Anexos & Links</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${n.video ? `<div class="mpill">🎥 <a href="${n.video}" target="_blank">Vídeo</a></div>` : ''}
+          ${n.links ? `<div class="mpill">🔗 <a href="${n.links}" target="_blank">Links externos</a></div>` : ''}
+        </div>
+      ` : ''}
+
+      <!-- IA -->
+      <div class="ai-block">
+        <div class="ai-hd"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg> Análise de Inteligência Artificial</div>
+        <div class="ai-body" id="ai-content">
+          ${n._analise ? n._analise.replace(/\n/g,'<br>') : `<button class="btn btn-sec" onclick="analisarIA(${n._id})">✨ Analisar com Gemini IA</button>`}
+        </div>
+      </div>
+    </div>
+
+    <!-- DECISÃO -->
+    <div class="card">
+      <div class="sec">Decisão de Validação</div>
+      <div class="decisao-grid">
+        <div class="dec-btn dec-pub ${decisaoAtual==='pode_publicar'||v.estado==='pode_publicar'?'selected':''}" onclick="selecionarDecisao('pode_publicar')">
+          <div class="di">✅</div>
+          <div class="dt">Pronta a publicar</div>
+          <div class="ds">Sem reparos ou alterações ligeiras</div>
+        </div>
+        <div class="dec-btn dec-corr ${decisaoAtual==='precisa_correcao'||v.estado==='precisa_correcao'?'selected':''}" onclick="selecionarDecisao('precisa_correcao')">
+          <div class="di">✏️</div>
+          <div class="dt">Pedir correção</div>
+          <div class="ds">Necessita de alterações pelo proponente</div>
+        </div>
+      </div>
+
+      <div id="decisao-opcoes">
+        ${(decisaoAtual==='pode_publicar'||v.estado==='pode_publicar') ? `
+          <div class="sec">Meios onde pode ser publicada</div>
+          <div class="pub-row">
+            <label class="pub-lbl"><input type="checkbox" id="m-site"> Site AET</label>
+            <label class="pub-lbl"><input type="checkbox" id="m-fb"> Facebook</label>
+            <label class="pub-lbl"><input type="checkbox" id="m-ig"> Instagram</label>
+            <label class="pub-lbl"><input type="checkbox" id="m-tk"> TikTok</label>
+          </div>
+        ` : ''}
+
+        ${(decisaoAtual==='precisa_correcao'||v.estado==='precisa_correcao') ? `
+          <div class="sec">Notas / Correções necessárias</div>
+          <textarea class="nota" id="val-nota" placeholder="Descreve as correções necessárias...">${v.nota||''}</textarea>
+        ` : ''}
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-apro btn-full" onclick="submeterValidacao()">Gravar Validação</button>
+      </div>
+    </div>
+  `;
+  container.innerHTML = html;
+}
+
+function selecionarDecisao(tipo){
+  decisaoAtual = tipo;
+  renderDetalheNoticia(noticiaAtual, document.getElementById('content-validar'));
+}
+
+async function analisarIA(id){
+  const el = document.getElementById('ai-content');
+  el.innerHTML = `<div class="ai-load"><span class="spinner"></span> A analisar notícia com Gemini IA…</div>`;
   try{
-    await apiGuardar(n,decisaoAtual,meios,nota);
-    pararPresenca_();
-    hideLoad();
-    if(decisaoAtual==='pode_publicar'){
-      toast('Notícia aprovada para publicação!','success');
-      noticiaAtual=null;decisaoAtual=null;
-      renderValidar();
+    const n = noticias.find(x=>x._id===id);
+    const url = API_URL+'?action=analisarIA&chave='+encodeURIComponent(chave(n))+'&t='+Date.now();
+    const res = await apiFetch_(url);
+    if(res.ok){
+      n._analise = res.analise;
+      saveNoticias();
+      el.innerHTML = res.analise.replace(/\n/g,'<br>');
     } else {
-      // Abre modal de email
-      hideLoad();
-      abrirEmailModal(n,nota);
+      el.innerHTML = `<span style="color:var(--red)">Erro na análise: ${res.error}</span>`;
     }
   }catch(e){
+    el.innerHTML = `<span style="color:var(--red)">Erro ao comunicar com o serviço de IA.</span>`;
+  }
+}
+
+async function submeterValidacao(){
+  if(!decisaoAtual && !validacoes[chave(noticiaAtual)]?.estado){
+    toast('Seleciona uma decisão primeiro','warning');
+    return;
+  }
+  const estado = decisaoAtual || validacoes[chave(noticiaAtual)].estado;
+  const meios = {
+    site: document.getElementById('m-site')?.checked || false,
+    fb: document.getElementById('m-fb')?.checked || false,
+    ig: document.getElementById('m-ig')?.checked || false,
+    tk: document.getElementById('m-tk')?.checked || false
+  };
+  const nota = document.getElementById('val-nota')?.value || '';
+
+  showLoad('A guardar validação…');
+  try {
+    await apiGuardar(noticiaAtual, estado, meios, nota);
     hideLoad();
-    toast('Erro ao guardar: '+e.message,'error');
+    toast('Validação gravada com sucesso!','success');
+    if(estado === 'precisa_correcao'){
+      abrirEmailModal(noticiaAtual, nota);
+    } else {
+      noticiaAtual = null;
+      renderValidar();
+    }
+  } catch(e){
+    hideLoad();
+    toast('Erro ao guardar validação.','error');
   }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// AI
+// MODAL DE EMAIL
 // ═══════════════════════════════════════════════════════════════
-async function analisarIA(n){
-  if(!n.corpo)return;
-  n._analise='loading';
+function abrirEmailModal(n, nota){
+  emailNotId = n._id;
+  document.getElementById('email-assunto').value = `Validação de Notícia: ${n.titulo}`;
+  document.getElementById('email-corpo').value = 
+`Olá ${n.proponente},
 
-  try{
-    const url = API_URL+'?action=analisarIA&chave='+encodeURIComponent(chave(n))+'&t='+Date.now();
-    const data = await apiFetch_(url, 30000);
-    if(!data.ok) throw new Error(data.error||'Erro');
-    n._analise = data.analise || 'Sem resposta.';
-    const el=document.getElementById('ai-'+n._id);
-    if(el)el.innerHTML=`<div class="ai-body">${n._analise.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`;
-  }catch(e){
-    n._analise='';
-    const el=document.getElementById('ai-'+n._id);
-    if(el)el.innerHTML=`<span style="font-size:12px;color:var(--red)">Erro na análise: ${(e.message||'desconhecido')}</span>`;
-  }
-}
+Relativamente à notícia proposta com o título "${n.titulo}", foram sugeridas as seguintes revisões/correções antes da sua publicação:
 
-// ═══════════════════════════════════════════════════════════════
-// EMAIL MODAL
-// ═══════════════════════════════════════════════════════════════
-function abrirEmailModal(n,nota){
-  emailNotId=n._id;
-  const assunto=`Notícia "${n.titulo}" — correções antes da publicação`;
-  const corpo=`Olá ${n.proponente||''},\n\nObrigado/a pela submissão da notícia "${n.titulo}".\n\nAntes de podermos publicar, pedimos que reveja os seguintes pontos:\n\n${nota}\n\nApós corrigir, pode submeter novamente através do formulário.\n\nObrigado pela colaboração!\n${sessao.nome}\nEquipa de Comunicação — AET`;
-  document.getElementById('email-assunto').value=assunto;
-  document.getElementById('email-corpo').value=corpo;
+${nota}
+
+Agradecemos o envio das alterações assim que possível.
+
+Melhores cumprimentos,
+${sessao.nome}
+Agrupamento de Escolas Templários`;
+
   document.getElementById('email-modal').classList.add('show');
 }
-function fecharEmailModal(){document.getElementById('email-modal').classList.remove('show');}
-async function copiarEmail(){
-  const texto='Assunto: '+document.getElementById('email-assunto').value+'\n\n'+document.getElementById('email-corpo').value;
-  try{
-    await navigator.clipboard.writeText(texto);
-    toast('Mensagem copiada! Cola no teu email.','success');
+
+function fecharEmailModal(){
+  document.getElementById('email-modal').classList.remove('show');
+  noticiaAtual = null;
+  renderValidar();
+}
+
+function copiarEmail(){
+  const corpo = document.getElementById('email-corpo').value;
+  navigator.clipboard.writeText(corpo).then(()=>{
+    toast('Mensagem copiada para a área de transferência!','success');
     fecharEmailModal();
-    noticiaAtual=null;decisaoAtual=null;
-    renderValidar();
-  }catch(e){toast('Seleciona e copia manualmente.','warning');}
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════
-// EXCEL IMPORT
+// ÁREA DE GESTÃO & IMPORTAÇÃO EXCEL
 // ═══════════════════════════════════════════════════════════════
+function renderGestao(){
+  const total = noticias.length;
+  const pend = noticias.filter(n=>estadoNoticia(n).estado==='pendente').length;
+  const pub = noticias.filter(n=>estadoNoticia(n).estado==='pode_publicar').length;
+  const corr = noticias.filter(n=>estadoNoticia(n).estado==='precisa_correcao').length;
+
+  document.getElementById('stats-gestao').innerHTML = `
+    <div class="sc"><div class="sv">${total}</div><div class="sl">Total de Noticias</div></div>
+    <div class="sc"><div class="sv" style="color:var(--amber)">${pend}</div><div class="sl">Pendentes</div></div>
+    <div class="sc"><div class="sv" style="color:var(--green)">${pub}</div><div class="sl">Prontas a publicar</div></div>
+    <div class="sc"><div class="sv" style="color:var(--blue)">${corr}</div><div class="sl">Pedida correção</div></div>
+  `;
+
+  document.getElementById('filter-row-gestao').innerHTML = `
+    <span class="chip ${filtroGestao==='todas'?'active':''}" onclick="setFiltroGestao('todas')">Todas (${total})</span>
+    <span class="chip ${filtroGestao==='pendente'?'active':''}" onclick="setFiltroGestao('pendente')">Pendentes (${pend})</span>
+    <span class="chip ${filtroGestao==='pode_publicar'?'active':''}" onclick="setFiltroGestao('pode_publicar')">Prontas (${pub})</span>
+    <span class="chip ${filtroGestao==='precisa_correcao'?'active':''}" onclick="setFiltroGestao('precisa_correcao')">Correção (${corr})</span>
+  `;
+
+  const filtradas = noticias.filter(n=>{
+    if(filtroGestao==='todas') return true;
+    return estadoNoticia(n).estado === filtroGestao;
+  });
+
+  const container = document.getElementById('lista-gestao');
+  if(!filtradas.length){
+    container.innerHTML = `<div class="empty"><p>Nenhuma notícia encontrada.</p></div>`;
+    return;
+  }
+
+  let html = '';
+  filtradas.forEach(n=>{
+    const v = estadoNoticia(n);
+    let badgeClass = 'b-pend', badgeTxt = 'Pendente';
+    if(v.estado==='pode_publicar'){ badgeClass='b-pub'; badgeTxt='Pronta a publicar'; }
+    if(v.estado==='precisa_correcao'){ badgeClass='b-corr'; badgeTxt='Correção pedida'; }
+
+    html += `
+      <div class="li">
+        <div class="li-ico" style="background:var(--blue-bg)">📄</div>
+        <div class="li-b">
+          <div class="li-t">${n.titulo}</div>
+          <div class="li-s">${n.escola||'Escola não indicada'} · ${n.proponente} ${v.validador?` (Validado por: ${v.validador})`:''}</div>
+        </div>
+        <div class="li-r">
+          <span class="badge ${badgeClass}">${badgeTxt}</span>
+        </div>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+function setFiltroGestao(f){
+  filtroGestao = f;
+  renderGestao();
+}
+
 function importarExcel(input){
-  const file=input.files[0];
-  if(!file)return;
-  const st=document.getElementById('import-status');
-  st.textContent='A ler ficheiro…';
-  showLoad('A importar notícias do Excel…');
-  const reader=new FileReader();
-  reader.onload=async function(e){
-    try{
-      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
-      const ws=wb.Sheets[wb.SheetNames[0]];
-      const rows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});
-      if(!rows.length){hideLoad();st.textContent='Ficheiro sem dados.';return;}
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, {type: 'array'});
+      const sheetName = workbook.SheetNames[0];
+      const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+      
+      let adicionados = 0;
+      let nextId = Math.max(0,...noticias.map(n=>n._id||0))+1;
+      const chavesLocais = new Set(noticias.map(n=>chave(n)));
 
-      const headers=Object.keys(rows[0]);
-      const ci=pats=>headers.find(h=>pats.some(p=>h.toLowerCase().includes(p.toLowerCase())))||null;
-      const COL={
-        ts:   ci(['hora de início','submission time','início']),
-        prop: ci(['nome do proponente','proponente']),
-        tit:  ci(['título da notícia','titulo da noticia','título (sem']),
-        cats: ci(['pergunta','categoria']),
-        esc:  ci(['estabelecimento']),
-        corp: ci(['notícia texto','noticia texto','texto do tipo']),
-        img:  ci(['imagem de destaque','destaque','capa']),
-        fotos:ci(['outras fotos']),
-        vid:  ci(['vídeo','video','vídeos']),
-        lnk:  ci(['links','formulários']),
-      };
+      rows.forEach(r=>{
+        const proponente = r['Nome'] || r['proponente'] || r['Carimbo de data/hora'] || 'Sem nome';
+        const titulo = r['Título da notícia'] || r['titulo'] || r['Título'] || 'Sem título';
+        const c = norm(titulo)+'|'+norm(proponente);
 
-      const existKeys=new Set(noticias.map(n=>norm(n.titulo)+'|'+norm(n.proponente)));
-      let nextId=Math.max(0,...noticias.map(n=>n._id||0))+1;
-      let imported=0;
-
-      rows.forEach(row=>{
-        const get=col=>col?(row[col]||'').toString().trim():'';
-        const titulo=get(COL.tit);
-        const proponente=get(COL.prop);
-        if(!titulo)return;
-
-        // Ignora linhas que são cabeçalhos repetidos
-        if(headers.some(h=>norm(h)===norm(titulo)))return;
-
-        const key=norm(titulo)+'|'+norm(proponente);
-        if(existKeys.has(key))return;
-
-        let data=new Date().toISOString().slice(0,10);
-        const ts=get(COL.ts);
-        if(ts){try{const d=new Date(ts);if(!isNaN(d))data=d.toISOString().slice(0,10);}catch(_){}}
-
-        noticias.push({
-          _id:nextId++,
-          proponente,titulo,
-          categorias:get(COL.cats).split(/[;,]/).map(s=>s.trim()).filter(Boolean),
-          escola:get(COL.esc),data,corpo:get(COL.corp),
-          imgDestaque:get(COL.img),
-          outrasFotos:get(COL.fotos).split(/[;\n]/).map(s=>s.trim()).filter(Boolean),
-          video:get(COL.vid),links:get(COL.lnk),
-          _meios:{site:false,fb:false,ig:false,tk:false},_analise:null
-        });
-        existKeys.add(key);
-        imported++;
+        if(!chavesLocais.has(c)){
+          const nova = {
+            _id: nextId++,
+            proponente: r['Nome'] || r['proponente'] || '',
+            emailProponente: r['Endereço de e-mail'] || r['emailProponente'] || '',
+            titulo: titulo,
+            categorias: (r['Categoria']||r['categorias']||'').toString().split(';').map(s=>s.trim()).filter(Boolean),
+            escola: r['Escola / Jardim de Infância'] || r['escola'] || '',
+            data: r['Data'] || new Date().toISOString().slice(0,10),
+            corpo: r['Texto da notícia'] || r['corpo'] || '',
+            imgDestaque: r['Imagem de destaque'] || r['imgDestaque'] || '',
+            outrasFotos: (r['Outras imagens']||r['outrasFotos']||'').toString().split(';').map(s=>s.trim()).filter(Boolean),
+            video: r['Vídeo'] || r['video'] || '',
+            links: r['Links'] || r['links'] || '',
+            _meios:{site:false,fb:false,ig:false,tk:false}, _analise:null
+          };
+          noticias.push(nova);
+          chavesLocais.add(c);
+          adicionados++;
+        }
       });
 
-      saveNoticias();hideLoad();input.value='';
-      if(imported>0){
-        st.textContent=`✓ ${imported} importada(s) — a sincronizar…`;
-        // Envia para Google Sheets em background
-        const novasNoticias = noticias.slice(-imported);
-        let sincOk=0;
-        for(const n of novasNoticias){
-          try{ const r=await apiGuardarNoticia(n); if(r.ok)sincOk++; }catch(_){}
-        }
-        st.textContent=`✓ ${imported} importada(s) · ${sincOk} sincronizadas com Google Sheets`;
-        toast(`${imported} notícia(s) importada(s) e sincronizadas!`,'success');
-        renderGestao();
-      } else {
-        st.textContent='✓ Sem notícias novas';
-        toast('Sem notícias novas para importar.','info');
-      }
-    }catch(err){
-      hideLoad();
-      st.textContent='Erro: '+err.message;
-      toast('Erro ao ler ficheiro.','error');
+      saveNoticias();
+      renderGestao();
+      document.getElementById('import-status').textContent = `${adicionados} notícias importadas do ficheiro!`;
+      toast(`${adicionados} notícias importadas com sucesso!`,'success');
+    } catch(err){
+      toast('Erro ao ler o ficheiro Excel. Verifique a estrutura das colunas.','error');
     }
   };
   reader.readAsArrayBuffer(file);
 }
 
-// ═══════════════════════════════════════════════════════════════
-// SINCRONIZAR TUDO
-// ═══════════════════════════════════════════════════════════════
 async function sincronizarTudo(){
-  if(!noticias.length){toast('Não há notícias para sincronizar.','warning');return;}
-  const st=document.getElementById('import-status');
-  showLoad('A sincronizar '+noticias.length+' notícias com Google Sheets…');
-  let ok=0, err=0;
-  for(const n of noticias){
-    try{
-      const r=await apiGuardarNoticia(n);
-      if(r&&r.ok)ok++;
-      else err++;
-    }catch(e){err++;}
+  showLoad('A sincronizar notícias com a Google Sheets…');
+  let enviadas = 0;
+  try {
+    for(const n of noticias){
+      await apiGuardarNoticia(n);
+      enviadas++;
+    }
+    hideLoad();
+    toast(`${enviadas} notícias sincronizadas com o servidor!`,'success');
+  } catch(e){
+    hideLoad();
+    toast('Erro durante a sincronização total.','error');
   }
-  hideLoad();
-  st.textContent=`✓ ${ok} sincronizadas · ${err} erros`;
-  if(ok>0) toast(`${ok} notícia(s) sincronizadas com Google Sheets!`,'success');
-  else toast('Não foi possível sincronizar. Verifica a ligação.','error');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// GESTÃO
-// ═══════════════════════════════════════════════════════════════
-async function renderGestao(){
-  showLoad('A carregar do Google Sheets…');
-  try{
-    const data = await apiListar();
-    // Merge notícias do Sheets
-    const chavesLocais = new Set(noticias.map(n=>chave(n)));
-    let nextId = Math.max(0,...noticias.map(n=>n._id||0))+1;
-    (data.noticias||[]).forEach(n=>{
-      const c = norm(n.titulo)+'|'+norm(n.proponente);
-      if(!chavesLocais.has(c)){
-        noticias.push({
-          _id: nextId++,
-          proponente: n.proponente, titulo: n.titulo,
-          categorias: (n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
-          escola: n.escola, data: (n.timestamp||'').slice(0,10),
-          corpo: n.corpo, imgDestaque: n.imgDestaque,
-          outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
-          video: n.video, links: n.links,
-          _meios:{site:false,fb:false,ig:false,tk:false}, _analise:null
-        });
-        chavesLocais.add(c);
-      }
-    });
-    saveNoticias();
-    validacoes = data.validacoes || {};
-  }catch(e){
-    // usa dados locais, não interrompe
-  }
-  hideLoad();
-
-  const total=noticias.length;
-  const pend=noticias.filter(n=>!validacoes[chave(n)]||validacoes[chave(n)].estado==='pendente').length;
-  const pub=noticias.filter(n=>(validacoes[chave(n)]||{}).estado==='pode_publicar').length;
-  const corr=noticias.filter(n=>(validacoes[chave(n)]||{}).estado==='enviado_correcao').length;
-
-  document.getElementById('stats-gestao').innerHTML=`
-    <div class="sc"><div class="sv">${total}</div><div class="sl">Total</div></div>
-    <div class="sc"><div class="sv" style="color:var(--amber)">${pend}</div><div class="sl">Pendentes</div></div>
-    <div class="sc"><div class="sv" style="color:var(--green)">${pub}</div><div class="sl">A publicar</div></div>
-    <div class="sc"><div class="sv" style="color:var(--blue)">${corr}</div><div class="sl">Para correção</div></div>`;
-
-  const filtros=['todas','pendente','pode_publicar','enviado_correcao'];
-  const fLabels={todas:`Todas (${total})`,pendente:`Pendentes (${pend})`,pode_publicar:`A publicar (${pub})`,enviado_correcao:`Para correção (${corr})`};
-  document.getElementById('filter-row-gestao').innerHTML=filtros.map(f=>
-    `<div class="chip ${filtroGestao===f?'active':''}" onclick="setFiltroGestao('${f}')">${fLabels[f]}</div>`
-  ).join('');
-
-  renderListaGestao();
-}
-
-function setFiltroGestao(f){filtroGestao=f;renderGestao();}
-
-function renderListaGestao(){
-  const el=document.getElementById('lista-gestao');
-  let lista=noticias;
-  if(filtroGestao!=='todas'){
-    lista=noticias.filter(n=>{
-      const est=(validacoes[chave(n)]||{}).estado||'pendente';
-      return est===filtroGestao;
-    });
-  }
-
-  if(!lista.length){
-    el.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24"><path d="M21 8v13H3V8"/><rect x="1" y="3" width="22" height="5" rx="1"/><line x1="10" y1="12" x2="14" y2="12"/></svg><p>Sem notícias nesta categoria.</p></div>`;
-    return;
-  }
-
-  const bmap={pendente:'b-pend',pode_publicar:'b-pub',enviado_correcao:'b-corr',em_validacao:'b-val'};
-  const lmap={pendente:'Pendente',pode_publicar:'✓ Validada',enviado_correcao:'✉ Aguarda correção',em_validacao:'Em validação'};
-
-  el.innerHTML=[...lista].reverse().map(n=>{
-    const v=validacoes[chave(n)]||{};
-    const est=v.estado||'pendente';
-    const meiosStr=v.meios?v.meios.split(';').filter(Boolean).map(m=>`<span style="font-size:10px;background:var(--green-bg);color:var(--green-text);padding:1px 6px;border-radius:20px">${m}</span>`).join(''):'';
-    return`<div class="li">
-      <div class="li-ico" style="background:var(--bg2)">
-        <svg viewBox="0 0 24 24" width="16" height="16" style="stroke:var(--text2);fill:none;stroke-width:1.8"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/></svg>
-      </div>
-      <div class="li-b">
-        <div class="li-t">${n.titulo}</div>
-        <div class="li-s">${n.proponente||'—'} · ${n.escola||'—'} · ${n.data||'—'}${v.validador?' · '+v.validador:''}</div>
-      </div>
-      <div class="li-r">
-        <span class="badge ${bmap[est]||'b-pend'}">${lmap[est]||est}</span>
-        <div style="display:flex;gap:3px;flex-wrap:wrap">${meiosStr}</div>
-      </div>
-    </div>`;
-  }).join('');
 }
 </script>
 </body>
