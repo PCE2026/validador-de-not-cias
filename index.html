@@ -365,6 +365,7 @@ const GRUPOS = {
 // ═══════════════════════════════════════════════════════════════
 let noticias   = JSON.parse(localStorage.getItem('aet_noticias5')||'[]');
 let validacoes = {};
+let presencas  = {};
 let sessao     = null;
 let grupoSel   = null;
 let noticiaAtual = null;
@@ -531,6 +532,7 @@ async function carregarDadosServidor_(){
     });
     saveNoticias();
     validacoes = data.validacoes || {};
+    presencas  = data.presencas || {};
     return true;
   }catch(e){
     return false;
@@ -903,12 +905,21 @@ function renderGestaoConteudo(){
 
     const infoValidacao = v.validador ? ` · Validado por ${v.validador}${v.dataValidacao?' em '+v.dataValidacao:''}` : '';
 
+    const pres = presencas[n.chave || chave(n)];
+    let presencaHtml = '';
+    if(pres && pres.validador){
+      let dataStr = '';
+      try{ dataStr = new Date(pres.timestamp).toLocaleDateString('pt-PT'); }catch(e){}
+      presencaHtml = `<div style="font-size:11px;color:var(--amber-text);margin-top:2px">🔎 Em validação por: ${pres.validador}${dataStr?' ('+dataStr+')':''}</div>`;
+    }
+
     html += `
       <div class="li">
         <div class="li-ico" style="background:var(--blue-bg)">📄</div>
         <div class="li-b">
           <div class="li-t">${n.titulo}</div>
           <div class="li-s">${n.escola||'Escola não indicada'} · ${n.proponente}${infoValidacao}</div>
+          ${presencaHtml}
         </div>
         <div class="li-r">
           <span class="badge ${badgeClass}">${badgeTxt}</span>
