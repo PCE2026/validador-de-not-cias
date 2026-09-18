@@ -676,10 +676,6 @@ function renderValidar(){
     const notaHtml = (abaValidar==='correcao' && v.nota) ? `<div style="font-size:11px;color:var(--text2);margin-top:3px">📝 ${v.nota}${v.dataValidacao?' · enviado em '+v.dataValidacao:''}</div>` : '';
     const publicadaHtml = (abaValidar==='publicadas') ? `<div style="font-size:11px;color:#5a1a8a;margin-top:3px">📢 Publicada por ${v.publicadoPor||v.validador||'—'} em ${v.dataPublicacao||'—'}</div>` : '';
 
-    const botaoPublicar = (abaValidar==='publicar') ? `
-      <button class="btn" style="background:#f0e8ff;color:#5a1a8a;font-size:11px;padding:6px 10px" onclick="event.stopPropagation();marcarComoPublicada(${n._id})">📢 Já está publicada</button>
-    ` : '';
-
     html += `
       <div class="li" onclick="abrirNoticia(${n._id})">
         <div class="li-ico" style="background:var(--blue-bg)">📄</div>
@@ -691,7 +687,6 @@ function renderValidar(){
         </div>
         <div class="li-r">
           <span class="badge ${badgeClass}">${badgeTxt}</span>
-          ${botaoPublicar}
         </div>
       </div>
     `;
@@ -803,12 +798,6 @@ function renderDetalheNoticia(n, container){
       <div class="btn-row">
         <button class="btn btn-apro btn-full" onclick="submeterValidacao()">Gravar Validação</button>
       </div>
-
-      ${v.estado==='pode_publicar' ? `
-        <div class="btn-row">
-          <button class="btn btn-full" style="background:#f0e8ff;color:#5a1a8a" onclick="marcarComoPublicada(${n._id})">📢 Já está publicada</button>
-        </div>
-      ` : ''}
       `}
     </div>
   `;
@@ -1009,7 +998,7 @@ function renderGestaoConteudo(){
     }
 
     const botaoPublicar = (v.estado==='pode_publicar') ? `
-      <button class="btn" style="background:#f0e8ff;color:#5a1a8a;font-size:11px;padding:6px 10px" onclick="marcarComoPublicadaGestao(${n._id})">📢 Já está publicada</button>
+      <button class="btn" style="background:#f0e8ff;color:#5a1a8a;font-size:11px;padding:6px 10px" onclick="marcarComoPublicadaGestao(${n._id})">Publicámos!</button>
     ` : '';
 
     html += `
