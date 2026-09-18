@@ -466,14 +466,15 @@ async function apiGuardar(n, estado, meios, nota){
   return data;
 }
 
-async function apiMarcarPublicada(n){
-  const url = API_URL+'?action=marcarPublicada&chave='+encodeURIComponent(chave(n))+'&validador='+encodeURIComponent(sessao.nome)+'&t='+Date.now();
+async function apiMarcarPublicada(n, quemNome){
+  const nome = quemNome || (sessao && sessao.nome) || 'Gestão';
+  const url = API_URL+'?action=marcarPublicada&chave='+encodeURIComponent(chave(n))+'&validador='+encodeURIComponent(nome)+'&t='+Date.now();
   const data = await apiFetch_(url);
   if(data.ok){
     const c = chave(n);
     if(!validacoes[c]) validacoes[c] = {};
     validacoes[c].estado = 'publicada';
-    validacoes[c].publicadoPor = sessao.nome;
+    validacoes[c].publicadoPor = nome;
     validacoes[c].dataPublicacao = new Date().toISOString().slice(0,10);
   }
   return data;
@@ -889,6 +890,25 @@ async function marcarComoPublicada(id){
   }
 }
 
+async function marcarComoPublicadaGestao(id){
+  const n = noticias.find(x=>x._id===id);
+  if(!n) return;
+  showLoad('A marcar como publicada…');
+  try {
+    const data = await apiMarcarPublicada(n, 'Gestão');
+    hideLoad();
+    if(data.ok){
+      toast('Notícia marcada como publicada!','success');
+      renderGestaoConteudo();
+    } else {
+      toast(data.error||'Erro ao marcar como publicada.','error');
+    }
+  } catch(e){
+    hideLoad();
+    toast('Erro ao marcar como publicada.','error');
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════
 // MODAL DE EMAIL
 // ═══════════════════════════════════════════════════════════════
@@ -988,6 +1008,10 @@ function renderGestaoConteudo(){
       presencaHtml = `<div style="font-size:11px;color:var(--amber-text);margin-top:2px">🔎 Em validação por: ${pres.validador}${dataStr?' ('+dataStr+')':''}</div>`;
     }
 
+    const botaoPublicar = (v.estado==='pode_publicar') ? `
+      <button class="btn" style="background:#f0e8ff;color:#5a1a8a;font-size:11px;padding:6px 10px" onclick="marcarComoPublicadaGestao(${n._id})">📢 Já está publicada</button>
+    ` : '';
+
     html += `
       <div class="li">
         <div class="li-ico" style="background:var(--blue-bg)">📄</div>
@@ -999,6 +1023,7 @@ function renderGestaoConteudo(){
         </div>
         <div class="li-r">
           <span class="badge ${badgeClass}">${badgeTxt}</span>
+          ${botaoPublicar}
         </div>
       </div>
     `;
