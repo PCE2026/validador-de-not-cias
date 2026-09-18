@@ -511,6 +511,7 @@ function selecionarGrupo(g){
 async function carregarDadosServidor_(){
   try{
     const data = await apiListar();
+    const chavesServidor = new Set((data.noticias||[]).map(n => n.chave || (norm(n.titulo)+'|'+norm(n.proponente))));
     const chavesLocais = new Set(noticias.map(n=>chave(n)));
     let nextId = Math.max(0,...noticias.map(n=>n._id||0))+1;
     (data.noticias||[]).forEach(n=>{
@@ -530,6 +531,9 @@ async function carregarDadosServidor_(){
         chavesLocais.add(c);
       }
     });
+    // Remove localmente as notícias que já não existem no servidor (ex: apagadas na Sheet)
+    noticias = noticias.filter(n => chavesServidor.has(chave(n)));
+    if(noticiaAtual && !chavesServidor.has(chave(noticiaAtual))) noticiaAtual = null;
     saveNoticias();
     validacoes = data.validacoes || {};
     presencas  = data.presencas || {};
