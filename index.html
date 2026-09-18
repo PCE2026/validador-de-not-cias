@@ -67,7 +67,7 @@ input.inp:focus{outline:none;border-color:var(--blue)}
 .user-pill svg{width:13px;height:13px;stroke:var(--text2);fill:none;stroke-width:2}
 
 /* ── stats ── */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
 .sc{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
 .sv{font-size:22px;font-weight:800;color:var(--text);line-height:1}
 .sl{font-size:11px;color:var(--text2);margin-top:4px}
@@ -466,6 +466,19 @@ async function apiGuardar(n, estado, meios, nota){
   return data;
 }
 
+async function apiMarcarPublicada(n){
+  const url = API_URL+'?action=marcarPublicada&chave='+encodeURIComponent(chave(n))+'&validador='+encodeURIComponent(sessao.nome)+'&t='+Date.now();
+  const data = await apiFetch_(url);
+  if(data.ok){
+    const c = chave(n);
+    if(!validacoes[c]) validacoes[c] = {};
+    validacoes[c].estado = 'publicada';
+    validacoes[c].publicadoPor = sessao.nome;
+    validacoes[c].dataPublicacao = new Date().toISOString().slice(0,10);
+  }
+  return data;
+}
+
 async function apiGuardarNoticia(n){
   const dados = {
     chave: chave(n),
@@ -627,17 +640,27 @@ function renderValidar(){
   const minha = filaGrupo();
   const pendentes = minha.filter(n=>estadoNoticia(n).estado==='pendente');
   const emCorrecao = minha.filter(n=>estadoNoticia(n).estado==='precisa_correcao');
+  const prontas = minha.filter(n=>estadoNoticia(n).estado==='pode_publicar');
+  const publicadas = minha.filter(n=>estadoNoticia(n).estado==='publicada');
 
   const abas = `<div class="filter-row">
     <div class="chip ${abaValidar==='pendentes'?'active':''}" onclick="setAbaValidar('pendentes')">Pendentes (${pendentes.length})</div>
     <div class="chip ${abaValidar==='correcao'?'active':''}" onclick="setAbaValidar('correcao')">Aguarda correção (${emCorrecao.length})</div>
+    <div class="chip ${abaValidar==='publicar'?'active':''}" onclick="setAbaValidar('publicar')">Prontas a publicar (${prontas.length})</div>
+    <div class="chip ${abaValidar==='publicadas'?'active':''}" onclick="setAbaValidar('publicadas')">Publicadas (${publicadas.length})</div>
   </div>`;
 
-  const lista = abaValidar==='correcao' ? emCorrecao : pendentes;
+  const listasPorAba = { pendentes, correcao:emCorrecao, publicar:prontas, publicadas };
+  const lista = listasPorAba[abaValidar] || pendentes;
 
   if(!lista.length){
-    const msg = abaValidar==='correcao' ? 'Não há notícias à espera de correção neste momento.' : 'Não há notícias pendentes para este ciclo.';
-    container.innerHTML=`${abas}<div class="card empty"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><p>${msg}</p></div>`;
+    const msgs = {
+      pendentes:'Não há notícias pendentes para este ciclo.',
+      correcao:'Não há notícias à espera de correção neste momento.',
+      publicar:'Não há notícias prontas a publicar neste momento.',
+      publicadas:'Ainda não há notícias publicadas.'
+    };
+    container.innerHTML=`${abas}<div class="card empty"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><p>${msgs[abaValidar]}</p></div>`;
     return;
   }
 
@@ -646,7 +669,15 @@ function renderValidar(){
     const v = estadoNoticia(n);
     let badgeClass = 'b-pend', badgeTxt = 'Pendente';
     if(v.estado==='precisa_correcao'){ badgeClass='b-corr'; badgeTxt='Aguarda correção'; }
+    if(v.estado==='pode_publicar'){ badgeClass='b-pub'; badgeTxt='Pronta a publicar'; }
+    if(v.estado==='publicada'){ badgeClass='b-val'; badgeTxt='📢 Publicada'; }
+
     const notaHtml = (abaValidar==='correcao' && v.nota) ? `<div style="font-size:11px;color:var(--text2);margin-top:3px">📝 ${v.nota}${v.dataValidacao?' · enviado em '+v.dataValidacao:''}</div>` : '';
+    const publicadaHtml = (abaValidar==='publicadas') ? `<div style="font-size:11px;color:#5a1a8a;margin-top:3px">📢 Publicada por ${v.publicadoPor||v.validador||'—'} em ${v.dataPublicacao||'—'}</div>` : '';
+
+    const botaoPublicar = (abaValidar==='publicar') ? `
+      <button class="btn" style="background:#f0e8ff;color:#5a1a8a;font-size:11px;padding:6px 10px" onclick="event.stopPropagation();marcarComoPublicada(${n._id})">📢 Já está publicada</button>
+    ` : '';
 
     html += `
       <div class="li" onclick="abrirNoticia(${n._id})">
@@ -655,9 +686,11 @@ function renderValidar(){
           <div class="li-t">${n.titulo}</div>
           <div class="li-s">${n.escola || 'Escola não indicada'} · ${n.proponente}</div>
           ${notaHtml}
+          ${publicadaHtml}
         </div>
         <div class="li-r">
           <span class="badge ${badgeClass}">${badgeTxt}</span>
+          ${botaoPublicar}
         </div>
       </div>
     `;
@@ -729,6 +762,12 @@ function renderDetalheNoticia(n, container){
 
     <!-- DECISÃO -->
     <div class="card">
+      ${v.estado==='publicada' ? `
+        <div class="sec">Estado</div>
+        <div class="presenca-banner" style="background:#f0e8ff;border-color:#c9a8f5;color:#5a1a8a">
+          📢 <strong>Já publicada</strong> por ${v.publicadoPor||v.validador||'—'} em ${v.dataPublicacao||'—'}. Não precisa de mais nenhuma ação.
+        </div>
+      ` : `
       <div class="sec">Decisão de Validação</div>
       <div class="decisao-grid">
         <div class="dec-btn dec-pub ${decisaoAtual==='pode_publicar'||v.estado==='pode_publicar'?'selected':''}" onclick="selecionarDecisao('pode_publicar')">
@@ -763,6 +802,13 @@ function renderDetalheNoticia(n, container){
       <div class="btn-row">
         <button class="btn btn-apro btn-full" onclick="submeterValidacao()">Gravar Validação</button>
       </div>
+
+      ${v.estado==='pode_publicar' ? `
+        <div class="btn-row">
+          <button class="btn btn-full" style="background:#f0e8ff;color:#5a1a8a" onclick="marcarComoPublicada(${n._id})">📢 Já está publicada</button>
+        </div>
+      ` : ''}
+      `}
     </div>
   `;
   container.innerHTML = html;
@@ -823,6 +869,26 @@ async function submeterValidacao(){
   }
 }
 
+async function marcarComoPublicada(id){
+  const n = noticias.find(x=>x._id===id);
+  if(!n) return;
+  showLoad('A marcar como publicada…');
+  try {
+    const data = await apiMarcarPublicada(n);
+    hideLoad();
+    if(data.ok){
+      toast('Notícia marcada como publicada!','success');
+      noticiaAtual = null;
+      renderValidar();
+    } else {
+      toast(data.error||'Erro ao marcar como publicada.','error');
+    }
+  } catch(e){
+    hideLoad();
+    toast('Erro ao marcar como publicada.','error');
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════
 // MODAL DE EMAIL
 // ═══════════════════════════════════════════════════════════════
@@ -874,12 +940,14 @@ function renderGestaoConteudo(){
   const pend = noticias.filter(n=>estadoNoticia(n).estado==='pendente').length;
   const pub = noticias.filter(n=>estadoNoticia(n).estado==='pode_publicar').length;
   const corr = noticias.filter(n=>estadoNoticia(n).estado==='precisa_correcao').length;
+  const publ = noticias.filter(n=>estadoNoticia(n).estado==='publicada').length;
 
   document.getElementById('stats-gestao').innerHTML = `
     <div class="sc"><div class="sv">${total}</div><div class="sl">Total de Noticias</div></div>
     <div class="sc"><div class="sv" style="color:var(--amber)">${pend}</div><div class="sl">Pendentes</div></div>
     <div class="sc"><div class="sv" style="color:var(--green)">${pub}</div><div class="sl">Prontas a publicar</div></div>
     <div class="sc"><div class="sv" style="color:var(--blue)">${corr}</div><div class="sl">Aguarda correção</div></div>
+    <div class="sc"><div class="sv" style="color:#5a1a8a">${publ}</div><div class="sl">Publicadas</div></div>
   `;
 
   document.getElementById('filter-row-gestao').innerHTML = `
@@ -887,6 +955,7 @@ function renderGestaoConteudo(){
     <span class="chip ${filtroGestao==='pendente'?'active':''}" onclick="setFiltroGestao('pendente')">Pendentes (${pend})</span>
     <span class="chip ${filtroGestao==='pode_publicar'?'active':''}" onclick="setFiltroGestao('pode_publicar')">Prontas (${pub})</span>
     <span class="chip ${filtroGestao==='precisa_correcao'?'active':''}" onclick="setFiltroGestao('precisa_correcao')">Aguarda correção (${corr})</span>
+    <span class="chip ${filtroGestao==='publicada'?'active':''}" onclick="setFiltroGestao('publicada')">Publicadas (${publ})</span>
   `;
 
   const filtradas = noticias.filter(n=>{
@@ -906,8 +975,10 @@ function renderGestaoConteudo(){
     let badgeClass = 'b-pend', badgeTxt = 'Pendente';
     if(v.estado==='pode_publicar'){ badgeClass='b-pub'; badgeTxt='Pronta a publicar'; }
     if(v.estado==='precisa_correcao'){ badgeClass='b-corr'; badgeTxt='Aguarda correção'; }
+    if(v.estado==='publicada'){ badgeClass='b-val'; badgeTxt='📢 Publicada'; }
 
     const infoValidacao = v.validador ? ` · Validado por ${v.validador}${v.dataValidacao?' em '+v.dataValidacao:''}` : '';
+    const infoPublicacao = v.estado==='publicada' ? `<div style="font-size:11px;color:#5a1a8a;margin-top:2px">📢 Publicada por ${v.publicadoPor||v.validador||'—'} em ${v.dataPublicacao||'—'}</div>` : '';
 
     const pres = presencas[n.chave || chave(n)];
     let presencaHtml = '';
@@ -923,6 +994,7 @@ function renderGestaoConteudo(){
         <div class="li-b">
           <div class="li-t">${n.titulo}</div>
           <div class="li-s">${n.escola||'Escola não indicada'} · ${n.proponente}${infoValidacao}</div>
+          ${infoPublicacao}
           ${presencaHtml}
         </div>
         <div class="li-r">
