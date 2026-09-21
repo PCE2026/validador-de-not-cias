@@ -427,11 +427,11 @@ function jsonpFetch_(url, timeoutMs){
   });
 }
 
-async function apiFetch_(url){
+async function apiFetch_(url, timeoutMs){
   let ultimoErro;
   for(let tentativa=1; tentativa<=3; tentativa++){
     try{
-      return await jsonpFetch_(url, 15000);
+      return await jsonpFetch_(url, timeoutMs||15000);
     }catch(e){
       ultimoErro = e;
       if(tentativa<3) await new Promise(r=>setTimeout(r, 700*tentativa));
@@ -815,7 +815,7 @@ async function analisarIA(id){
   try{
     const n = noticias.find(x=>x._id===id);
     const url = API_URL+'?action=analisarIA&chave='+encodeURIComponent(chave(n))+'&t='+Date.now();
-    const res = await apiFetch_(url);
+    const res = await apiFetch_(url, 45000);
     if(res.ok){
       n._analise = res.analise;
       saveNoticias();
