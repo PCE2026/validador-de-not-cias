@@ -521,33 +521,45 @@ function selecionarGrupo(g){
 }
 
 // Vai buscar notícias e validações ao servidor (com retry já incluído em apiFetch_).
-// Devolve true/false consoante conseguiu ou não ligar-se.
+// A Google Sheet é sempre a fonte única de verdade: em cada chamada com sucesso,
+// a lista local é reconstruída inteiramente a partir do servidor (nunca é um
+// acumulado local), para que todos os validadores vejam sempre os mesmos números,
+// independentemente do computador ou do histórico de sincronizações anteriores.
+// Só se preserva do estado local o que é puramente local (análise de IA já feita,
+// e os checkboxes de meios ainda não gravados) e o _id, para manter a identidade
+// do item nos handlers de clique.
 async function carregarDadosServidor_(){
   try{
     const data = await apiListar();
-    const chavesServidor = new Set((data.noticias||[]).map(n => n.chave || (norm(n.titulo)+'|'+norm(n.proponente))));
-    const chavesLocais = new Set(noticias.map(n=>chave(n)));
-    let nextId = Math.max(0,...noticias.map(n=>n._id||0))+1;
-    (data.noticias||[]).forEach(n=>{
+    const listaServidor = data.noticias || [];
+
+    const mapaLocal = {};
+    noticias.forEach(n => { mapaLocal[chave(n)] = n; });
+
+    let nextId = Math.max(0, ...noticias.map(n=>n._id||0)) + 1;
+
+    noticias = listaServidor.map(n=>{
       const c = n.chave || (norm(n.titulo)+'|'+norm(n.proponente));
-      if(!chavesLocais.has(c)){
-        noticias.push({
-          _id: nextId++,
-          chave: c,
-          proponente: n.proponente, titulo: n.titulo,
-          categorias: (n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
-          escola: n.escola, data: (n.timestamp||'').slice(0,10),
-          corpo: n.corpo, imgDestaque: n.imgDestaque,
-          outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
-          video: n.video, links: n.links, emailProponente: n.emailProponente||'',
-          _meios:{site:false,fb:false,ig:false,tk:false}, _analise:null
-        });
-        chavesLocais.add(c);
-      }
+      const existente = mapaLocal[c];
+      return {
+        _id: existente ? existente._id : nextId++,
+        chave: c,
+        proponente: n.proponente, titulo: n.titulo,
+        categorias: (n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
+        escola: n.escola, data: (n.timestamp||'').slice(0,10),
+        corpo: n.corpo, imgDestaque: n.imgDestaque,
+        outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
+        video: n.video, links: n.links, emailProponente: n.emailProponente||'',
+        _meios: existente ? existente._meios : {site:false,fb:false,ig:false,tk:false},
+        _analise: existente ? existente._analise : null
+      };
     });
-    // Remove localmente as notícias que já não existem no servidor (ex: apagadas na Sheet)
-    noticias = noticias.filter(n => chavesServidor.has(chave(n)));
-    if(noticiaAtual && !chavesServidor.has(chave(noticiaAtual))) noticiaAtual = null;
+
+    if(noticiaAtual){
+      const chaveAtual = chave(noticiaAtual);
+      noticiaAtual = noticias.find(n => n.chave === chaveAtual) || null;
+    }
+
     saveNoticias();
     validacoes = data.validacoes || {};
     presencas  = data.presencas || {};
