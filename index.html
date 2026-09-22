@@ -1,1110 +1,1555 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-PT">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Validador de Notícias — AET</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<title>Módulo 6</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#fff;--bg2:#f6f6f4;--bg3:#efefec;
-  --text:#171715;--text2:#65655f;--text3:#9a9a94;
-  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.17);
-  --blue:#1a6fc4;--blue-bg:#e8f1fb;--blue-text:#0c4a8a;
-  --green:#1a7a4a;--green-bg:#e5f3ec;--green-text:#0e5230;
-  --red:#c0392b;--red-bg:#fdecea;--red-text:#7d1f17;
-  --amber:#b06000;--amber-bg:#fef3e1;--amber-text:#7a4100;
-  --r:8px;--rl:12px;--font:'Segoe UI',system-ui,sans-serif;
-}
-body{font-family:var(--font);background:#ededeb;color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
-.wrap{max-width:820px;margin:0 auto;padding:24px 16px}
+  :root{
+    --bg-0:#0B1526;
+    --bg-1:#0F1E33;
+    --bg-2:#15283F;
+    --signal:#5FE3D3;
+    --signal-dim:#2E5C57;
+    --breath:#FF9F6B;
+    --locked:#33445A;
+    --locked-fill:#1A2739;
+    --text:#EAF2F0;
+    --text-dim:#8FA3B8;
+    --violet:#A78BFA;
+    --ok:#7CD98A;
+  }
 
-/* ── home ── */
-.home-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.home-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:40px 36px;max-width:540px;width:100%;text-align:center}
-.home-logo{width:60px;height:60px;border-radius:var(--r);background:var(--blue-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
-.home-logo svg{width:30px;height:30px;stroke:var(--blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.home-box h1{font-size:22px;font-weight:800;margin-bottom:6px}
-.home-box>p{font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.6}
-.area-grid{display:grid;grid-template-columns:1fr;gap:10px}
-.area-btn{display:flex;align-items:center;gap:14px;padding:16px 18px;border:1.5px solid var(--border);border-radius:var(--rl);background:var(--bg2);cursor:pointer;text-align:left;transition:all .15s;font-family:var(--font)}
-.area-btn:hover{border-color:#7aabdf;background:var(--blue-bg);transform:translateY(-1px)}
-.area-icon{width:44px;height:44px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px}
-.area-text .title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px}
-.area-text .sub{font-size:12px;color:var(--text2);line-height:1.4}
+  *{box-sizing:border-box;}
 
-/* ── login validar ── */
-.login-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:36px 32px;max-width:500px;width:100%;text-align:center}
-.login-box h2{font-size:18px;font-weight:800;margin-bottom:6px}
-.login-box>p{font-size:13px;color:var(--text2);margin-bottom:24px}
-.login-label{font-size:12px;font-weight:700;color:var(--text2);display:block;text-align:left;margin-bottom:5px;margin-top:14px}
-.login-label:first-of-type{margin-top:0}
-input.inp{width:100%;font-size:14px;padding:10px 12px;border:1.5px solid var(--border2);border-radius:var(--r);font-family:var(--font)}
-input.inp:focus{outline:none;border-color:var(--blue)}
-.grupo-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 20px}
-.grupo-btn{padding:14px 12px;border:2px solid var(--border);border-radius:var(--r);background:var(--bg2);cursor:pointer;text-align:center;transition:all .15s;font-family:var(--font)}
-.grupo-btn:hover{border-color:#7aabdf;background:var(--blue-bg)}
-.grupo-btn.selected{border-color:var(--blue);background:var(--blue-bg)}
-.gb-icon{font-size:22px;margin-bottom:5px}
-.gb-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px}
-.gb-sub{font-size:10px;color:var(--text2);line-height:1.4}
+  html,body{
+    margin:0;
+    min-height:100%;
+    background:var(--bg-0);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    overflow-x:hidden;
+  }
 
-/* ── gestão password ── */
-.gestao-pass{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:36px 32px;max-width:400px;width:100%;text-align:center}
-.gestao-pass h2{font-size:18px;font-weight:800;margin-bottom:6px}
-.gestao-pass p{font-size:13px;color:var(--text2);margin-bottom:20px}
+  body{
+    position:relative;
+    min-height:100vh;
+  }
 
-/* ── header ── */
-.header{display:flex;align-items:center;gap:14px;margin-bottom:20px}
-.logo{width:44px;height:44px;border-radius:var(--r);background:var(--blue-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.logo svg{width:22px;height:22px;stroke:var(--blue);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.hb{flex:1}
-.hb h1{font-size:17px;font-weight:800;color:var(--text)}
-.hb p{font-size:12px;color:var(--text2);margin-top:1px}
-.user-pill{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;white-space:nowrap;flex-shrink:0}
-.user-pill:hover{background:var(--bg3)}
-.user-pill svg{width:13px;height:13px;stroke:var(--text2);fill:none;stroke-width:2}
+  /* ambient breathing glow */
+  .breath-bg{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:0;
+    background:
+      radial-gradient(ellipse 60% 40% at 30% 15%, rgba(95,227,211,0.10), transparent 60%),
+      radial-gradient(ellipse 55% 45% at 75% 80%, rgba(255,159,107,0.08), transparent 60%);
+    animation:breathe 7s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{ transform:scale(1); opacity:0.85; }
+    50%{ transform:scale(1.06); opacity:1; }
+  }
 
-/* ── stats ── */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
-.sc{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
-.sv{font-size:22px;font-weight:800;color:var(--text);line-height:1}
-.sl{font-size:11px;color:var(--text2);margin-top:4px}
+  header{
+    position:relative;
+    z-index:2;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+    padding:28px 24px 8px;
+    max-width:520px;
+    margin:0 auto;
+  }
 
-/* ── card ── */
-.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:20px;margin-bottom:14px}
-.presenca-banner{background:#fff8e1;border:1.5px solid #f0c14b;color:#7a5900;border-radius:var(--r);padding:10px 14px;font-size:13px;margin-bottom:12px;line-height:1.5}
+  .title-block h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:1.55rem;
+    line-height:1.15;
+    margin:0 0 4px;
+    letter-spacing:-0.01em;
+  }
+  .title-block p{
+    margin:0;
+    font-size:0.85rem;
+    color:var(--text-dim);
+  }
 
-/* ── import box ── */
-.import-box{background:var(--bg);border:1.5px dashed #aab8cc;border-radius:var(--rl);padding:18px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.import-box svg{width:26px;height:26px;stroke:#7a9abc;fill:none;stroke-width:1.5;flex-shrink:0}
-.import-text h3{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
-.import-text p{font-size:12px;color:var(--text2)}
-.file-label{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:var(--blue-bg);color:var(--blue-text);border-radius:var(--r);font-size:12px;font-weight:700;cursor:pointer;border:1px solid #7aabdf;white-space:nowrap;flex-shrink:0}
-.file-label:hover{background:#d8ebf9}
-.file-label svg{width:14px;height:14px;stroke:var(--blue);fill:none;stroke-width:2}
-.file-label input{display:none}
+  .score-badge{
+    text-align:right;
+    flex-shrink:0;
+  }
+  .score-badge .pts{
+    font-family:'JetBrains Mono',monospace;
+    font-size:1.25rem;
+    font-weight:600;
+    color:var(--signal);
+  }
+  .score-badge .tier{
+    font-size:0.7rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    margin-top:2px;
+  }
 
-/* ── lista notícias ── */
-.li{padding:12px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:11px;cursor:pointer;transition:all .1s}
-.li:last-child{border-bottom:none;padding-bottom:0}
-.li:hover{background:var(--bg2);margin:0 -10px;padding:12px 10px;border-radius:var(--r)}
-.li:hover .li-t{color:var(--blue)}
-.li-ico{width:34px;height:34px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.li-b{flex:1;min-width:0}
-.li-t{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .15s}
-.li-s{font-size:11px;color:var(--text2)}
-.li-r{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
-.badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 9px;border-radius:20px;font-weight:700;white-space:nowrap}
-.b-pend{background:var(--amber-bg);color:var(--amber-text)}
-.b-pub{background:var(--green-bg);color:var(--green-text)}
-.b-corr{background:var(--blue-bg);color:var(--blue-text)}
-.b-val{background:#f0e8ff;color:#5a1a8a}
+  main{
+    position:relative;
+    z-index:2;
+    max-width:520px;
+    margin:0 auto;
+    padding:10px 8px 60px;
+  }
 
-/* ── detalhe validação ── */
-.ntitle{font-size:19px;font-weight:800;color:var(--text);margin-bottom:8px;line-height:1.3}
-.meta-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;padding:10px 12px;background:var(--bg2);border-radius:var(--r)}
-.mi{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
-.mi svg{width:12px;height:12px;stroke:var(--text3);fill:none;stroke-width:2;flex-shrink:0}
-.nivel-badge{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;margin-bottom:10px}
-.nivel-a{background:#fff3e0;color:#7a4000;border:1px solid #f0c070}
-.nivel-b{background:#e8f0fe;color:#1a3a7a;border:1px solid #90b0e8}
-.cat-pill{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--text2)}
-.sec{font-size:10px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin:14px 0 7px}
-.nbody{font-size:14px;color:var(--text);line-height:1.75;white-space:pre-wrap;padding:14px;background:var(--bg2);border-radius:var(--r);margin-bottom:6px}
-.nbody.empty{color:var(--text2);font-style:italic}
-.prog-wrap{height:5px;background:var(--bg3);border-radius:3px;margin:5px 0 2px}
-.prog-bar{height:5px;border-radius:3px}
-.char-info{display:flex;justify-content:space-between;font-size:11px;color:var(--text2)}
-.mpill{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:5px 10px;font-size:12px;display:flex;align-items:center;gap:5px}
-.mpill svg{width:13px;height:13px;stroke:var(--text2);fill:none;stroke-width:2;flex-shrink:0}
-.mpill a{color:var(--blue);text-decoration:none}
-.dest-img{width:100%;max-height:220px;object-fit:cover;border-radius:var(--r);border:1px solid var(--border);display:block;margin-bottom:8px;cursor:pointer}
-.dest-img:hover{opacity:.88}
+  .map-wrap{
+    position:relative;
+  }
 
-/* ── ai ── */
-.ai-block{background:linear-gradient(135deg,#f0f6ff,#f4f0ff);border:1px solid #c5d5f0;border-radius:var(--rl);padding:14px 16px;margin:14px 0}
-.ai-hd{font-size:10px;font-weight:800;color:#4a5a80;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.ai-hd svg{width:14px;height:14px;stroke:#4a5a80;fill:none;stroke-width:2}
-.ai-body{font-size:13px;color:var(--text);line-height:1.65}
-.ai-body strong{color:#2a3a5a}
-.spinner{display:inline-block;width:13px;height:13px;border:2px solid #c8d0e8;border-top-color:#5570c0;border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.ai-load{font-size:12px;color:#4a5a80;display:flex;align-items:center;gap:8px;font-style:italic}
+  svg.path-map{
+    width:100%;
+    height:auto;
+    display:block;
+    overflow:visible;
+  }
 
-/* ── decisão ── */
-.resp-banner{background:var(--amber-bg);border:1px solid #e8c070;border-radius:var(--r);padding:14px 16px;margin-bottom:16px;font-size:13px;color:var(--amber-text);line-height:1.65}
-.resp-banner strong{display:block;font-size:14px;margin-bottom:4px}
-.decisao-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
-.dec-btn{padding:14px 10px;border-radius:var(--rl);border:2px solid var(--border);background:var(--bg2);cursor:pointer;text-align:center;transition:all .15s;font-family:var(--font)}
-.dec-btn:hover{transform:translateY(-2px)}
-.dec-btn.selected{transform:translateY(-2px)}
-.dec-btn .di{font-size:24px;margin-bottom:6px}
-.dec-btn .dt{font-size:12px;font-weight:700;margin-bottom:2px}
-.dec-btn .ds{font-size:11px;color:var(--text2);line-height:1.3}
-.dec-pub{border-color:#90d4a8}.dec-pub.selected{background:var(--green-bg);border-color:var(--green)}
-.dec-corr{border-color:#90b0e8}.dec-corr.selected{background:var(--blue-bg);border-color:var(--blue)}
+  .path-base{
+    fill:none;
+    stroke:var(--locked);
+    stroke-width:5;
+    stroke-linecap:round;
+  }
+  .path-progress{
+    fill:none;
+    stroke:var(--signal);
+    stroke-width:5;
+    stroke-linecap:round;
+    filter:drop-shadow(0 0 6px rgba(95,227,211,0.55));
+    transition:stroke-dashoffset 900ms cubic-bezier(.4,0,.2,1);
+  }
 
-.pub-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
-.pub-lbl{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer;padding:8px 16px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);transition:all .15s;user-select:none}
-.pub-lbl.on{border-color:var(--green);background:var(--green-bg);color:var(--green-text)}
-.pub-lbl input{width:14px;height:14px;accent-color:var(--green);cursor:pointer}
+  .pulse-dot{
+    fill:var(--signal);
+    filter:drop-shadow(0 0 5px rgba(95,227,211,0.9));
+  }
 
-textarea.obs,textarea.nota{width:100%;font-size:13px;resize:vertical;padding:9px 11px;border:1.5px solid var(--border2);border-radius:var(--r);font-family:var(--font)}
-textarea.obs:focus,textarea.nota:focus{outline:none;border-color:var(--blue)}
-.obs{min-height:65px}
-.nota{min-height:90px;border-color:#90b0e8}
+  .node{
+    cursor:pointer;
+    outline:none;
+  }
+  .node circle.ring{
+    fill:var(--locked-fill);
+    stroke:var(--locked);
+    stroke-width:3;
+    transition:stroke 300ms, fill 300ms;
+  }
+  .node.unlocked circle.ring{
+    stroke:var(--signal);
+    fill:#123A38;
+    animation:node-breathe 3.2s ease-in-out infinite;
+  }
+  .node.completed circle.ring{
+    stroke:var(--ok);
+    fill:#13351F;
+  }
+  .node.locked{ cursor:default; }
 
-/* ── email modal ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;align-items:center;justify-content:center;padding:16px}
-.modal-overlay.show{display:flex}
-.modal{background:var(--bg);border-radius:var(--rl);padding:26px;max-width:560px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.18);max-height:90vh;overflow-y:auto}
-.modal h2{font-size:16px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:8px}
-.modal h2 svg{width:18px;height:18px;stroke:var(--blue);fill:none;stroke-width:2}
-.modal .sub{font-size:12px;color:var(--text2);margin-bottom:14px}
-.ef{margin-bottom:12px}
-.ef label{font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:4px}
-.ef input,.ef textarea{width:100%;font-size:13px;padding:8px 11px;border:1px solid var(--border2);border-radius:var(--r);font-family:var(--font)}
-.ef textarea{min-height:220px;resize:vertical;line-height:1.6}
-.modal-btns{display:flex;gap:8px;margin-top:14px}
+  @keyframes node-breathe{
+    0%,100%{ transform:scale(1); }
+    50%{ transform:scale(1.06); }
+  }
+  .node{ transform-box:fill-box; transform-origin:center; }
 
-/* ── buttons ── */
-.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-button.btn{padding:9px 16px;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;border:none;font-family:var(--font);transition:filter .15s}
-button.btn:hover{filter:brightness(.93)}
-button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-.btn-full{width:100%;justify-content:center}
-.btn-apro{background:var(--green-bg);color:var(--green-text)}
-.btn-corr{background:var(--blue-bg);color:var(--blue-text)}
-.btn-sec{background:var(--bg2);color:var(--text2);border:1px solid var(--border2)!important}
-.btn-pri{background:var(--blue-bg);color:var(--blue-text)}
+  .node:focus-visible circle.ring{
+    stroke:var(--violet);
+    stroke-width:4;
+  }
 
-/* ── filter chips ── */
-.filter-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
-.chip{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--text2);transition:all .15s}
-.chip.active{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue)}
+  .node text.num{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:600;
+    fill:var(--text-dim);
+    font-size:15px;
+    text-anchor:middle;
+    dominant-baseline:central;
+    pointer-events:none;
+  }
+  .node.unlocked text.num,
+  .node.completed text.num{ fill:var(--text); }
 
-.empty{text-align:center;padding:36px 16px;color:var(--text2)}
-.empty svg{width:36px;height:36px;stroke:var(--text3);fill:none;stroke-width:1.5;margin:0 auto 10px;display:block}
-.empty p{font-size:13px;line-height:1.6}
-.toast{position:fixed;bottom:20px;right:20px;background:var(--bg);border:1px solid var(--border2);border-radius:var(--rl);padding:10px 14px;font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.13);z-index:9999;transform:translateY(60px);opacity:0;transition:all .25s;max-width:320px}
-.toast.show{transform:translateY(0);opacity:1}
-.toast svg{width:16px;height:16px;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0}
-.loading{display:none;position:fixed;inset:0;background:rgba(255,255,255,.82);z-index:8888;flex-direction:column;align-items:center;justify-content:center;gap:12px}
-.loading.show{display:flex}
-.loading .sp{width:28px;height:28px;border:3px solid #dde;border-top-color:#5570c0;border-radius:50%;animation:spin .7s linear infinite}
-.loading p{font-size:13px;color:var(--text2)}
-@media(max-width:600px){
-  .stats{grid-template-columns:repeat(2,1fr)}
-  .decisao-grid{grid-template-columns:1fr}
-  .tab span{display:none}
-  .grupo-grid{grid-template-columns:1fr}
-}
+  .node text.label{
+    font-family:'Inter',sans-serif;
+    font-size:11px;
+    font-weight:500;
+    fill:var(--text-dim);
+    pointer-events:none;
+  }
+  .node.unlocked text.label,
+  .node.completed text.label{ fill:var(--text); }
+
+  .lock-icon, .check-icon{ pointer-events:none; }
+
+  /* level overlay */
+  .level-screen{
+    position:fixed;
+    inset:0;
+    z-index:10;
+    background:var(--bg-0);
+    display:none;
+    flex-direction:column;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .level-screen.open{ display:flex; }
+  .level-header{
+    position:sticky;
+    top:0;
+    z-index:2;
+    background:var(--bg-0);
+  }
+
+  .level-header{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:20px 20px 14px;
+    border-bottom:1px solid var(--bg-2);
+  }
+  .back-btn{
+    background:none;
+    border:1px solid var(--locked);
+    color:var(--text);
+    border-radius:999px;
+    width:36px;
+    height:36px;
+    font-size:1rem;
+    cursor:pointer;
+  }
+  .back-btn:hover{ border-color:var(--signal); color:var(--signal); }
+
+  .level-header h2{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:1.2rem;
+    margin:0;
+  }
+  .level-header .eyebrow{
+    display:block;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.7rem;
+    color:var(--signal);
+    letter-spacing:0.08em;
+    margin-bottom:2px;
+  }
+
+  .level-body{
+    flex:1;
+    max-width:520px;
+    width:100%;
+    margin:0 auto;
+    padding:28px 22px 40px;
+  }
+
+  .placeholder-card{
+    border:1px dashed var(--locked);
+    border-radius:14px;
+    padding:22px;
+    color:var(--text-dim);
+    font-size:0.92rem;
+    line-height:1.5;
+  }
+
+  .complete-btn{
+    margin-top:24px;
+    background:var(--signal);
+    color:#062824;
+    border:none;
+    border-radius:10px;
+    padding:13px 20px;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:0.95rem;
+    cursor:pointer;
+    width:100%;
+  }
+  .complete-btn:hover{ filter:brightness(1.08); }
+  .complete-btn:focus-visible{ outline:2px solid var(--violet); outline-offset:2px; }
+
+  .test-tag{
+    display:inline-block;
+    margin-top:18px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.68rem;
+    color:var(--breath);
+    letter-spacing:0.06em;
+  }
+
+  .stage-title{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:1.05rem;
+    margin:0 0 4px;
+  }
+  .stage-progress{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.72rem;
+    color:var(--text-dim);
+    margin-bottom:16px;
+  }
+  .flash-card{
+    background:var(--bg-2);
+    border:1px solid var(--locked);
+    border-radius:14px;
+    padding:22px;
+    font-size:1.05rem;
+    line-height:1.5;
+    margin-bottom:18px;
+    min-height:60px;
+    display:flex;
+    align-items:center;
+  }
+  .flash-btns{
+    display:flex;
+    gap:10px;
+  }
+  .nav-row{
+    display:flex;
+    gap:10px;
+    margin-top:14px;
+  }
+  .nav-row .opt-btn{ flex:0 0 auto; min-width:110px; }
+  .opt-btn{
+    flex:1;
+    background:var(--bg-1);
+    border:1px solid var(--locked);
+    color:var(--text);
+    border-radius:10px;
+    padding:13px 10px;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:0.9rem;
+    cursor:pointer;
+    text-align:center;
+  }
+  .opt-btn:hover:not(:disabled){ border-color:var(--signal); color:var(--signal); }
+  .opt-btn:disabled{ cursor:default; opacity:0.75; }
+  .opt-btn:focus-visible{ outline:2px solid var(--violet); outline-offset:2px; }
+  .flash-feedback{
+    margin-top:12px;
+    font-size:0.88rem;
+    min-height:20px;
+  }
+  .flash-feedback.ok{ color:var(--ok); }
+  .flash-feedback.bad{ color:var(--breath); }
+
+  .quiz-timer{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.9rem;
+    color:var(--breath);
+    margin-bottom:10px;
+  }
+  .quiz-options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .quiz-opt.correct{ border-color:var(--ok) !important; color:var(--ok) !important; }
+  .quiz-opt.wrong{ border-color:#E06B6B !important; color:#E06B6B !important; }
+  .opt-btn.correct{ border-color:var(--ok) !important; color:var(--ok) !important; }
+  .opt-btn.wrong{ border-color:#E06B6B !important; color:#E06B6B !important; }
+
+  /* identificação */
+  .id-form label{ display:block; font-size:0.8rem; color:var(--text-dim); margin:14px 0 6px; }
+  .id-form input{
+    width:100%; background:var(--bg-2); border:1px solid var(--locked);
+    color:var(--text); border-radius:10px; padding:12px; font-size:0.95rem; font-family:'Inter',sans-serif;
+  }
+  .id-form input:focus-visible{ outline:2px solid var(--violet); outline-offset:2px; }
+  .id-error{ color:#E06B6B; font-size:0.82rem; margin-top:10px; min-height:18px; }
+
+  /* incorporação da página + temporizador de cópia */
+  .embed-frame{
+    width:100%; height:60vh; min-height:360px; border:1px solid var(--locked);
+    border-radius:14px; background:var(--bg-2); margin-bottom:14px;
+  }
+  @media (max-width:640px){
+    .embed-frame{ height:42vh; min-height:240px; }
+  }
+  .embed-fallback{ font-size:0.8rem; color:var(--text-dim); margin-bottom:16px; }
+  .embed-fallback a{ color:var(--signal); }
+  .copy-timer{
+    font-family:'JetBrains Mono',monospace; font-size:1.4rem; color:var(--breath);
+    text-align:center; margin-bottom:14px;
+  }
+  /* barra de ação fixa ao ECRÃ (não à página) — fica sempre visível,     */
+  /* mesmo que o dedo fique "preso" a fazer scroll dentro do embed.       */
+  .copy-actionbar{
+    position:fixed; left:0; right:0; bottom:0;
+    background:var(--bg-0);
+    border-top:1px solid var(--bg-2);
+    padding:12px 22px calc(12px + env(safe-area-inset-bottom, 0px));
+    z-index:20;
+    box-shadow:0 -8px 24px rgba(6,12,24,0.55);
+  }
+  .copy-actionbar-inner{ max-width:520px; margin:0 auto; }
+  .copy-actionbar .complete-btn{ margin-top:0; }
+  .copy-actionbar .copy-hint{
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--text-dim);
+    text-align:center; margin-bottom:8px;
+  }
+  /* reserva espaço no fim do conteúdo para a barra fixa não tapar nada */
+  .copy-actionbar-spacer{ height:96px; }
+
+  /* campo de reflexão */
+  .reflect-textarea{
+    width:100%; min-height:120px; background:var(--bg-2); border:1px solid var(--locked);
+    color:var(--text); border-radius:12px; padding:14px; font-family:'Inter',sans-serif;
+    font-size:0.95rem; resize:vertical; margin-bottom:14px;
+  }
+  .reflect-textarea:focus-visible{ outline:2px solid var(--violet); outline-offset:2px; }
+
+  /* overlay de reinício obrigatório */
+  .overlay{
+    position:fixed; inset:0; background:rgba(11,21,38,0.94);
+    display:none; align-items:center; justify-content:center; z-index:30; padding:24px;
+  }
+  .overlay.open{ display:flex; }
+  .overlay-card{
+    max-width:400px; width:100%; border-radius:16px; padding:28px 24px; text-align:center;
+    background:#2A1414; border:1px solid #E06B6B;
+  }
+  .overlay-card .icon{ font-size:2rem; margin-bottom:10px; display:block; }
+  .overlay-card h2{ font-family:'Fraunces',serif; font-size:1.15rem; margin:0 0 10px; }
+  .overlay-card p{ color:var(--text-dim); font-size:0.92rem; line-height:1.5; margin:0 0 20px; }
+  .overlay-card button{
+    background:#E06B6B; color:#2A1414; border:none; border-radius:10px; padding:12px 18px;
+    font-family:'Inter',sans-serif; font-weight:600; font-size:0.92rem; cursor:pointer; width:100%;
+  }
+
+  .help-links{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .help-links a{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:var(--bg-2);
+    border:1px solid var(--violet);
+    color:var(--violet);
+    text-decoration:none;
+    font-size:0.8rem;
+    font-weight:500;
+    padding:8px 12px;
+    border-radius:999px;
+  }
+  .help-links a:hover{ background:var(--violet); color:var(--bg-0); }
+  .help-links a:focus-visible{ outline:2px solid var(--violet); outline-offset:2px; }
+
+  .calc-input-row{
+    display:flex;
+    gap:10px;
+    margin-bottom:4px;
+  }
+  .calc-input-row input{
+    flex:1;
+    background:var(--bg-1);
+    border:1px solid var(--locked);
+    color:var(--text);
+    border-radius:10px;
+    padding:12px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:1rem;
+    min-width:0;
+  }
+  .calc-input-row input:focus-visible{ outline:2px solid var(--violet); outline-offset:2px; }
+
+  @media (prefers-reduced-motion: reduce){
+    .breath-bg, .node.unlocked circle.ring{ animation:none; }
+    .path-progress{ transition:none; }
+  }
 </style>
 </head>
 <body>
 
-<!-- HOME -->
-<div class="home-screen" id="home-screen">
-  <div class="home-box">
-    <div class="home-logo">
-      <svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+<div class="breath-bg" aria-hidden="true"></div>
+
+<header>
+  <div class="title-block">
+    <h1>Módulo 6</h1>
+    <p>Regulação, Circulação, Respiração, Digestão &amp; Equilíbrio Interno</p>
+  </div>
+  <div class="score-badge">
+    <div class="pts" id="pts-display">0 pts</div>
+    <div class="tier" id="tier-display">—</div>
+  </div>
+</header>
+
+<main>
+  <div class="map-wrap">
+    <svg class="path-map" viewBox="0 0 400 900" id="map-svg">
+      <path class="path-base" d="M120,780 C200,700 260,680 280,620 C300,560 180,520 100,460 C40,400 260,360 300,300 C340,240 200,180 160,120" />
+      <path class="path-progress" id="progress-path" d="M120,780 C200,700 260,680 280,620 C300,560 180,520 100,460 C40,400 260,360 300,300 C340,240 200,180 160,120" />
+
+      <circle class="pulse-dot" r="5" id="pulse-dot">
+        <animateMotion dur="6s" repeatCount="indefinite"
+          path="M120,780 C200,700 260,680 280,620 C300,560 180,520 100,460 C40,400 260,360 300,300 C340,240 200,180 160,120" />
+      </circle>
+
+      <!-- Nível 1 -->
+      <g class="node" data-level="1" tabindex="0" transform="translate(120,780)">
+        <circle class="ring" r="30"></circle>
+        <text class="num" y="0">1</text>
+        <text class="label" x="42" y="-6">Regulação Interna</text>
+        <text class="label" x="42" y="10">Nervosa &amp; Endócrina</text>
+      </g>
+
+      <!-- Nível 2 -->
+      <g class="node" data-level="2" tabindex="0" transform="translate(280,620)">
+        <circle class="ring" r="30"></circle>
+        <text class="num" y="0">2</text>
+        <text class="label" x="42" y="-6">Aparelho</text>
+        <text class="label" x="42" y="10">Circulatório</text>
+      </g>
+
+      <!-- Nível 3 -->
+      <g class="node" data-level="3" tabindex="0" transform="translate(100,460)">
+        <circle class="ring" r="30"></circle>
+        <text class="num" y="0">3</text>
+        <text class="label" x="-42" y="-6" text-anchor="end">Aparelho</text>
+        <text class="label" x="-42" y="10" text-anchor="end">Respiratório</text>
+      </g>
+
+      <!-- Nível 4 -->
+      <g class="node" data-level="4" tabindex="0" transform="translate(300,300)">
+        <circle class="ring" r="30"></circle>
+        <text class="num" y="0">4</text>
+        <text class="label" x="42" y="-6">Digestivo</text>
+        <text class="label" x="42" y="10">&amp; Urinário</text>
+      </g>
+
+      <!-- Nível 5 -->
+      <g class="node" data-level="5" tabindex="0" transform="translate(160,120)">
+        <circle class="ring" r="34"></circle>
+        <text class="num" y="0">5</text>
+        <text class="label" x="46" y="-6">Equilíbrio Final</text>
+        <text class="label" x="46" y="10">Térmico &amp; Hídrico</text>
+      </g>
+    </svg>
+  </div>
+</main>
+
+<!-- Level overlay screen -->
+<div class="level-screen" id="level-screen">
+  <div class="level-header">
+    <button class="back-btn" id="back-btn" aria-label="Voltar ao mapa">←</button>
+    <div>
+      <span class="eyebrow" id="level-eyebrow">NÍVEL X</span>
+      <h2 id="level-title">Título do nível</h2>
     </div>
-    <h1>Validador de Notícias</h1>
-    <p>Agrupamento de Escolas Templários de Tomar</p>
-    <div class="area-grid">
-      <div class="area-btn" onclick="irPara('login-validar')">
-        <div class="area-icon" style="background:var(--amber-bg)">✅</div>
-        <div class="area-text"><div class="title">Validar Notícias</div><div class="sub">Área dos professores validadores</div></div>
-      </div>
-      <div class="area-btn" onclick="irPara('login-gestao')">
-        <div class="area-icon" style="background:var(--green-bg)">📊</div>
-        <div class="area-text"><div class="title">Gestão — Ver Todas</div><div class="sub">Panorama total e importação de notícias</div></div>
-      </div>
+  </div>
+  <div class="level-body">
+    <div class="help-links" id="help-links" style="display:none;"></div>
+    <div id="level-content">
+      <div class="placeholder-card">Conteúdo deste nível ainda por preencher — vamos construir isto a seguir, nível a nível.</div>
     </div>
+    <button class="complete-btn" id="complete-btn">Concluir nível</button>
+    <span class="test-tag" id="test-tag">[botão temporário para testar o desbloqueio — será substituído pela tarefa real]</span>
   </div>
 </div>
 
-<!-- LOGIN VALIDAR -->
-<div class="home-screen" id="screen-login-validar" style="display:none">
-  <div class="login-box">
-    <h2>Área de Validação</h2>
-    <p>Identifica-te para ver as notícias do teu ciclo.</p>
-    <label class="login-label">Nome completo *</label>
-    <input class="inp" type="text" id="login-nome" placeholder="Ex: Ana Martins" autocomplete="name">
-    <label class="login-label" style="margin-bottom:8px">Grupo de ensino *</label>
-    <div class="grupo-grid">
-      <div class="grupo-btn" id="gbtn-A" onclick="selecionarGrupo('A')">
-        <div class="gb-icon">🏫</div>
-        <div class="gb-title">Pré-escolar e 1.º Ciclo</div>
-        <div class="gb-sub">Escolas Básicas/JI e Centros Escolares</div>
-      </div>
-      <div class="grupo-btn" id="gbtn-B" onclick="selecionarGrupo('B')">
-        <div class="gb-icon">🎓</div>
-        <div class="gb-title">2.º/3.º Ciclo e Secundário</div>
-        <div class="gb-sub">EBI Santa Iria · EB Gualdim Pais · ES Jácome Ratton</div>
-      </div>
-    </div>
-    <button class="btn btn-apro btn-full" onclick="fazerLogin()">
-      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Entrar
-    </button>
-    <button class="btn btn-sec btn-full" onclick="irPara('home')" style="margin-top:8px">Voltar</button>
-    <hr style="border:none;border-top:1px solid var(--border);margin:20px 0">
-    <button class="btn btn-sec btn-full" onclick="irPara('login-gestao')" style="font-size:12px">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Aceder à área de Gestão
-    </button>
+<div class="overlay" id="restart-overlay">
+  <div class="overlay-card">
+    <span class="icon">⛔</span>
+    <h2>Não tens permissão para sair da aplicação!</h2>
+    <p>Caso o faças, inicias novamente o trabalho e a tua professora é informada.</p>
+    <button id="restart-ok-btn">OK, recomeçar o Nível 1</button>
   </div>
 </div>
-
-<!-- LOGIN GESTÃO -->
-<div class="home-screen" id="screen-login-gestao" style="display:none">
-  <div class="gestao-pass">
-    <h2>Gestão</h2>
-    <p>Introduz a password de acesso.</p>
-    <input class="inp" type="password" id="gestao-pass" placeholder="Password" onkeydown="if(event.key==='Enter')entrarGestao()">
-    <button class="btn btn-apro btn-full" onclick="entrarGestao()" style="margin-top:12px">
-      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Entrar
-    </button>
-    <button class="btn btn-sec btn-full" onclick="irPara('home')" style="margin-top:8px">Voltar</button>
-  </div>
-</div>
-
-<!-- ÁREA: VALIDAR -->
-<div id="screen-validar" style="display:none">
-<div class="wrap">
-  <div class="header">
-    <div class="logo"><svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg></div>
-    <div class="hb"><h1>Validar Notícias</h1><p id="hdr-validar-sub"></p></div>
-    <button class="btn btn-sec" onclick="atualizarAgora()" style="font-size:12px" title="Ir buscar as notícias e estados mais recentes">
-      <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>Atualizar agora
-    </button>
-    <div class="user-pill" onclick="sairValidador()">
-      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span id="user-pill-nome"></span>
-    </div>
-  </div>
-  <div class="stats" id="stats-validar"></div>
-  <div id="content-validar"></div>
-</div>
-</div>
-
-<!-- ÁREA: GESTÃO -->
-<div id="screen-gestao" style="display:none">
-<div class="wrap">
-  <div class="header">
-    <div class="logo"><svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg></div>
-    <div class="hb"><h1>Gestão — Ver Todas</h1><p>Panorama total · importação semanal do Excel</p></div>
-    <div class="user-pill" onclick="irPara('home')">
-      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      Sair
-    </div>
-  </div>
-
-  <!-- IMPORT BOX -->
-  <div class="import-box">
-    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
-    <div class="import-text">
-      <h3>Importar Excel (processo manual — reserva)</h3>
-      <p>As notícias chegam agora automaticamente. Usa isto só se a automação falhar. Descarrega o <a href="https://aetemplarios-my.sharepoint.com/:x:/g/personal/pce_aetemplarios_pt/IQDPMod9VEGtQ6p1W-YDsBBVASYZpvq_udqBDQrykQ0tcwA" target="_blank" style="color:var(--blue);font-weight:600">Notícias 1.xlsx</a> do OneDrive → Ficheiro → Transferir uma cópia → carrega aqui</p>
-    </div>
-    <label class="file-label">
-      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      Importar Excel (processo manual — reserva)
-      <input type="file" accept=".xlsx,.xls" onchange="importarExcel(this)">
-    </label>
-    <button class="btn btn-pri" onclick="sincronizarTudo()" style="font-size:12px">
-      <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
-      Sincronizar com Google Sheets
-    </button>
-    <span id="import-status" style="font-size:12px;color:var(--text2)"></span>
-  </div>
-
-  <div class="stats" id="stats-gestao"></div>
-  <div class="filter-row" id="filter-row-gestao"></div>
-  <div class="card"><div id="lista-gestao"></div></div>
-</div>
-</div>
-
-<!-- MODAL EMAIL -->
-<div class="modal-overlay" id="email-modal">
-  <div class="modal">
-    <h2><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>Email para o proponente</h2>
-    <p class="sub">Revê e ajusta antes de copiar.</p>
-    <div class="ef"><label>Assunto</label><input type="text" id="email-assunto"></div>
-    <div class="ef"><label>Mensagem</label><textarea id="email-corpo"></textarea></div>
-    <div class="modal-btns">
-      <button class="btn btn-pri" onclick="copiarEmail()" style="flex:1;justify-content:center">
-        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copiar mensagem
-      </button>
-      <button class="btn btn-sec" onclick="fecharEmailModal()">Fechar</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-<div class="loading" id="loading"><div class="sp"></div><p id="load-msg">A processar…</p></div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════════════════════
-const API_URL = 'https://script.google.com/macros/s/AKfycbwFxi003S3RIYSQJdJP1rgZZ_qvgtESIFE2nQWJZN1LU1CjtZG9vCN8mNu5MGLApBQ6AA/exec';
-const PASS_GESTAO = 'templarios2027';
+  // ===== CONFIGURAÇÃO DO NOVO FLUXO DO NÍVEL 1 =====
+  const MISSAO_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyHAsWJCo5vv5QVajCKuX69VAeYjYdrOAHGCtPz3EZqX5R-1h7KBAT5C3r0Pv3YJ8D6/exec';
+  const COPY_MINUTES = 5;
+  const LEVEL1_COPY_LINKS = [
+    { label: 'Homeostasia', url: 'https://view.genially.com/659bc4c3582e380014f3d636' },
+    { label: 'Sistema Nervoso/Endócrino', url: 'https://view.genially.com/659bc4f9b82d3b00159432b6' },
+  ];
 
-const GRUPOS = {
-  A:{label:'Pré-escolar e 1.º Ciclo',
-     esc:['valdonas','serra','carvalhos de figueiredo','curvaceiras','junceira','olalhas','templários','d. pedro iv','são pedro','casais']},
-  B:{label:'2.º/3.º Ciclo e Secundário',
-     esc:['santa iria','gualdim','jácome','jacome','ratton']}
-};
+  const LEVELS = [
+    { id:1, name:'Regulação Nervosa e Endócrina', basePoints:10 },
+    { id:2, name:'Aparelho Circulatório', basePoints:15 },
+    { id:3, name:'Aparelho Respiratório', basePoints:20 },
+    { id:4, name:'Aparelho Digestivo e Urinário', basePoints:20 },
+    { id:5, name:'Regulação Térmica e Hídrica', basePoints:25 },
+  ];
 
-// ═══════════════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════════════
-let noticias   = JSON.parse(localStorage.getItem('aet_noticias5')||'[]');
-let validacoes = {};
-let presencas  = {};
-let sessao     = null;
-let grupoSel   = null;
-let noticiaAtual = null;
-let decisaoAtual = null;
-let filtroGestao = 'todas';
-let abaValidar   = 'pendentes'; // 'pendentes' | 'correcao'
-let emailNotId   = null;
+  const CLASSIFY_NE = [
+    { text:'Transmite a mensagem através de impulsos elétricos.', answer:'nervosa' },
+    { text:'Transmite a mensagem através do sangue, sob a forma de hormonas.', answer:'endocrina' },
+    { text:'Resposta rápida, medida em milissegundos.', answer:'nervosa' },
+    { text:'Resposta lenta, que pode demorar minutos a horas a instalar-se.', answer:'endocrina' },
+    { text:'Efeito geralmente localizado e de curta duração.', answer:'nervosa' },
+    { text:'Efeito geralmente generalizado e duradouro.', answer:'endocrina' },
+    { text:'Usa neurónios como via de comunicação.', answer:'nervosa' },
+    { text:'Usa glândulas endócrinas e o sangue como via de comunicação.', answer:'endocrina' },
+  ];
 
-function saveNoticias(){ try{localStorage.setItem('aet_noticias5',JSON.stringify(noticias));}catch(e){} }
+  const CLASSIFY_SP = [
+    { text:'Aumenta a frequência cardíaca.', answer:'simpatico' },
+    { text:'Diminui a frequência cardíaca.', answer:'parassimpatico' },
+    { text:'Dilata as pupilas.', answer:'simpatico' },
+    { text:'Contrai as pupilas.', answer:'parassimpatico' },
+    { text:'Aumenta a frequência respiratória.', answer:'simpatico' },
+    { text:'Estimula os processos digestivos.', answer:'parassimpatico' },
+    { text:'Prepara o corpo para "luta ou fuga".', answer:'simpatico' },
+    { text:'Promove o "descanso e digestão".', answer:'parassimpatico' },
+  ];
 
-// ═══════════════════════════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════════════════════════
-function norm(s){return(s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[,.]/g,'').replace(/\s+/g,' ').trim();}
-function escolaGrupo(escola){
-  const e=norm(escola);
-  if(GRUPOS.B.esc.some(s=>e.includes(norm(s))))return 'B';
-  if(GRUPOS.A.esc.some(s=>e.includes(norm(s))))return 'A';
-  return null;
-}
-function chave(n){ return (n&&n.chave) ? n.chave : (norm(n.titulo)+'|'+norm(n.proponente)); }
+  const QUIZ_L1 = [
+    { q:'O que é uma glândula endócrina?', options:['Um órgão que produz hormonas e as liberta diretamente no sangue','Um músculo que se contrai por estímulo elétrico','Um vaso sanguíneo de grande calibre','Um recetor sensorial da pele'], correct:0 },
+    { q:'O que é uma hormona?', options:['Um tipo de célula nervosa','Um mensageiro químico transportado pelo sangue até um órgão-alvo','Um recetor localizado no cérebro','Um tipo de vaso linfático'], correct:1 },
+    { q:'O que é o "órgão-alvo" de uma hormona?', options:['O órgão que produz a hormona','Qualquer órgão do corpo, sem exceção','O órgão ou tecido com recetores específicos que respondem a essa hormona','O órgão que elimina a hormona do corpo'], correct:2 },
+    { q:'Porque é a hipófise chamada "glândula mestra"?', options:['Porque é a maior glândula do corpo','Porque regula a atividade de várias outras glândulas endócrinas','Porque só atua durante o sono','Porque não depende do cérebro'], correct:1 },
+    { q:'Qual destas características pertence à regulação NERVOSA (e não à endócrina)?', options:['Efeito lento e duradouro','Mensageiro transportado pelo sangue','Resposta rápida e de curta duração','Ação generalizada em todo o corpo'], correct:2 },
+    { q:'Antes de uma competição importante, um atleta sente o coração acelerar e as mãos a tremer ligeiramente, mesmo sem ainda ter começado a competir. Isto deve-se sobretudo à ação de:', options:['Sistema nervoso simpático e libertação de adrenalina','Sistema nervoso parassimpático','Sistema digestivo','Sistema urinário'], correct:0 },
+  ];
 
-function showLoad(msg){document.getElementById('load-msg').textContent=msg||'A processar…';document.getElementById('loading').classList.add('show');}
-function hideLoad(){document.getElementById('loading').classList.remove('show');}
-function toast(msg,type='info'){
-  const t=document.getElementById('toast');
-  const s={success:`<svg viewBox="0 0 24 24" style="stroke:var(--green)"><polyline points="20 6 9 17 4 12"/></svg>`,
-    error:`<svg viewBox="0 0 24 24" style="stroke:var(--red)"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
-    warning:`<svg viewBox="0 0 24 24" style="stroke:var(--amber)"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>`,
-    info:`<svg viewBox="0 0 24 24" style="stroke:var(--blue)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>`};
-  t.innerHTML=(s[type]||s.info)+msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3500);
-}
+  const LEVEL_LINKS = {
+    1: [
+      { label: 'Genially: Homeostasia', url: 'https://view.genially.com/659bc4c3582e380014f3d636' },
+      { label: 'Genially: Sistema Nervoso/Endócrino', url: 'https://view.genially.com/659bc4f9b82d3b00159432b6' },
+    ],
+    2: [
+      { label: 'Genially: Sistema Circulatório 1/2', url: 'https://view.genially.com/659bc519b82d3b0015944827' },
+      { label: 'Genially: Sistema Circulatório 2/2', url: 'https://view.genially.com/659bc5096670f50013edec2b' },
+    ],
+    3: [
+      { label: 'Genially: Sistema Respiratório', url: 'https://view.genially.com/659bc52a582e380014f40754' },
+    ],
+    4: [
+      { label: 'Genially: Sistema Digestivo 1/2', url: 'https://view.genially.com/659bc53dcc82080014bd14a0' },
+      { label: 'Genially: Sistema Digestivo 2/2 e Urinário', url: 'https://view.genially.com/659bc5546670f50013ee31ff' },
+    ],
+    5: [
+      { label: 'Genially: Regulação Hídrico e Eletrolítico', url: 'https://view.genially.com/659bc55d58842c0014a5dccd' },
+    ],
+  };
 
-// ═══════════════════════════════════════════════════════════════
-// API — COMUNICAÇÃO JSONP (CONTORNA CORS TOTALMENTE)
-// ═══════════════════════════════════════════════════════════════
-function jsonpFetch_(url, timeoutMs){
-  return new Promise((resolve, reject)=>{
-    const cbName = 'cb_'+Date.now()+'_'+Math.floor(Math.random()*9999);
-    const script = document.createElement('script');
-    const timer = setTimeout(()=>{
-      cleanup();
-      reject(new Error('Timeout na comunicação com o servidor'));
-    }, timeoutMs||15000);
-    function cleanup(){
-      clearTimeout(timer);
-      delete window[cbName];
-      if(script.parentNode) script.parentNode.removeChild(script);
-    }
-    window[cbName] = function(data){
-      cleanup();
-      resolve(data);
-    };
-    script.src = url + '&callback=' + cbName;
-    script.onerror = ()=>{ cleanup(); reject(new Error('Erro de ligação')); };
-    document.head.appendChild(script);
-  });
-}
+  const CLASSIFY_TEMP = [
+    { text:'Vasodilatação periférica (os vasos sanguíneos da pele dilatam).', answer:'hiper' },
+    { text:'Vasoconstrição periférica (os vasos sanguíneos da pele contraem).', answer:'hipo' },
+    { text:'Aumento da sudorese (transpiração).', answer:'hiper' },
+    { text:'Arrepio e tremor muscular (tiritar).', answer:'hipo' },
+    { text:'Comportamento voluntário: procurar a sombra ou beber água fresca.', answer:'hiper' },
+    { text:'Comportamento voluntário: vestir mais roupa ou procurar abrigo.', answer:'hipo' },
+    { text:'O corpo tenta perder calor para o ambiente.', answer:'hiper' },
+    { text:'O corpo tenta reter e produzir mais calor.', answer:'hipo' },
+  ];
 
-async function apiFetch_(url, timeoutMs){
-  let ultimoErro;
-  for(let tentativa=1; tentativa<=3; tentativa++){
-    try{
-      return await jsonpFetch_(url, timeoutMs||15000);
-    }catch(e){
-      ultimoErro = e;
-      if(tentativa<3) await new Promise(r=>setTimeout(r, 700*tentativa));
-    }
+  const CLASSIFY_HIDRICO = [
+    { text:'Deteta alterações na concentração de solutos no sangue (osmolaridade).', answer:'osmo' },
+    { text:'Deteta alterações no volume de sangue e líquidos circulantes.', answer:'volume' },
+    { text:'Está muito relacionado com o mecanismo da sede.', answer:'osmo' },
+    { text:'Pode ser ativado, por exemplo, após uma hemorragia significativa.', answer:'volume' },
+    { text:'Localiza-se sobretudo no hipotálamo, sensível à concentração do plasma.', answer:'osmo' },
+    { text:'Localiza-se em zonas como as aurículas do coração e os grandes vasos.', answer:'volume' },
+    { text:'É ativado quando bebemos pouca água e o sangue fica mais concentrado.', answer:'osmo' },
+    { text:'É ativado quando há perda de volume de líquidos, como em vómitos ou diarreia intensa.', answer:'volume' },
+  ];
+
+  const QUIZ_L5 = [
+    { q:'Qual é, em geral, a temperatura corporal central de referência no ser humano?', options:['Aproximadamente 37°C','Aproximadamente 30°C','Aproximadamente 42°C','Aproximadamente 25°C'], correct:0 },
+    { q:'Qual destas NÃO é uma forma de transferência de calor entre o corpo e o ambiente?', options:['Condução','Convecção','Radiação','Digestão'], correct:3 },
+    { q:'A evaporação do suor ajuda o corpo a:', options:['Ganhar calor rapidamente','Perder calor, arrefecendo a pele','Reter mais água','Aumentar a frequência cardíaca'], correct:1 },
+    { q:'O que desencadeia o mecanismo da sede?', options:['A diminuição da temperatura corporal','O aumento da frequência respiratória','O aumento da osmolaridade do sangue ou a diminuição do volume de líquidos corporais','A contração do músculo cardíaco'], correct:2 },
+    { q:'Numa situação de hipertermia (temperatura corporal elevada), o corpo tende a:', options:['Vasodilatar e transpirar, para perder calor','Vasoconstringir e tremer, para reter calor','Parar de produzir urina','Aumentar a digestão'], correct:0 },
+    { q:'Porque é importante regular o equilíbrio hídrico e eletrolítico?', options:['Apenas para controlar a temperatura corporal','Apenas para regular a digestão','Para manter o volume e a composição dos líquidos corporais compatíveis com a vida','Não tem influência no funcionamento do organismo'], correct:2 },
+    { q:'Durante uma prova de longa duração ao sol, um atleta deve beber água regularmente sobretudo para:', options:['Repor os líquidos perdidos pela sudorese e evitar a desidratação','Aumentar a temperatura corporal','Reduzir a frequência cardíaca a zero','Impedir a vasodilatação'], correct:0 },
+  ];
+
+  const CLASSIFY_NUTRIENTS = [
+    { text:'Hidratos de carbono.', answer:'macro' },
+    { text:'Lípidos.', answer:'macro' },
+    { text:'Proteínas.', answer:'macro' },
+    { text:'Sais minerais (ex: Ca2+, Na+, K+, Fe2+).', answer:'micro' },
+    { text:'Vitaminas.', answer:'micro' },
+    { text:'É necessário em grande quantidade na dieta diária.', answer:'macro' },
+    { text:'É necessário apenas em pequenas quantidades, mas essencial ao bom funcionamento do organismo.', answer:'micro' },
+    { text:'Fornece a maior parte da energia (calorias) da dieta.', answer:'macro' },
+  ];
+
+  const CLASSIFY_TUBE = [
+    { text:'Boca.', answer:'tubo' },
+    { text:'Esófago.', answer:'tubo' },
+    { text:'Estômago.', answer:'tubo' },
+    { text:'Intestino delgado.', answer:'tubo' },
+    { text:'Intestino grosso.', answer:'tubo' },
+    { text:'Fígado.', answer:'anexo' },
+    { text:'Pâncreas.', answer:'anexo' },
+    { text:'Glândulas salivares.', answer:'anexo' },
+  ];
+
+  const QUIZ_L4 = [
+    { q:'Qual a ordem correta das atividades do aparelho digestivo?', options:['Ingestão → Digestão → Condução → Absorção → Armazenamento → Eliminação','Digestão → Ingestão → Absorção → Condução → Eliminação → Armazenamento','Absorção → Ingestão → Digestão → Eliminação → Condução → Armazenamento','Ingestão → Absorção → Digestão → Condução → Eliminação → Armazenamento'], correct:0 },
+    { q:'O que é a "ingestão"?', options:['A entrada dos alimentos no tubo digestivo, através da boca','A passagem dos nutrientes para o sangue','A eliminação dos resíduos não digeridos','A transformação química dos alimentos'], correct:0 },
+    { q:'O que é a "absorção"?', options:['A entrada do alimento na boca','A passagem dos nutrientes do tubo digestivo para o sangue','A eliminação das fezes','O armazenamento de energia no fígado'], correct:1 },
+    { q:'Qual é a principal função dos rins?', options:['Produzir hormonas digestivas','Armazenar os nutrientes absorvidos','Filtrar o sangue e produzir urina, eliminando substâncias em excesso ou tóxicas','Triturar mecanicamente os alimentos'], correct:2 },
+    { q:'O aparelho excretor é responsável por:', options:['Produzir enzimas digestivas','Absorver vitaminas lipossolúveis','Contrair os músculos do tubo digestivo','Eliminar do organismo substâncias que já não são necessárias, como a urina'], correct:3 },
+    { q:'Que órgão produz a bílis, importante para a digestão dos lípidos?', options:['Fígado','Pâncreas','Estômago','Intestino grosso'], correct:0 },
+    { q:'Antes de uma maratona, os atletas costumam fazer uma refeição rica em hidratos de carbono. A razão principal é:', options:['Aumentar as reservas de energia disponíveis para o esforço prolongado','Facilitar a eliminação urinária','Reduzir a absorção de água','Diminuir a necessidade de vitaminas'], correct:0 },
+  ];
+
+  const CLASSIFY_ZONE = [
+    { text:'Inclui as fossas nasais, a faringe, a laringe, a traqueia e os brônquios.', answer:'condutora' },
+    { text:'Inclui os alvéolos pulmonares.', answer:'trocas' },
+    { text:'A sua função principal é conduzir, aquecer, humidificar e filtrar o ar.', answer:'condutora' },
+    { text:'É aqui que ocorre a hematose (troca de O2 e CO2).', answer:'trocas' },
+    { text:'Não participa diretamente nas trocas gasosas.', answer:'condutora' },
+    { text:'Tem paredes muito finas, rodeadas por uma rede de capilares sanguíneos.', answer:'trocas' },
+    { text:'Inclui os bronquíolos, até aos sacos alveolares.', answer:'condutora' },
+    { text:'É onde o oxigénio passa para o sangue e o dióxido de carbono sai do sangue.', answer:'trocas' },
+  ];
+
+  const CLASSIFY_MECH = [
+    { text:'Respiração normal, em repouso.', answer:'eupneica' },
+    { text:'Ocorre durante o exercício físico intenso.', answer:'forcada' },
+    { text:'Envolve principalmente o diafragma e os músculos intercostais externos.', answer:'eupneica' },
+    { text:'Envolve também os músculos intercostais internos e os músculos abdominais.', answer:'forcada' },
+    { text:'Movimenta apenas o volume corrente.', answer:'eupneica' },
+    { text:'Pode mobilizar os volumes de reserva inspiratória e expiratória.', answer:'forcada' },
+    { text:'A expiração é passiva, sem gasto muscular ativo.', answer:'eupneica' },
+    { text:'Exige participação muscular ativa tanto na inspiração como na expiração.', answer:'forcada' },
+  ];
+
+  const CLASSIFY_VENT = [
+    { text:'Aumento da frequência respiratória.', answer:'aumenta' },
+    { text:'Diminuição do volume corrente.', answer:'diminui' },
+    { text:'Esforço físico intenso.', answer:'aumenta' },
+    { text:'Repouso e relaxamento.', answer:'diminui' },
+    { text:'Acumulação de CO2 no sangue, que estimula os centros respiratórios.', answer:'aumenta' },
+    { text:'Respiração superficial e lenta.', answer:'diminui' },
+    { text:'Necessidade aumentada de O2 pelos músculos em atividade.', answer:'aumenta' },
+    { text:'Obstrução ou bloqueio parcial das vias aéreas.', answer:'diminui' },
+  ];
+
+  const QUIZ_L3 = [
+    { q:'O que é a hematose?', options:['A troca de O2 e CO2 entre o ar alveolar e o sangue','A produção de glóbulos vermelhos nos pulmões','A filtração do ar nas fossas nasais','A contração do diafragma'], correct:0 },
+    { q:'O que é a capacidade vital?', options:['O ar que fica sempre nos pulmões e nunca sai','O volume de um único ciclo respiratório normal','O volume máximo de ar mobilizado numa inspiração forçada seguida de expiração forçada','A frequência respiratória máxima possível'], correct:2 },
+    { q:'O volume residual é:', options:['O ar que fica sempre nos pulmões, mesmo após uma expiração forçada','O ar inspirado numa respiração normal','O ar extra que se consegue inspirar após uma inspiração normal','O ar total que os pulmões conseguem conter'], correct:0 },
+    { q:'O que representa o VO2 máx?', options:['O volume total dos pulmões','O consumo máximo de oxigénio que o organismo consegue utilizar durante o esforço físico','A frequência respiratória em repouso','A quantidade de CO2 expirado por minuto'], correct:1 },
+    { q:'Durante o esforço físico, o que acontece geralmente à frequência respiratória e ao volume corrente?', options:['Ambos aumentam, para elevar a ventilação pulmonar','Ambos diminuem, para poupar energia','A frequência respiratória diminui e o volume corrente aumenta','Mantêm-se sempre inalterados'], correct:0 },
+    { q:'Qual a relação entre o aparelho respiratório e o aparelho circulatório?', options:['Não têm qualquer relação direta','O respiratório fornece O2 ao sangue e remove CO2; o circulatório transporta esses gases pelo corpo','O circulatório produz o ar que o respiratório utiliza','O respiratório substitui o circulatório durante o esforço físico'], correct:1 },
+    { q:'Um nadador de elite treina a respiração para aumentar a sua capacidade vital. Isso permite-lhe:', options:['Mobilizar um maior volume de ar por ciclo respiratório','Reduzir a frequência cardíaca a zero','Eliminar a necessidade de oxigénio','Aumentar apenas a frequência respiratória, sem mudar o volume'], correct:0 },
+  ];
+
+  const CLASSIFY_CIRC = [
+    { text:'Sai do ventrículo esquerdo e leva sangue oxigenado a todo o corpo.', answer:'grande' },
+    { text:'Sai do ventrículo direito e leva sangue aos pulmões.', answer:'pequena' },
+    { text:'Também chamada circulação sistémica.', answer:'grande' },
+    { text:'Também chamada circulação pulmonar.', answer:'pequena' },
+    { text:'O sangue troca gases (O2/CO2) com as células dos tecidos do corpo.', answer:'grande' },
+    { text:'O sangue troca gases (O2/CO2) com o ar, nos alvéolos pulmonares.', answer:'pequena' },
+    { text:'Termina na aurícula esquerda, já com sangue oxigenado.', answer:'pequena' },
+    { text:'Termina na aurícula direita, com sangue pobre em oxigénio.', answer:'grande' },
+  ];
+
+  const CLASSIFY_VESSELS = [
+    { text:'Transporta sangue do coração para os órgãos.', answer:'arteria' },
+    { text:'Transporta sangue dos órgãos de volta ao coração.', answer:'veia' },
+    { text:'Tem parede muscular espessa e elástica, adaptada a pressões elevadas.', answer:'arteria' },
+    { text:'Possui válvulas que impedem o retorno do sangue.', answer:'veia' },
+    { text:'A aorta é o maior exemplo deste tipo de vaso.', answer:'arteria' },
+    { text:'As veias cavas são exemplos deste tipo de vaso.', answer:'veia' },
+    { text:'O sangue circula a baixa pressão, ajudado pela contração dos músculos à volta do vaso.', answer:'veia' },
+    { text:'É neste tipo de vaso que se sente o pulso.', answer:'arteria' },
+  ];
+
+  const CLASSIFY_DC = [
+    { text:'Aumento da frequência cardíaca.', answer:'aumenta' },
+    { text:'Diminuição do volume sistólico.', answer:'diminui' },
+    { text:'Estimulação do sistema nervoso simpático.', answer:'aumenta' },
+    { text:'Estimulação do sistema nervoso parassimpático.', answer:'diminui' },
+    { text:'Aumento do retorno venoso — chega mais sangue ao coração.', answer:'aumenta' },
+    { text:'Hemorragia grave, com perda de sangue.', answer:'diminui' },
+    { text:'Libertação de adrenalina durante um esforço físico intenso.', answer:'aumenta' },
+    { text:'Repouso profundo e relaxamento total.', answer:'diminui' },
+  ];
+
+  const QUIZ_L2 = [
+    { q:'O que é a pressão sistólica?', options:['A pressão no momento em que os ventrículos se contraem','A pressão no momento em que os ventrículos relaxam','A pressão exercida dentro das veias','A pressão do ar nos pulmões'], correct:0 },
+    { q:'O pulso arterial corresponde a:', options:['O som produzido pelo coração a bater','A distensão rítmica da parede arterial provocada pela sístole ventricular','A velocidade do sangue nas veias','A pressão sanguínea nos capilares'], correct:1 },
+    { q:'Qual das seguintes NÃO é um fator que facilita o retorno venoso?', options:['Válvulas venosas','Bomba muscular','Bomba respiratória','Contração do ventrículo esquerdo do coração'], correct:3 },
+    { q:'Que componente do sangue transporta principalmente o oxigénio?', options:['Glóbulos vermelhos (eritrócitos)','Glóbulos brancos (leucócitos)','Plaquetas','Plasma'], correct:0 },
+    { q:'O que acontece, em geral, à frequência cardíaca durante o esforço físico?', options:['Aumenta, para responder às maiores necessidades de oxigénio dos músculos','Diminui sempre, para poupar energia','Mantém-se sempre exatamente igual','Só aumenta em atletas de alta competição'], correct:0 },
+    { q:'A hemóstase é o processo que permite:', options:['Produzir novos glóbulos vermelhos','Regular a temperatura do sangue','Parar uma hemorragia através da coagulação do sangue','Transportar hormonas até ao órgão-alvo'], correct:2 },
+    { q:'Um ciclista bem treinado costuma ter, em repouso, uma frequência cardíaca mais baixa do que uma pessoa sedentária. Isto deve-se sobretudo a:', options:['Um volume sistólico maior, que permite bombear mais sangue por batimento','Um coração mais pequeno','Menos glóbulos vermelhos no sangue','Válvulas venosas menos eficientes'], correct:0 },
+  ];
+
+  // status: 'locked' | 'unlocked' | 'completed'
+  let state = {
+    points: 0,
+    status: { 1:'unlocked', 2:'locked', 3:'locked', 4:'locked', 5:'locked' }
+  };
+
+  const ptsDisplay = document.getElementById('pts-display');
+  const tierDisplay = document.getElementById('tier-display');
+  const progressPath = document.getElementById('progress-path');
+  const levelScreen = document.getElementById('level-screen');
+  const levelEyebrow = document.getElementById('level-eyebrow');
+  const levelTitle = document.getElementById('level-title');
+  const levelContentEl = document.getElementById('level-content');
+  const helpLinksEl = document.getElementById('help-links');
+  const completeBtn = document.getElementById('complete-btn');
+  const testTag = document.getElementById('test-tag');
+  const backBtn = document.getElementById('back-btn');
+
+  let activeLevel = null;
+  const pathLength = progressPath.getTotalLength();
+  progressPath.style.strokeDasharray = pathLength;
+
+  function tierFor(points){
+    if(points >= 135) return 'Ouro 🥇';
+    if(points >= 100) return 'Prata 🥈';
+    if(points >= 60) return 'Bronze 🥉';
+    return '—';
   }
-  throw ultimoErro;
-}
 
-async function apiListar(){
-  const url = API_URL+'?action=listar&t='+Date.now();
-  const data = await apiFetch_(url);
-  if(!data.ok) throw new Error(data.error||'Erro ao listar notícias');
-  return data;
-}
+  function render(){
+    ptsDisplay.textContent = state.points + ' pts';
+    tierDisplay.textContent = tierFor(state.points);
 
-async function apiGuardar(n, estado, meios, nota){
-  const dados = {
-    chave: chave(n),
-    titulo: n.titulo,
-    proponente: n.proponente,
-    escola: n.escola||'',
-    validador: sessao.nome,
-    estado,
-    meios: Object.keys(meios).filter(k=>meios[k]).join(';'),
-    nota: nota||'',
-    dataValidacao: new Date().toISOString().slice(0,10)
-  };
-  const url = API_URL+'?action=guardarValidacao&chave='+encodeURIComponent(dados.chave)
-    +'&dados='+encodeURIComponent(JSON.stringify(dados))+'&t='+Date.now();
-  const data = await apiFetch_(url);
-  validacoes[dados.chave] = dados;
-  return data;
-}
+    const completedCount = Object.values(state.status).filter(s => s === 'completed').length;
+    const revealed = pathLength * (completedCount / LEVELS.length);
+    progressPath.style.strokeDashoffset = pathLength - revealed;
 
-async function apiMarcarPublicada(n, quemNome){
-  const nome = quemNome || (sessao && sessao.nome) || 'Gestão';
-  const url = API_URL+'?action=marcarPublicada&chave='+encodeURIComponent(chave(n))+'&validador='+encodeURIComponent(nome)+'&t='+Date.now();
-  const data = await apiFetch_(url);
-  if(data.ok){
-    const c = chave(n);
-    if(!validacoes[c]) validacoes[c] = {};
-    validacoes[c].estado = 'publicada';
-    validacoes[c].publicadoPor = nome;
-    validacoes[c].dataPublicacao = new Date().toISOString().slice(0,10);
-  }
-  return data;
-}
-
-async function apiGuardarNoticia(n){
-  const dados = {
-    chave: chave(n),
-    timestamp: n.data||new Date().toISOString().slice(0,10),
-    proponente: n.proponente||'',
-    emailProponente: n.emailProponente||'',
-    titulo: n.titulo||'',
-    categorias: (n.categorias||[]).join(';'),
-    escola: n.escola||'',
-    corpo: n.corpo||'',
-    imgDestaque: n.imgDestaque||'',
-    outrasFotos: (n.outrasFotos||[]).join(';'),
-    video: n.video||'',
-    links: n.links||''
-  };
-  const url = API_URL+'?action=guardarNoticia&dados='+encodeURIComponent(JSON.stringify(dados))+'&t='+Date.now();
-  return await apiFetch_(url);
-}
-
-// ═══════════════════════════════════════════════════════════════
-// NAVEGAÇÃO E LOGIN
-// ═══════════════════════════════════════════════════════════════
-function irPara(area){
-  ['home-screen','screen-login-validar','screen-login-gestao','screen-validar','screen-gestao']
-    .forEach(id=>{ const el=document.getElementById(id); if(el)el.style.display='none'; });
-  const mapa = {
-    'home':'home-screen','login-validar':'screen-login-validar',
-    'login-gestao':'screen-login-gestao','validar':'screen-validar','gestao':'screen-gestao'
-  };
-  const el = document.getElementById(mapa[area]);
-  if(el) el.style.display = (area==='home'||area==='login-validar'||area==='login-gestao') ? 'flex' : 'block';
-  if(area==='gestao') renderGestao();
-}
-
-function selecionarGrupo(g){
-  grupoSel=g;
-  document.querySelectorAll('.grupo-btn').forEach(b=>b.classList.remove('selected'));
-  document.getElementById('gbtn-'+g).classList.add('selected');
-}
-
-// Vai buscar notícias e validações ao servidor (com retry já incluído em apiFetch_).
-// A Google Sheet é sempre a fonte única de verdade: em cada chamada com sucesso,
-// a lista local é reconstruída inteiramente a partir do servidor (nunca é um
-// acumulado local), para que todos os validadores vejam sempre os mesmos números,
-// independentemente do computador ou do histórico de sincronizações anteriores.
-// Só se preserva do estado local o que é puramente local (análise de IA já feita,
-// e os checkboxes de meios ainda não gravados) e o _id, para manter a identidade
-// do item nos handlers de clique.
-async function carregarDadosServidor_(){
-  try{
-    const data = await apiListar();
-    const listaServidor = data.noticias || [];
-
-    const mapaLocal = {};
-    noticias.forEach(n => { mapaLocal[chave(n)] = n; });
-
-    let nextId = Math.max(0, ...noticias.map(n=>n._id||0)) + 1;
-
-    noticias = listaServidor.map(n=>{
-      const c = n.chave || (norm(n.titulo)+'|'+norm(n.proponente));
-      const existente = mapaLocal[c];
-      return {
-        _id: existente ? existente._id : nextId++,
-        chave: c,
-        proponente: n.proponente, titulo: n.titulo,
-        categorias: (n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
-        escola: n.escola, data: (n.timestamp||'').slice(0,10),
-        corpo: n.corpo, imgDestaque: n.imgDestaque,
-        outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
-        video: n.video, links: n.links, emailProponente: n.emailProponente||'',
-        _meios: existente ? existente._meios : {site:false,fb:false,ig:false,tk:false},
-        _analise: existente ? existente._analise : null
-      };
+    document.querySelectorAll('.node').forEach(node => {
+      const lvl = Number(node.dataset.level);
+      node.classList.remove('locked','unlocked','completed');
+      node.classList.add(state.status[lvl]);
+      node.setAttribute('aria-disabled', state.status[lvl] === 'locked');
     });
+  }
 
-    if(noticiaAtual){
-      const chaveAtual = chave(noticiaAtual);
-      noticiaAtual = noticias.find(n => n.chave === chaveAtual) || null;
+  function openLevel(id){
+    if(state.status[id] === 'locked') return;
+    activeLevel = id;
+    const lvl = LEVELS.find(l => l.id === id);
+    levelEyebrow.textContent = 'NÍVEL ' + id;
+    levelTitle.textContent = lvl.name;
+    levelScreen.classList.add('open');
+
+    if(id === 1){
+      setupLevel1();
+    } else if(id === 2){
+      setupLevel2();
+    } else if(id === 3){
+      setupLevel3();
+    } else if(id === 4){
+      setupLevel4();
+    } else if(id === 5){
+      setupLevel5();
+    } else {
+      completeBtn.style.display = 'block';
+      testTag.style.display = 'inline-block';
+      helpLinksEl.style.display = 'none';
+      levelContentEl.innerHTML = '<div class="placeholder-card">Conteúdo deste nível ainda por preencher — vamos construir isto a seguir, nível a nível.</div>';
+      completeBtn.disabled = state.status[id] === 'completed';
+      completeBtn.textContent = state.status[id] === 'completed' ? 'Nível já concluído' : 'Concluir nível';
+    }
+  }
+
+  function renderHelpLinks(id){
+    const links = LEVEL_LINKS[id];
+    if(!links){ helpLinksEl.style.display = 'none'; return; }
+    helpLinksEl.innerHTML = links.map(l =>
+      `<a href="${l.url}" target="_blank" rel="noopener">📖 ${l.label}</a>`
+    ).join('');
+    helpLinksEl.style.display = 'flex';
+  }
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i = a.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // ===== ENVIO DE EVENTOS DO NÍVEL 1 PARA A GOOGLE SHEET =====
+  function sendMissaoEvent(payload){
+    if(!MISSAO_SCRIPT_URL || MISSAO_SCRIPT_URL === 'COLOCAR_AQUI_O_URL_DO_SCRIPT') return;
+    fetch(MISSAO_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload),
+    }).catch(() => { /* melhor esforço — não bloqueia o fluxo do aluno */ });
+  }
+
+  // ===== CONTROLO DE SAÍDA DO SEPARADOR (só ativo durante o Nível 1) =====
+  let level1Session = null; // { nome, turma } quando o fluxo está em curso
+  let missaoHiddenSince = null;
+  const restartOverlay = document.getElementById('restart-overlay');
+
+  document.addEventListener('visibilitychange', () => {
+    if(!level1Session) return;
+    if(document.visibilityState === 'hidden'){
+      missaoHiddenSince = Date.now();
+    } else if(document.visibilityState === 'visible' && missaoHiddenSince !== null){
+      missaoHiddenSince = null;
+      sendMissaoEvent({
+        tipo: 'Saída do separador — reinício',
+        nome: level1Session.nome,
+        turma: level1Session.turma,
+        nivel: 1,
+      });
+      restartOverlay.classList.add('open');
+    }
+  });
+
+  document.getElementById('restart-ok-btn').addEventListener('click', () => {
+    restartOverlay.classList.remove('open');
+    clearLevel1Progress();
+    if(level1Session) runLevel1Steps(level1Session, false, 0);
+  });
+
+  // ===== PERSISTÊNCIA LOCAL (mesmo Chromebook) — permite retomar no dia seguinte =====
+  const LEVEL1_STORAGE_KEY = 'missao6_l1_progress';
+
+  function saveLevel1Progress(student, stepIdx){
+    try {
+      localStorage.setItem(LEVEL1_STORAGE_KEY, JSON.stringify({
+        nome: student.nome,
+        turma: student.turma,
+        stepIdx: stepIdx,
+        savedAt: Date.now(),
+      }));
+    } catch(e) { /* localStorage indisponível — segue sem guardar */ }
+  }
+
+  function loadLevel1Progress(){
+    try {
+      const raw = localStorage.getItem(LEVEL1_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch(e) { return null; }
+  }
+
+  function clearLevel1Progress(){
+    try { localStorage.removeItem(LEVEL1_STORAGE_KEY); } catch(e) { /* ignora */ }
+  }
+
+  // Remove a barra de ação fixa do passo de cópia (vive fora de #level-content,
+  // presa ao <body>, por isso tem de ser limpa manualmente ao sair desse passo).
+  function removeCopyActionbar(){
+    const el = document.getElementById('copy-actionbar');
+    if(el) el.remove();
+  }
+
+  // ===== NÍVEL 1 =====
+  function setupLevel1(){
+    completeBtn.style.display = 'none';
+    testTag.style.display = 'none';
+    helpLinksEl.style.display = 'none';
+    level1Session = null;
+
+    if(state.status[1] === 'completed'){
+      levelContentEl.innerHTML = `
+        <div class="placeholder-card">Já concluíste este nível — bom trabalho! Podes rever os desafios para consolidar a matéria, sem perder pontos.</div>
+        <button class="complete-btn" id="review-btn" style="margin-top:16px;">Rever desafios</button>
+      `;
+      document.getElementById('review-btn').addEventListener('click', () => {
+        showLevel1Identification(true);
+      });
+      return;
     }
 
-    saveNoticias();
-    validacoes = data.validacoes || {};
-    presencas  = data.presencas || {};
-    return true;
-  }catch(e){
-    return false;
-  }
-}
-
-async function fazerLogin(){
-  const nome=document.getElementById('login-nome').value.trim();
-  if(!nome){toast('Escreve o teu nome completo','warning');return;}
-  if(!grupoSel){toast('Seleciona o teu grupo','warning');return;}
-  sessao={nome,grupo:grupoSel};
-  document.getElementById('user-pill-nome').textContent=nome;
-  document.getElementById('hdr-validar-sub').textContent=GRUPOS[grupoSel].label+' · a validar notícias do teu ciclo';
-  irPara('validar');
-  showLoad('A carregar notícias e estados…');
-  const ok = await carregarDadosServidor_();
-  hideLoad();
-  if(!ok){
-    toast('Servidor indisponível. A usar dados locais.','warning');
-  }
-  renderValidar();
-}
-
-async function atualizarAgora(){
-  showLoad('A atualizar…');
-  const ok = await carregarDadosServidor_();
-  hideLoad();
-  if(ok){
-    toast('Dados atualizados.','success');
-  }else{
-    toast('Servidor indisponível. A usar dados locais.','warning');
-  }
-  renderValidar();
-}
-
-function sairValidador(){
-  if(!confirm('Tens a certeza que queres sair?'))return;
-  sessao=null;grupoSel=null;noticiaAtual=null;decisaoAtual=null;
-  document.getElementById('login-nome').value='';
-  document.querySelectorAll('.grupo-btn').forEach(b=>b.classList.remove('selected'));
-  irPara('home');
-}
-
-function entrarGestao(){
-  const pass=document.getElementById('gestao-pass').value;
-  if(pass!==PASS_GESTAO){toast('Password incorreta','error');return;}
-  document.getElementById('gestao-pass').value='';
-  irPara('gestao');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// RENDER: VALIDAR & GESTÃO
-// ═══════════════════════════════════════════════════════════════
-function filaGrupo(){
-  return noticias.filter(n=>{
-    const g=escolaGrupo(n.escola);
-    return !g||g===sessao.grupo;
-  });
-}
-
-function estadoNoticia(n){
-  const v=validacoes[chave(n)];
-  if(!v)return{estado:'pendente'};
-  return v;
-}
-
-function renderStats(){
-  const minha=filaGrupo();
-  const pend=minha.filter(n=>estadoNoticia(n).estado==='pendente').length;
-  const pub=minha.filter(n=>estadoNoticia(n).estado==='pode_publicar').length;
-  const corr=minha.filter(n=>estadoNoticia(n).estado==='precisa_correcao').length;
-  document.getElementById('stats-validar').innerHTML=`
-    <div class="sc"><div class="sv">${minha.length}</div><div class="sl">Notícias no teu ciclo</div></div>
-    <div class="sc"><div class="sv" style="color:var(--amber)">${pend}</div><div class="sl">Pendentes</div></div>
-    <div class="sc"><div class="sv" style="color:var(--green)">${pub}</div><div class="sl">Prontas para publicar</div></div>
-    <div class="sc"><div class="sv" style="color:var(--blue)">${corr}</div><div class="sl">Pedida correção</div></div>
-  `;
-}
-
-function renderValidar(){
-  renderStats();
-  const container = document.getElementById('content-validar');
-  if(noticiaAtual){
-    renderDetalheNoticia(noticiaAtual, container);
-    return;
-  }
-
-  const minha = filaGrupo();
-  const pendentes = minha.filter(n=>estadoNoticia(n).estado==='pendente');
-  const emCorrecao = minha.filter(n=>estadoNoticia(n).estado==='precisa_correcao');
-  const prontas = minha.filter(n=>estadoNoticia(n).estado==='pode_publicar');
-  const publicadas = minha.filter(n=>estadoNoticia(n).estado==='publicada');
-
-  const abas = `<div class="filter-row">
-    <div class="chip ${abaValidar==='pendentes'?'active':''}" onclick="setAbaValidar('pendentes')">Pendentes (${pendentes.length})</div>
-    <div class="chip ${abaValidar==='correcao'?'active':''}" onclick="setAbaValidar('correcao')">Aguarda correção (${emCorrecao.length})</div>
-    <div class="chip ${abaValidar==='publicar'?'active':''}" onclick="setAbaValidar('publicar')">Prontas a publicar (${prontas.length})</div>
-    <div class="chip ${abaValidar==='publicadas'?'active':''}" onclick="setAbaValidar('publicadas')">Publicadas (${publicadas.length})</div>
-  </div>`;
-
-  const listasPorAba = { pendentes, correcao:emCorrecao, publicar:prontas, publicadas };
-  const lista = listasPorAba[abaValidar] || pendentes;
-
-  if(!lista.length){
-    const msgs = {
-      pendentes:'Não há notícias pendentes para este ciclo.',
-      correcao:'Não há notícias à espera de correção neste momento.',
-      publicar:'Não há notícias prontas a publicar neste momento.',
-      publicadas:'Ainda não há notícias publicadas.'
-    };
-    container.innerHTML=`${abas}<div class="card empty"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><p>${msgs[abaValidar]}</p></div>`;
-    return;
-  }
-
-  let html = `${abas}<div class="card">`;
-  lista.forEach(n=>{
-    const v = estadoNoticia(n);
-    let badgeClass = 'b-pend', badgeTxt = 'Pendente';
-    if(v.estado==='precisa_correcao'){ badgeClass='b-corr'; badgeTxt='Aguarda correção'; }
-    if(v.estado==='pode_publicar'){ badgeClass='b-pub'; badgeTxt='Pronta a publicar'; }
-    if(v.estado==='publicada'){ badgeClass='b-val'; badgeTxt='📢 Publicada'; }
-
-    const notaHtml = (abaValidar==='correcao' && v.nota) ? `<div style="font-size:11px;color:var(--text2);margin-top:3px">📝 ${v.nota}${v.dataValidacao?' · enviado em '+v.dataValidacao:''}</div>` : '';
-    const publicadaHtml = (abaValidar==='publicadas') ? `<div style="font-size:11px;color:#5a1a8a;margin-top:3px">📢 Publicada por ${v.publicadoPor||v.validador||'—'} em ${v.dataPublicacao||'—'}</div>` : '';
-
-    html += `
-      <div class="li" onclick="abrirNoticia(${n._id})">
-        <div class="li-ico" style="background:var(--blue-bg)">📄</div>
-        <div class="li-b">
-          <div class="li-t">${n.titulo}</div>
-          <div class="li-s">${n.escola || 'Escola não indicada'} · ${n.proponente}</div>
-          ${notaHtml}
-          ${publicadaHtml}
+    const saved = loadLevel1Progress();
+    if(saved){
+      const savedDate = new Date(saved.savedAt).toLocaleDateString('pt-PT');
+      levelContentEl.innerHTML = `
+        <div class="placeholder-card">
+          Encontrámos um trabalho por terminar neste computador: <strong>${saved.nome}</strong> (${saved.turma}), guardado em ${savedDate}.
         </div>
-        <div class="li-r">
-          <span class="badge ${badgeClass}">${badgeTxt}</span>
+        <div class="nav-row" style="margin-top:16px;">
+          <button class="opt-btn" id="restart-fresh-btn">Começar de novo</button>
+          <button class="complete-btn" id="resume-btn" style="flex:1;">Continuar de onde fiquei</button>
         </div>
+      `;
+      document.getElementById('resume-btn').addEventListener('click', () => {
+        runLevel1Steps({ nome: saved.nome, turma: saved.turma }, false, saved.stepIdx);
+      });
+      document.getElementById('restart-fresh-btn').addEventListener('click', () => {
+        clearLevel1Progress();
+        showLevel1Identification(false);
+      });
+      return;
+    }
+
+    showLevel1Identification(false);
+  }
+
+  function showLevel1Identification(isReview){
+    levelContentEl.innerHTML = `
+      <div class="id-form">
+        <p class="stage-progress">Antes de começares, identifica-te.</p>
+        <label for="l1-nome">Nome</label>
+        <input type="text" id="l1-nome" autocomplete="off">
+        <label for="l1-turma">Turma</label>
+        <input type="text" id="l1-turma" autocomplete="off">
+        <div class="id-error" id="l1-id-error"></div>
+        <button class="complete-btn" id="l1-start-btn" style="margin-top:8px;">Começar Nível 1</button>
       </div>
     `;
-  });
-  html += `</div>`;
-  container.innerHTML = html;
-}
-
-function setAbaValidar(a){ abaValidar=a; renderValidar(); }
-
-async function abrirNoticia(id){
-  noticiaAtual = noticias.find(n=>n._id===id);
-  decisaoAtual = null;
-  renderValidar();
-  if(noticiaAtual && sessao){
-    try {
-      const url = API_URL+'?action=marcarPresenca&chave='+encodeURIComponent(chave(noticiaAtual))+'&validador='+encodeURIComponent(sessao.nome);
-      await apiFetch_(url);
-      const urlPres = API_URL+'?action=obterPresenca&chave='+encodeURIComponent(chave(noticiaAtual))+'&validador='+encodeURIComponent(sessao.nome);
-      const res = await apiFetch_(urlPres);
-      if(res.ok && res.presenca){
-        toast(`Atenção: ${res.presenca.validador} também está a ver esta notícia!`, 'warning');
+    document.getElementById('l1-start-btn').addEventListener('click', () => {
+      const nome = document.getElementById('l1-nome').value.trim();
+      const turma = document.getElementById('l1-turma').value.trim();
+      const errorEl = document.getElementById('l1-id-error');
+      if(!nome || !turma){
+        errorEl.textContent = 'Preenche o nome e a turma antes de começar.';
+        return;
       }
-    } catch(e){}
+      runLevel1Steps({ nome, turma }, isReview, 0);
+    });
   }
-}
 
-function renderDetalheNoticia(n, container){
-  const v = estadoNoticia(n);
-  const len = (n.corpo||'').length;
-  
-  let html = `
-    <button class="btn btn-sec" onclick="noticiaAtual=null;renderValidar()" style="margin-bottom:14px">
-      <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Voltar à lista
-    </button>
-    
-    <div id="presenca-banner-container"></div>
+  const CYCLES_PER_DOC = 2; // ciclos completos (copiar→explicar→refletir) antes de poder pedir o documento seguinte
 
-    <div class="card">
-      <h2 class="ntitle">${n.titulo}</h2>
-      <div class="meta-row">
-        <div class="mi">👤 ${n.proponente}</div>
-        <div class="mi">🏫 ${n.escola||'—'}</div>
-        <div class="mi">📅 ${n.data||'—'}</div>
-      </div>
-      
-      ${n.imgDestaque ? `<img src="${n.imgDestaque}" class="dest-img" onclick="window.open('${n.imgDestaque}')">` : ''}
+  function buildLevel1Steps(){
+    const steps = [];
+    LEVEL1_COPY_LINKS.forEach((link, idx) => {
+      for(let cycle = 1; cycle <= CYCLES_PER_DOC; cycle++){
+        steps.push({ type: 'copy', link, cycle });
+        steps.push({ type: 'explain' });
+        steps.push({ type: 'reflect', momento: `${link.label} (parte ${cycle}/${CYCLES_PER_DOC})` });
+      }
+      const isLast = idx === LEVEL1_COPY_LINKS.length - 1;
+      if(!isLast){
+        steps.push({ type: 'request-next', nextLabel: LEVEL1_COPY_LINKS[idx + 1].label });
+      }
+    });
+    steps.push({ type: 'quiz' });
+    return steps;
+  }
 
-      <div class="sec">Texto da notícia</div>
-      <div class="nbody ${!n.corpo?'empty':''}">${n.corpo || 'Sem texto.'}</div>
-      <div class="char-info"><span>${len} caracteres</span></div>
+  function runLevel1Steps(student, isReview, startStepIdx){
+    level1Session = isReview ? null : student; // só ativa o controlo de saída fora do modo de revisão
+    const steps = buildLevel1Steps();
+    let stepIdx = startStepIdx || 0;
+    showStep();
 
-      ${n.video || n.links ? `
-        <div class="sec">Anexos & Links</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          ${n.video ? `<div class="mpill">🎥 <a href="${n.video}" target="_blank">Vídeo</a></div>` : ''}
-          ${n.links ? `<div class="mpill">🔗 <a href="${n.links}" target="_blank">Links externos</a></div>` : ''}
-        </div>
-      ` : ''}
-
-      <!-- IA -->
-      <div class="ai-block">
-        <div class="ai-hd"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg> Análise de Inteligência Artificial</div>
-        <div class="ai-body" id="ai-content">
-          ${n._analise ? n._analise.replace(/\n/g,'<br>') : `<button class="btn btn-sec" onclick="analisarIA(${n._id})">✨ Analisar com Gemini IA</button>`}
-        </div>
-      </div>
-    </div>
-
-    <!-- DECISÃO -->
-    <div class="card">
-      ${v.estado==='publicada' ? `
-        <div class="sec">Estado</div>
-        <div class="presenca-banner" style="background:#f0e8ff;border-color:#c9a8f5;color:#5a1a8a">
-          📢 <strong>Já publicada</strong> por ${v.publicadoPor||v.validador||'—'} em ${v.dataPublicacao||'—'}. Não precisa de mais nenhuma ação.
-        </div>
-      ` : `
-      <div class="sec">Decisão de Validação</div>
-      <div class="decisao-grid">
-        <div class="dec-btn dec-pub ${decisaoAtual==='pode_publicar'||v.estado==='pode_publicar'?'selected':''}" onclick="selecionarDecisao('pode_publicar')">
-          <div class="di">✅</div>
-          <div class="dt">Pronta a publicar</div>
-          <div class="ds">Sem reparos ou alterações ligeiras</div>
-        </div>
-        <div class="dec-btn dec-corr ${decisaoAtual==='precisa_correcao'||v.estado==='precisa_correcao'?'selected':''}" onclick="selecionarDecisao('precisa_correcao')">
-          <div class="di">✏️</div>
-          <div class="dt">Pedir correção</div>
-          <div class="ds">Necessita de alterações pelo proponente</div>
-        </div>
-      </div>
-
-      <div id="decisao-opcoes">
-        ${(decisaoAtual==='pode_publicar'||v.estado==='pode_publicar') ? `
-          <div class="sec">Meios onde pode ser publicada</div>
-          <div class="pub-row">
-            <label class="pub-lbl"><input type="checkbox" id="m-site"> Site AET</label>
-            <label class="pub-lbl"><input type="checkbox" id="m-fb"> Facebook</label>
-            <label class="pub-lbl"><input type="checkbox" id="m-ig"> Instagram</label>
-            <label class="pub-lbl"><input type="checkbox" id="m-tk"> TikTok</label>
-          </div>
-        ` : ''}
-
-        ${(decisaoAtual==='precisa_correcao'||v.estado==='precisa_correcao') ? `
-          <div class="sec">Notas / Correções necessárias</div>
-          <textarea class="nota" id="val-nota" placeholder="Descreve as correções necessárias...">${v.nota||''}</textarea>
-        ` : ''}
-      </div>
-
-      <div class="btn-row">
-        <button class="btn btn-apro btn-full" onclick="submeterValidacao()">Gravar Validação</button>
-      </div>
-      `}
-    </div>
-  `;
-  container.innerHTML = html;
-}
-
-function selecionarDecisao(tipo){
-  decisaoAtual = tipo;
-  renderDetalheNoticia(noticiaAtual, document.getElementById('content-validar'));
-}
-
-async function analisarIA(id){
-  const el = document.getElementById('ai-content');
-  el.innerHTML = `<div class="ai-load"><span class="spinner"></span> A analisar notícia com Gemini IA…</div>`;
-  try{
-    const n = noticias.find(x=>x._id===id);
-    const url = API_URL+'?action=analisarIA&chave='+encodeURIComponent(chave(n))+'&t='+Date.now();
-    const res = await apiFetch_(url, 45000);
-    if(res.ok){
-      n._analise = res.analise;
-      saveNoticias();
-      el.innerHTML = res.analise.replace(/\n/g,'<br>');
-    } else {
-      el.innerHTML = `<span style="color:var(--red)">Erro na análise: ${res.error}</span>`;
+    function showStep(){
+      removeCopyActionbar();
+      if(!isReview) saveLevel1Progress(student, stepIdx);
+      const step = steps[stepIdx];
+      if(step.type === 'copy'){
+        renderCopyStep(step.link, step.cycle, () => { stepIdx++; showStep(); });
+      } else if(step.type === 'explain'){
+        renderExplainStep(() => { stepIdx++; showStep(); });
+      } else if(step.type === 'reflect'){
+        renderReflectStep(student, step.momento, () => { stepIdx++; showStep(); });
+      } else if(step.type === 'request-next'){
+        renderRequestNextStep(step.nextLabel, () => { stepIdx++; showStep(); });
+      } else if(step.type === 'quiz'){
+        runQuizStage(QUIZ_L1, 'Quiz Final do Nível 1', () => { stepIdx++; showStep(); }, 60);
+      } else {
+        level1Session = null;
+        if(!isReview) clearLevel1Progress();
+        levelContentEl.innerHTML = '<div class="placeholder-card" style="border-style:solid;border-color:var(--ok);color:var(--text);">Concluíste o Nível 1! 🎉</div>';
+        const btn = document.createElement('button');
+        btn.className = 'complete-btn';
+        btn.style.marginTop = '18px';
+        btn.textContent = isReview ? 'Voltar ao mapa' : 'Concluir Nível 1';
+        btn.addEventListener('click', () => { isReview ? closeLevel() : completeLevel(1); });
+        levelContentEl.appendChild(btn);
+      }
     }
-  }catch(e){
-    el.innerHTML = `<span style="color:var(--red)">Erro ao comunicar com o serviço de IA.</span>`;
-  }
-}
-
-async function submeterValidacao(){
-  if(!decisaoAtual && !validacoes[chave(noticiaAtual)]?.estado){
-    toast('Seleciona uma decisão primeiro','warning');
-    return;
-  }
-  const estado = decisaoAtual || validacoes[chave(noticiaAtual)].estado;
-  const meios = {
-    site: document.getElementById('m-site')?.checked || false,
-    fb: document.getElementById('m-fb')?.checked || false,
-    ig: document.getElementById('m-ig')?.checked || false,
-    tk: document.getElementById('m-tk')?.checked || false
-  };
-  const nota = document.getElementById('val-nota')?.value || '';
-
-  showLoad('A guardar validação…');
-  try {
-    await apiGuardar(noticiaAtual, estado, meios, nota);
-    hideLoad();
-    toast('Validação gravada com sucesso!','success');
-    if(estado === 'precisa_correcao'){
-      abrirEmailModal(noticiaAtual, nota);
-    } else {
-      noticiaAtual = null;
-      renderValidar();
-    }
-  } catch(e){
-    hideLoad();
-    toast('Erro ao guardar validação.','error');
-  }
-}
-
-async function marcarComoPublicada(id){
-  const n = noticias.find(x=>x._id===id);
-  if(!n) return;
-  showLoad('A marcar como publicada…');
-  try {
-    const data = await apiMarcarPublicada(n);
-    hideLoad();
-    if(data.ok){
-      toast('Notícia marcada como publicada!','success');
-      noticiaAtual = null;
-      renderValidar();
-    } else {
-      toast(data.error||'Erro ao marcar como publicada.','error');
-    }
-  } catch(e){
-    hideLoad();
-    toast('Erro ao marcar como publicada.','error');
-  }
-}
-
-async function marcarComoPublicadaGestao(id){
-  const n = noticias.find(x=>x._id===id);
-  if(!n) return;
-  showLoad('A marcar como publicada…');
-  try {
-    const data = await apiMarcarPublicada(n, 'Gestão');
-    hideLoad();
-    if(data.ok){
-      toast('Notícia marcada como publicada!','success');
-      renderGestaoConteudo();
-    } else {
-      toast(data.error||'Erro ao marcar como publicada.','error');
-    }
-  } catch(e){
-    hideLoad();
-    toast('Erro ao marcar como publicada.','error');
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// MODAL DE EMAIL
-// ═══════════════════════════════════════════════════════════════
-function abrirEmailModal(n, nota){
-  emailNotId = n._id;
-  document.getElementById('email-assunto').value = `Validação de Notícia: ${n.titulo}`;
-  document.getElementById('email-corpo').value = 
-`Olá ${n.proponente},
-
-Relativamente à notícia proposta com o título "${n.titulo}", foram sugeridas as seguintes revisões/correções antes da sua publicação:
-
-${nota}
-
-Agradecemos o envio das alterações assim que possível.
-
-Melhores cumprimentos,
-${sessao.nome}
-Agrupamento de Escolas Templários`;
-
-  document.getElementById('email-modal').classList.add('show');
-}
-
-function fecharEmailModal(){
-  document.getElementById('email-modal').classList.remove('show');
-  noticiaAtual = null;
-  renderValidar();
-}
-
-function copiarEmail(){
-  const corpo = document.getElementById('email-corpo').value;
-  navigator.clipboard.writeText(corpo).then(()=>{
-    toast('Mensagem copiada para a área de transferência!','success');
-    fecharEmailModal();
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════
-// ÁREA DE GESTÃO & IMPORTAÇÃO EXCEL
-// ═══════════════════════════════════════════════════════════════
-async function renderGestao(){
-  showLoad('A carregar do Google Sheets…');
-  await carregarDadosServidor_();
-  hideLoad();
-  renderGestaoConteudo();
-}
-
-function renderGestaoConteudo(){
-  const total = noticias.length;
-  const pend = noticias.filter(n=>estadoNoticia(n).estado==='pendente').length;
-  const pub = noticias.filter(n=>estadoNoticia(n).estado==='pode_publicar').length;
-  const corr = noticias.filter(n=>estadoNoticia(n).estado==='precisa_correcao').length;
-  const publ = noticias.filter(n=>estadoNoticia(n).estado==='publicada').length;
-
-  document.getElementById('stats-gestao').innerHTML = `
-    <div class="sc"><div class="sv">${total}</div><div class="sl">Total de Noticias</div></div>
-    <div class="sc"><div class="sv" style="color:var(--amber)">${pend}</div><div class="sl">Pendentes</div></div>
-    <div class="sc"><div class="sv" style="color:var(--green)">${pub}</div><div class="sl">Prontas a publicar</div></div>
-    <div class="sc"><div class="sv" style="color:var(--blue)">${corr}</div><div class="sl">Aguarda correção</div></div>
-    <div class="sc"><div class="sv" style="color:#5a1a8a">${publ}</div><div class="sl">Publicadas</div></div>
-  `;
-
-  document.getElementById('filter-row-gestao').innerHTML = `
-    <span class="chip ${filtroGestao==='todas'?'active':''}" onclick="setFiltroGestao('todas')">Todas (${total})</span>
-    <span class="chip ${filtroGestao==='pendente'?'active':''}" onclick="setFiltroGestao('pendente')">Pendentes (${pend})</span>
-    <span class="chip ${filtroGestao==='pode_publicar'?'active':''}" onclick="setFiltroGestao('pode_publicar')">Prontas (${pub})</span>
-    <span class="chip ${filtroGestao==='precisa_correcao'?'active':''}" onclick="setFiltroGestao('precisa_correcao')">Aguarda correção (${corr})</span>
-    <span class="chip ${filtroGestao==='publicada'?'active':''}" onclick="setFiltroGestao('publicada')">Publicadas (${publ})</span>
-  `;
-
-  const filtradas = noticias.filter(n=>{
-    if(filtroGestao==='todas') return true;
-    return estadoNoticia(n).estado === filtroGestao;
-  });
-
-  const container = document.getElementById('lista-gestao');
-  if(!filtradas.length){
-    container.innerHTML = `<div class="empty"><p>Nenhuma notícia encontrada.</p></div>`;
-    return;
   }
 
-  let html = '';
-  filtradas.forEach(n=>{
-    const v = estadoNoticia(n);
-    let badgeClass = 'b-pend', badgeTxt = 'Pendente';
-    if(v.estado==='pode_publicar'){ badgeClass='b-pub'; badgeTxt='Pronta a publicar'; }
-    if(v.estado==='precisa_correcao'){ badgeClass='b-corr'; badgeTxt='Aguarda correção'; }
-    if(v.estado==='publicada'){ badgeClass='b-val'; badgeTxt='📢 Publicada'; }
-
-    const infoValidacao = v.validador ? ` · Validado por ${v.validador}${v.dataValidacao?' em '+v.dataValidacao:''}` : '';
-    const infoPublicacao = v.estado==='publicada' ? `<div style="font-size:11px;color:#5a1a8a;margin-top:2px">📢 Publicada por ${v.publicadoPor||v.validador||'—'} em ${v.dataPublicacao||'—'}</div>` : '';
-
-    const pres = presencas[n.chave || chave(n)];
-    let presencaHtml = '';
-    if(pres && pres.validador){
-      let dataStr = '';
-      try{ dataStr = new Date(pres.timestamp).toLocaleDateString('pt-PT'); }catch(e){}
-      presencaHtml = `<div style="font-size:11px;color:var(--amber-text);margin-top:2px">🔎 Em validação por: ${pres.validador}${dataStr?' ('+dataStr+')':''}</div>`;
-    }
-
-    const botaoPublicar = (v.estado==='pode_publicar') ? `
-      <button class="btn" style="background:#f0e8ff;color:#5a1a8a;font-size:11px;padding:6px 10px" onclick="marcarComoPublicadaGestao(${n._id})">Publicámos!</button>
-    ` : '';
-
-    html += `
-      <div class="li">
-        <div class="li-ico" style="background:var(--blue-bg)">📄</div>
-        <div class="li-b">
-          <div class="li-t">${n.titulo}</div>
-          <div class="li-s">${n.escola||'Escola não indicada'} · ${n.proponente}${infoValidacao}</div>
-          ${infoPublicacao}
-          ${presencaHtml}
-        </div>
-        <div class="li-r">
-          <span class="badge ${badgeClass}">${badgeTxt}</span>
-          ${botaoPublicar}
-        </div>
+  function renderCopyStep(link, onDone){
+    levelContentEl.innerHTML = `
+      <div class="stage-title">Passa para o caderno: ${link.label}</div>
+      <div class="stage-progress" id="copy-instructions">Copia o conteúdo desta página para o teu caderno. No mínimo ${COPY_MINUTES} minutos — depois disso, ficas o tempo que precisares. Clica no botão só quando estiveres mesmo pronto para falar com o colega.</div>
+      <div class="copy-timer" id="copy-timer">${COPY_MINUTES}:00</div>
+      <iframe class="embed-frame" id="copy-iframe" src="${link.url}" title="${link.label}" loading="lazy"></iframe>
+      <div class="embed-fallback">Se a página não aparecer acima, abre-a numa nova aba: <a href="${link.url}" target="_blank" rel="noopener">${link.label}</a></div>
+      <div class="copy-actionbar-spacer"></div>
+    `;
+    // Barra de ação fixa ao próprio ECRÃ (position:fixed), fora do fluxo do
+    // #level-content — assim fica sempre visível e por cima de tudo, mesmo que
+    // o dedo, ao tentar fazer scroll sobre o embed, fique "preso" dentro dele
+    // e a página não deslize. O aluno nunca precisa de conseguir fazer scroll
+    // para chegar ao botão.
+    removeCopyActionbar();
+    const actionbar = document.createElement('div');
+    actionbar.className = 'copy-actionbar';
+    actionbar.id = 'copy-actionbar';
+    actionbar.innerHTML = `
+      <div class="copy-actionbar-inner">
+        <div class="copy-hint" id="copy-hint">Aguarda o fim do tempo mínimo para continuares.</div>
+        <button class="complete-btn" id="copy-done-btn" disabled>Terminei, quero falar com o colega</button>
       </div>
     `;
-  });
-  container.innerHTML = html;
-}
+    document.body.appendChild(actionbar);
+    // O iframe acima é criado UMA ÚNICA VEZ para este documento e nunca é recriado,
+    // para o aluno não perder a página onde ficou. Ao fim do tempo mínimo, o botão
+    // liberta-se e fica disponível o tempo que for preciso — sem mais temporizadores.
+    const timerEl = document.getElementById('copy-timer');
+    const doneBtn = document.getElementById('copy-done-btn');
+    const hintEl = document.getElementById('copy-hint');
+    let secondsLeft = COPY_MINUTES * 60;
+    const timerId = setInterval(() => {
+      secondsLeft--;
+      const m = String(Math.floor(secondsLeft / 60)).padStart(2, '0');
+      const s = String(secondsLeft % 60).padStart(2, '0');
+      timerEl.textContent = m + ':' + s;
+      if(secondsLeft <= 0){
+        clearInterval(timerId);
+        doneBtn.disabled = false;
+        hintEl.textContent = 'Já podes continuar quando quiseres.';
+      }
+    }, 1000);
+    doneBtn.addEventListener('click', () => { clearInterval(timerId); removeCopyActionbar(); onDone(); });
+  }
 
-function setFiltroGestao(f){
-  filtroGestao = f;
-  renderGestaoConteudo();
-}
+  function renderExplainStep(onDone){
+    removeCopyActionbar();
+    levelContentEl.innerHTML = `
+      <div class="placeholder-card">
+        Vira-te para o colega do lado e explica-lhe, por palavras tuas, o que acabaste de aprender.
+      </div>
+      <button class="complete-btn" id="explain-next-btn" style="margin-top:16px;">Já expliquei ao colega, continuar</button>
+    `;
+    document.getElementById('explain-next-btn').addEventListener('click', onDone);
+  }
 
-function importarExcel(input){
-  const file = input.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e){
-    try {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, {type: 'array'});
-      const sheetName = workbook.SheetNames[0];
-      const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-      
-      let adicionados = 0;
-      let nextId = Math.max(0,...noticias.map(n=>n._id||0))+1;
-      const chavesLocais = new Set(noticias.map(n=>chave(n)));
+  function renderReflectStep(student, momento, onDone){
+    removeCopyActionbar();
+    levelContentEl.innerHTML = `
+      <div class="stage-title">Reflexão</div>
+      <div class="stage-progress">O que achas que foi mais difícil de perceber para o teu colega?</div>
+      <textarea class="reflect-textarea" id="reflect-text" placeholder="Escreve aqui..."></textarea>
+      <div class="id-error" id="reflect-error"></div>
+      <button class="complete-btn" id="reflect-next-btn">Guardar e continuar</button>
+    `;
+    document.getElementById('reflect-next-btn').addEventListener('click', () => {
+      const texto = document.getElementById('reflect-text').value.trim();
+      const errorEl = document.getElementById('reflect-error');
+      if(!texto){
+        errorEl.textContent = 'Escreve alguma coisa antes de continuar.';
+        return;
+      }
+      sendMissaoEvent({
+        tipo: 'Reflexão',
+        nome: student.nome,
+        turma: student.turma,
+        nivel: 1,
+        momento: momento,
+        texto: texto,
+      });
+      onDone();
+    });
+  }
 
-      rows.forEach(r=>{
-        const proponente = r['Nome'] || r['proponente'] || r['Carimbo de data/hora'] || 'Sem nome';
-        const titulo = r['Título da notícia'] || r['titulo'] || r['Título'] || 'Sem título';
-        const c = norm(titulo)+'|'+norm(proponente);
+  function runClassifyStage(items, labelA, labelB, keyA, keyB, title, onDone){
+    const deck = shuffle(items);
+    const answers = new Array(deck.length).fill(null);
+    let idx = 0;
+    renderCard();
 
-        if(!chavesLocais.has(c)){
-          const nova = {
-            _id: nextId++,
-            proponente: r['Nome'] || r['proponente'] || '',
-            emailProponente: r['Endereço de e-mail'] || r['emailProponente'] || '',
-            titulo: titulo,
-            categorias: (r['Categoria']||r['categorias']||'').toString().split(';').map(s=>s.trim()).filter(Boolean),
-            escola: r['Escola / Jardim de Infância'] || r['escola'] || '',
-            data: r['Data'] || new Date().toISOString().slice(0,10),
-            corpo: r['Texto da notícia'] || r['corpo'] || '',
-            imgDestaque: r['Imagem de destaque'] || r['imgDestaque'] || '',
-            outrasFotos: (r['Outras imagens']||r['outrasFotos']||'').toString().split(';').map(s=>s.trim()).filter(Boolean),
-            video: r['Vídeo'] || r['video'] || '',
-            links: r['Links'] || r['links'] || '',
-            _meios:{site:false,fb:false,ig:false,tk:false}, _analise:null
-          };
-          noticias.push(nova);
-          chavesLocais.add(c);
-          adicionados++;
+    function renderCard(){
+      const item = deck[idx];
+      levelContentEl.innerHTML = `
+        <div class="stage-title">${title}</div>
+        <div class="stage-progress">Item ${idx + 1} / ${deck.length}</div>
+        <div class="flash-card">${item.text}</div>
+        <div class="flash-btns">
+          <button class="opt-btn" data-choice="${keyA}">${labelA}</button>
+          <button class="opt-btn" data-choice="${keyB}">${labelB}</button>
+        </div>
+        <div class="flash-feedback" id="flash-feedback"></div>
+        <div class="nav-row">
+          <button class="opt-btn" id="prev-item-btn" ${idx === 0 ? 'disabled' : ''}>← Anterior</button>
+          <button class="complete-btn" id="next-item-btn" style="flex:1;">${idx === deck.length - 1 ? 'Concluir Parte' : 'Seguinte →'}</button>
+        </div>
+      `;
+      const buttons = levelContentEl.querySelectorAll('.flash-btns .opt-btn');
+      const feedback = document.getElementById('flash-feedback');
+
+      function paint(){
+        buttons.forEach(b => {
+          b.classList.remove('correct','wrong');
+          if(answers[idx] !== null){
+            if(b.dataset.choice === item.answer) b.classList.add('correct');
+            if(b.dataset.choice === answers[idx] && answers[idx] !== item.answer) b.classList.add('wrong');
+          }
+        });
+        if(answers[idx] === null){
+          feedback.textContent = '';
+          feedback.className = 'flash-feedback';
+        } else if(answers[idx] === item.answer){
+          feedback.textContent = 'Certo! ✅';
+          feedback.className = 'flash-feedback ok';
+        } else {
+          const correctLabel = item.answer === keyA ? labelA : labelB;
+          feedback.textContent = 'Resposta certa: "' + correctLabel + '".';
+          feedback.className = 'flash-feedback bad';
         }
+      }
+      paint();
+
+      buttons.forEach(b => {
+        b.addEventListener('click', () => {
+          answers[idx] = b.dataset.choice;
+          paint();
+        });
       });
 
-      saveNoticias();
-      renderGestao();
-      document.getElementById('import-status').textContent = `${adicionados} notícias importadas do ficheiro!`;
-      toast(`${adicionados} notícias importadas com sucesso!`,'success');
-    } catch(err){
-      toast('Erro ao ler o ficheiro Excel. Verifique a estrutura das colunas.','error');
+      document.getElementById('prev-item-btn').addEventListener('click', () => { idx--; renderCard(); });
+      document.getElementById('next-item-btn').addEventListener('click', () => {
+        if(idx < deck.length - 1){ idx++; renderCard(); }
+        else { finishStage(); }
+      });
     }
-  };
-  reader.readAsArrayBuffer(file);
-}
 
-async function sincronizarTudo(){
-  showLoad('A sincronizar notícias com a Google Sheets…');
-  let enviadas = 0;
-  try {
-    for(const n of noticias){
-      await apiGuardarNoticia(n);
-      enviadas++;
+    function finishStage(){
+      let score = 0;
+      deck.forEach((item, i) => { if(answers[i] === item.answer) score++; });
+      const pct = Math.round((score / deck.length) * 100);
+      const nota = ((score / deck.length) * 20).toFixed(1);
+      levelContentEl.innerHTML = `
+        <div class="placeholder-card">Resultado: <strong>${score} / ${deck.length}</strong> corretas (${pct}% — nota: ${nota}/20).</div>
+        <div class="flash-btns" style="margin-top:16px;">
+          <button class="opt-btn" id="retry-classify-btn">Tentar novamente</button>
+          <button class="complete-btn" id="continue-classify-btn" style="flex:1;">Continuar</button>
+        </div>
+      `;
+      document.getElementById('retry-classify-btn').addEventListener('click', () => runClassifyStage(items, labelA, labelB, keyA, keyB, title, onDone));
+      document.getElementById('continue-classify-btn').addEventListener('click', onDone);
     }
-    hideLoad();
-    toast(`${enviadas} notícias sincronizadas com o servidor!`,'success');
-  } catch(e){
-    hideLoad();
-    toast('Erro durante a sincronização total.','error');
   }
-}
+
+  function runQuizStage(questions, title, onDone, timeSeconds){
+    const total = timeSeconds || 60;
+    const deck = shuffle(questions);
+    const answers = new Array(deck.length).fill(null);
+    let idx = 0;
+    let timeLeft = total;
+    let timerId = null;
+
+    levelContentEl.innerHTML = `
+      <div class="stage-title">${title}</div>
+      <div class="stage-progress">Tens ${total} segundos no total para responder a ${deck.length} perguntas. Podes navegar entre perguntas e mudar respostas até concluíres.</div>
+      <button class="complete-btn" id="start-quiz-btn" style="margin-top:16px;">Começar</button>
+    `;
+    document.getElementById('start-quiz-btn').addEventListener('click', () => {
+      timerId = setInterval(() => {
+        timeLeft--;
+        const el = document.getElementById('quiz-timer');
+        if(el) el.textContent = '⏱ ' + timeLeft + 's';
+        if(timeLeft <= 0){ clearInterval(timerId); finishQuiz(); }
+      }, 1000);
+      renderQuestion();
+    });
+
+    function renderQuestion(){
+      const q = deck[idx];
+      levelContentEl.innerHTML = `
+        <div class="quiz-timer" id="quiz-timer">⏱ ${timeLeft}s</div>
+        <div class="stage-progress">Pergunta ${idx + 1} / ${deck.length}</div>
+        <div class="flash-card">${q.q}</div>
+        <div class="quiz-options">
+          ${q.options.map((opt, i) => `<button class="opt-btn quiz-opt" data-i="${i}">${opt}</button>`).join('')}
+        </div>
+        <div class="nav-row">
+          <button class="opt-btn" id="prev-item-btn" ${idx === 0 ? 'disabled' : ''}>← Anterior</button>
+          <button class="complete-btn" id="next-item-btn" style="flex:1;">${idx === deck.length - 1 ? 'Concluir Parte' : 'Seguinte →'}</button>
+        </div>
+      `;
+      const opts = levelContentEl.querySelectorAll('.quiz-opt');
+
+      function paint(){
+        opts.forEach((b, i) => {
+          b.classList.remove('correct','wrong');
+          if(answers[idx] !== null){
+            if(i === q.correct) b.classList.add('correct');
+            if(i === answers[idx] && answers[idx] !== q.correct) b.classList.add('wrong');
+          }
+        });
+      }
+      paint();
+
+      opts.forEach((b, i) => {
+        b.addEventListener('click', () => {
+          answers[idx] = i;
+          paint();
+        });
+      });
+
+      document.getElementById('prev-item-btn').addEventListener('click', () => { idx--; renderQuestion(); });
+      document.getElementById('next-item-btn').addEventListener('click', () => {
+        if(idx < deck.length - 1){ idx++; renderQuestion(); }
+        else { clearInterval(timerId); finishQuiz(); }
+      });
+    }
+
+    function finishQuiz(){
+      let score = 0;
+      deck.forEach((q, i) => { if(answers[i] === q.correct) score++; });
+      const pct = Math.round((score / deck.length) * 100);
+      const nota = ((score / deck.length) * 20).toFixed(1);
+      levelContentEl.innerHTML = `
+        <div class="placeholder-card">Resultado do quiz: <strong>${score} / ${deck.length}</strong> (${pct}% — nota: ${nota}/20)</div>
+        <div class="flash-btns" style="margin-top:16px;">
+          <button class="opt-btn" id="retry-quiz-btn">Tentar novamente</button>
+          <button class="complete-btn" id="continue-btn" style="flex:1;">Continuar</button>
+        </div>
+      `;
+      document.getElementById('retry-quiz-btn').addEventListener('click', () => runQuizStage(questions, title, onDone, total));
+      document.getElementById('continue-btn').addEventListener('click', onDone);
+    }
+  }
+
+  function runCalcStage(problems, title, onDone){
+    const deck = shuffle(problems);
+    let idx = 0;
+    renderProblem();
+
+    function renderProblem(){
+      if(idx >= deck.length){ onDone(); return; }
+      const p = deck[idx];
+      levelContentEl.innerHTML = `
+        <div class="stage-title">${title}</div>
+        <div class="stage-progress">Problema ${idx + 1} / ${deck.length}</div>
+        <div class="flash-card">${p.text}</div>
+        <div class="calc-input-row">
+          <input type="number" id="calc-input" placeholder="Resultado em ${p.unit}">
+          <button class="opt-btn" id="calc-check-btn" style="flex:0 0 auto;">Verificar</button>
+        </div>
+        <div class="flash-feedback" id="flash-feedback"></div>
+      `;
+      const input = document.getElementById('calc-input');
+      const checkBtn = document.getElementById('calc-check-btn');
+      const check = () => {
+        const val = Number(input.value);
+        const feedback = document.getElementById('flash-feedback');
+        if(val === p.answer){
+          feedback.textContent = 'Certo! ✅ (' + p.answer + ' ' + p.unit + ')';
+          feedback.className = 'flash-feedback ok';
+          input.disabled = true;
+          checkBtn.disabled = true;
+          setTimeout(() => { idx++; renderProblem(); }, 700);
+        } else {
+          feedback.textContent = 'Não é esse valor — revê a fórmula (Débito Cardíaco = Frequência Cardíaca × Volume Sistólico) e tenta outra vez.';
+          feedback.className = 'flash-feedback bad';
+        }
+      };
+      checkBtn.addEventListener('click', check);
+      input.addEventListener('keydown', e => { if(e.key === 'Enter') check(); });
+    }
+  }
+
+  function setupLevel2(){
+    completeBtn.style.display = 'none';
+    testTag.style.display = 'none';
+    renderHelpLinks(2);
+
+    if(state.status[2] === 'completed'){
+      levelContentEl.innerHTML = `
+        <div class="placeholder-card">Já concluíste este nível — bom trabalho! Podes rever os desafios para consolidar a matéria, sem perder pontos.</div>
+        <button class="complete-btn" id="review-btn" style="margin-top:16px;">Rever desafios</button>
+      `;
+      document.getElementById('review-btn').addEventListener('click', () => runLevel2Flow(true));
+      return;
+    }
+    runLevel2Flow(false);
+  }
+
+  function runLevel2Flow(isReview){
+    let stage = 0;
+    showStage();
+
+    function showStage(){
+      if(stage === 0){
+        runClassifyStage(CLASSIFY_CIRC, 'Grande Circulação', 'Pequena Circulação', 'grande', 'pequena', 'Parte 1 de 4 — Grande vs Pequena Circulação', () => { stage = 1; showStage(); });
+      } else if(stage === 1){
+        runClassifyStage(CLASSIFY_VESSELS, 'Artéria', 'Veia', 'arteria', 'veia', 'Parte 2 de 4 — Artérias vs Veias', () => { stage = 2; showStage(); });
+      } else if(stage === 2){
+        runClassifyStage(CLASSIFY_DC, 'Aumenta', 'Diminui', 'aumenta', 'diminui', 'Parte 3 de 4 — O que Aumenta ou Diminui o Débito Cardíaco?', () => { stage = 3; showStage(); });
+      } else if(stage === 3){
+        runQuizStage(QUIZ_L2, 'Parte 4 de 4 — Quiz Cronometrado', () => { stage = 4; showStage(); }, 75);
+      } else {
+        levelContentEl.innerHTML = '<div class="placeholder-card" style="border-style:solid;border-color:var(--ok);color:var(--text);">Concluíste as 4 partes do Nível 2! 🎉</div>';
+        const btn = document.createElement('button');
+        btn.className = 'complete-btn';
+        btn.style.marginTop = '18px';
+        btn.textContent = isReview ? 'Voltar ao mapa' : 'Concluir Nível 2';
+        btn.addEventListener('click', () => { isReview ? closeLevel() : completeLevel(2); });
+        levelContentEl.appendChild(btn);
+      }
+    }
+  }
+
+  function setupLevel3(){
+    completeBtn.style.display = 'none';
+    testTag.style.display = 'none';
+    renderHelpLinks(3);
+
+    if(state.status[3] === 'completed'){
+      levelContentEl.innerHTML = `
+        <div class="placeholder-card">Já concluíste este nível — bom trabalho! Podes rever os desafios para consolidar a matéria, sem perder pontos.</div>
+        <button class="complete-btn" id="review-btn" style="margin-top:16px;">Rever desafios</button>
+      `;
+      document.getElementById('review-btn').addEventListener('click', () => runLevel3Flow(true));
+      return;
+    }
+    runLevel3Flow(false);
+  }
+
+  function runLevel3Flow(isReview){
+    let stage = 0;
+    showStage();
+
+    function showStage(){
+      if(stage === 0){
+        runClassifyStage(CLASSIFY_ZONE, 'Zona Condutora', 'Zona de Trocas', 'condutora', 'trocas', 'Parte 1 de 4 — Zona Condutora vs Zona de Trocas Gasosas', () => { stage = 1; showStage(); });
+      } else if(stage === 1){
+        runClassifyStage(CLASSIFY_MECH, 'Eupneica', 'Forçada', 'eupneica', 'forcada', 'Parte 2 de 4 — Respiração Eupneica vs Forçada', () => { stage = 2; showStage(); });
+      } else if(stage === 2){
+        runClassifyStage(CLASSIFY_VENT, 'Aumenta', 'Diminui', 'aumenta', 'diminui', 'Parte 3 de 4 — O que Aumenta ou Diminui a Ventilação Pulmonar?', () => { stage = 3; showStage(); });
+      } else if(stage === 3){
+        runQuizStage(QUIZ_L3, 'Parte 4 de 4 — Quiz Cronometrado', () => { stage = 4; showStage(); }, 75);
+      } else {
+        levelContentEl.innerHTML = '<div class="placeholder-card" style="border-style:solid;border-color:var(--ok);color:var(--text);">Concluíste as 4 partes do Nível 3! 🎉</div>';
+        const btn = document.createElement('button');
+        btn.className = 'complete-btn';
+        btn.style.marginTop = '18px';
+        btn.textContent = isReview ? 'Voltar ao mapa' : 'Concluir Nível 3';
+        btn.addEventListener('click', () => { isReview ? closeLevel() : completeLevel(3); });
+        levelContentEl.appendChild(btn);
+      }
+    }
+  }
+
+  function setupLevel4(){
+    completeBtn.style.display = 'none';
+    testTag.style.display = 'none';
+    renderHelpLinks(4);
+
+    if(state.status[4] === 'completed'){
+      levelContentEl.innerHTML = `
+        <div class="placeholder-card">Já concluíste este nível — bom trabalho! Podes rever os desafios para consolidar a matéria, sem perder pontos.</div>
+        <button class="complete-btn" id="review-btn" style="margin-top:16px;">Rever desafios</button>
+      `;
+      document.getElementById('review-btn').addEventListener('click', () => runLevel4Flow(true));
+      return;
+    }
+    runLevel4Flow(false);
+  }
+
+  function runLevel4Flow(isReview){
+    let stage = 0;
+    showStage();
+
+    function showStage(){
+      if(stage === 0){
+        runClassifyStage(CLASSIFY_NUTRIENTS, 'Macronutriente', 'Micronutriente', 'macro', 'micro', 'Parte 1 de 3 — Macronutrientes vs Micronutrientes', () => { stage = 1; showStage(); });
+      } else if(stage === 1){
+        runClassifyStage(CLASSIFY_TUBE, 'Tubo Digestivo', 'Órgão Anexo', 'tubo', 'anexo', 'Parte 2 de 3 — Tubo Digestivo vs Órgãos Anexos', () => { stage = 2; showStage(); });
+      } else if(stage === 2){
+        runQuizStage(QUIZ_L4, 'Parte 3 de 3 — Quiz Cronometrado', () => { stage = 3; showStage(); }, 75);
+      } else {
+        levelContentEl.innerHTML = '<div class="placeholder-card" style="border-style:solid;border-color:var(--ok);color:var(--text);">Concluíste as 3 partes do Nível 4! 🎉</div>';
+        const btn = document.createElement('button');
+        btn.className = 'complete-btn';
+        btn.style.marginTop = '18px';
+        btn.textContent = isReview ? 'Voltar ao mapa' : 'Concluir Nível 4';
+        btn.addEventListener('click', () => { isReview ? closeLevel() : completeLevel(4); });
+        levelContentEl.appendChild(btn);
+      }
+    }
+  }
+
+  function setupLevel5(){
+    completeBtn.style.display = 'none';
+    testTag.style.display = 'none';
+    renderHelpLinks(5);
+
+    if(state.status[5] === 'completed'){
+      levelContentEl.innerHTML = `
+        <div class="placeholder-card">Já concluíste o jogo — parabéns! Podes rever os desafios para consolidar a matéria, sem perder pontos.</div>
+        <button class="complete-btn" id="review-btn" style="margin-top:16px;">Rever desafios</button>
+      `;
+      document.getElementById('review-btn').addEventListener('click', () => runLevel5Flow(true));
+      return;
+    }
+    runLevel5Flow(false);
+  }
+
+  function runLevel5Flow(isReview){
+    let stage = 0;
+    showStage();
+
+    function showStage(){
+      if(stage === 0){
+        runClassifyStage(CLASSIFY_TEMP, 'Hipertermia', 'Hipotermia', 'hiper', 'hipo', 'Parte 1 de 3 — Respostas à Hipertermia vs Hipotermia', () => { stage = 1; showStage(); });
+      } else if(stage === 1){
+        runClassifyStage(CLASSIFY_HIDRICO, 'Recetor de Osmolaridade', 'Recetor de Volume', 'osmo', 'volume', 'Parte 2 de 3 — Recetores de Osmolaridade vs de Volume', () => { stage = 2; showStage(); });
+      } else if(stage === 2){
+        runQuizStage(QUIZ_L5, 'Parte 3 de 3 — Quiz Cronometrado', () => { stage = 3; showStage(); }, 75);
+      } else {
+        levelContentEl.innerHTML = `
+          <div class="placeholder-card" style="border-style:solid;border-color:var(--ok);color:var(--text);">
+            Concluíste as 3 partes do Nível 5 — e fechaste o círculo da homeostasia que começou no Nível 1! 🎉🏆
+          </div>`;
+        const btn = document.createElement('button');
+        btn.className = 'complete-btn';
+        btn.style.marginTop = '18px';
+        btn.textContent = isReview ? 'Voltar ao mapa' : 'Concluir Jogo';
+        btn.addEventListener('click', () => { isReview ? closeLevel() : completeLevel(5); });
+        levelContentEl.appendChild(btn);
+      }
+    }
+  }
+
+  function closeLevel(){
+    levelScreen.classList.remove('open');
+    activeLevel = null;
+    level1Session = null;
+    removeCopyActionbar();
+  }
+
+  function completeLevel(id){
+    if(state.status[id] === 'completed') return;
+    state.status[id] = 'completed';
+    state.points += LEVELS.find(l => l.id === id).basePoints;
+    if(id < LEVELS.length && state.status[id+1] === 'locked'){
+      state.status[id+1] = 'unlocked';
+    }
+    render();
+    closeLevel();
+  }
+
+  document.querySelectorAll('.node').forEach(node => {
+    const lvl = Number(node.dataset.level);
+    node.addEventListener('click', () => openLevel(lvl));
+    node.addEventListener('keydown', e => {
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openLevel(lvl); }
+    });
+  });
+
+  backBtn.addEventListener('click', closeLevel);
+  completeBtn.addEventListener('click', () => { if(activeLevel) completeLevel(activeLevel); });
+
+  render();
 </script>
+
 </body>
 </html>
