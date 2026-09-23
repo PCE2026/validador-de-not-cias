@@ -332,6 +332,7 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
   <div class="modal">
     <h2><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>Email para o proponente</h2>
     <p class="sub">Revê e ajusta antes de copiar.</p>
+    <div class="ef"><label>Para</label><input type="text" id="email-para" readonly></div>
     <div class="ef"><label>Assunto</label><input type="text" id="email-assunto"></div>
     <div class="ef"><label>Mensagem</label><textarea id="email-corpo"></textarea></div>
     <div class="modal-btns">
@@ -636,9 +637,9 @@ function renderStats(){
   const corr=minha.filter(n=>estadoNoticia(n).estado==='precisa_correcao').length;
   document.getElementById('stats-validar').innerHTML=`
     <div class="sc"><div class="sv">${minha.length}</div><div class="sl">Notícias no teu ciclo</div></div>
-    <div class="sc"><div class="sv" style="color:var(--amber)">${pend}</div><div class="sl">Pendentes</div></div>
+    <div class="sc"><div class="sv" style="color:var(--amber)">${pend}</div><div class="sl">A Validar</div></div>
     <div class="sc"><div class="sv" style="color:var(--green)">${pub}</div><div class="sl">Prontas para publicar</div></div>
-    <div class="sc"><div class="sv" style="color:var(--blue)">${corr}</div><div class="sl">Pedida correção</div></div>
+    <div class="sc"><div class="sv" style="color:var(--blue)">${corr}</div><div class="sl">Aguarda correção</div></div>
   `;
 }
 
@@ -657,7 +658,7 @@ function renderValidar(){
   const publicadas = minha.filter(n=>estadoNoticia(n).estado==='publicada');
 
   const abas = `<div class="filter-row">
-    <div class="chip ${abaValidar==='pendentes'?'active':''}" onclick="setAbaValidar('pendentes')">Pendentes (${pendentes.length})</div>
+    <div class="chip ${abaValidar==='pendentes'?'active':''}" onclick="setAbaValidar('pendentes')">A Validar (${pendentes.length})</div>
     <div class="chip ${abaValidar==='correcao'?'active':''}" onclick="setAbaValidar('correcao')">Aguarda correção (${emCorrecao.length})</div>
     <div class="chip ${abaValidar==='publicar'?'active':''}" onclick="setAbaValidar('publicar')">Prontas a publicar (${prontas.length})</div>
     <div class="chip ${abaValidar==='publicadas'?'active':''}" onclick="setAbaValidar('publicadas')">Publicadas (${publicadas.length})</div>
@@ -668,7 +669,7 @@ function renderValidar(){
 
   if(!lista.length){
     const msgs = {
-      pendentes:'Não há notícias pendentes para este ciclo.',
+      pendentes:'Não há notícias a validar para este ciclo.',
       correcao:'Não há notícias à espera de correção neste momento.',
       publicar:'Não há notícias prontas a publicar neste momento.',
       publicadas:'Ainda não há notícias publicadas.'
@@ -680,13 +681,14 @@ function renderValidar(){
   let html = `${abas}<div class="card">`;
   lista.forEach(n=>{
     const v = estadoNoticia(n);
-    let badgeClass = 'b-pend', badgeTxt = 'Pendente';
+    let badgeClass = 'b-pend', badgeTxt = 'A Validar';
     if(v.estado==='precisa_correcao'){ badgeClass='b-corr'; badgeTxt='Aguarda correção'; }
     if(v.estado==='pode_publicar'){ badgeClass='b-pub'; badgeTxt='Pronta a publicar'; }
     if(v.estado==='publicada'){ badgeClass='b-val'; badgeTxt='📢 Publicada'; }
 
     const notaHtml = (abaValidar==='correcao' && v.nota) ? `<div style="font-size:11px;color:var(--text2);margin-top:3px">📝 ${v.nota}${v.dataValidacao?' · enviado em '+v.dataValidacao:''}</div>` : '';
     const publicadaHtml = (abaValidar==='publicadas') ? `<div style="font-size:11px;color:#5a1a8a;margin-top:3px">📢 Publicada por ${v.publicadoPor||v.validador||'—'} em ${v.dataPublicacao||'—'}</div>` : '';
+    const validadorCorrecaoHtml = (abaValidar==='correcao' && v.validador) ? `<span style="font-size:10px;color:var(--text2)">${v.validador}</span>` : '';
 
     html += `
       <div class="li" onclick="abrirNoticia(${n._id})">
@@ -699,6 +701,7 @@ function renderValidar(){
         </div>
         <div class="li-r">
           <span class="badge ${badgeClass}">${badgeTxt}</span>
+          ${validadorCorrecaoHtml}
         </div>
       </div>
     `;
@@ -729,7 +732,23 @@ async function abrirNoticia(id){
 function renderDetalheNoticia(n, container){
   const v = estadoNoticia(n);
   const len = (n.corpo||'').length;
-  
+  const emCorrecao = v.estado==='precisa_correcao';
+
+  const corpoHtml = emCorrecao ? `
+    <textarea class="nbody" id="corpo-editavel" style="width:100%;min-height:160px;resize:vertical;font-family:var(--font);font-size:14px;line-height:1.75;border:1.5px solid var(--border2);border-radius:var(--r);padding:14px;background:var(--bg2)" oninput="document.getElementById('char-count-editavel').textContent=this.value.length+' caracteres'">${n.corpo || ''}</textarea>
+    <div class="char-info"><span id="char-count-editavel">${len} caracteres</span></div>
+    <button class="btn btn-pri" onclick="guardarTextoCorrigido(${n._id})" style="margin-top:8px">
+      <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Guardar Texto Corrigido
+    </button>
+  ` : `
+    <div class="nbody ${!n.corpo?'empty':''}">${n.corpo || 'Sem texto.'}</div>
+    <div class="char-info"><span>${len} caracteres</span></div>
+  `;
+
+  const textoBtnGravar = (decisaoAtual==='precisa_correcao' || (!decisaoAtual && v.estado==='precisa_correcao'))
+    ? 'Gravar Validação e Gerar Email para Correção'
+    : 'Gravar Validação';
+
   let html = `
     <button class="btn btn-sec" onclick="noticiaAtual=null;renderValidar()" style="margin-bottom:14px">
       <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Voltar à lista
@@ -741,6 +760,7 @@ function renderDetalheNoticia(n, container){
       <h2 class="ntitle">${n.titulo}</h2>
       <div class="meta-row">
         <div class="mi">👤 ${n.proponente}</div>
+        <div class="mi">✉️ ${n.emailProponente||'—'}</div>
         <div class="mi">🏫 ${n.escola||'—'}</div>
         <div class="mi">📅 ${n.data||'—'}</div>
       </div>
@@ -748,8 +768,7 @@ function renderDetalheNoticia(n, container){
       ${n.imgDestaque ? `<img src="${n.imgDestaque}" class="dest-img" onclick="window.open('${n.imgDestaque}')">` : ''}
 
       <div class="sec">Texto da notícia</div>
-      <div class="nbody ${!n.corpo?'empty':''}">${n.corpo || 'Sem texto.'}</div>
-      <div class="char-info"><span>${len} caracteres</span></div>
+      ${corpoHtml}
 
       ${n.video || n.links ? `
         <div class="sec">Anexos & Links</div>
@@ -808,7 +827,7 @@ function renderDetalheNoticia(n, container){
       </div>
 
       <div class="btn-row">
-        <button class="btn btn-apro btn-full" onclick="submeterValidacao()">Gravar Validação</button>
+        <button class="btn btn-apro btn-full" onclick="submeterValidacao()">${textoBtnGravar}</button>
       </div>
       `}
     </div>
@@ -819,6 +838,35 @@ function renderDetalheNoticia(n, container){
 function selecionarDecisao(tipo){
   decisaoAtual = tipo;
   renderDetalheNoticia(noticiaAtual, document.getElementById('content-validar'));
+}
+
+async function guardarTextoCorrigido(id){
+  const n = noticias.find(x=>x._id===id);
+  if(!n) return;
+  const campo = document.getElementById('corpo-editavel');
+  if(!campo) return;
+  const novoCorpo = campo.value;
+  const corpoAnterior = n.corpo;
+  n.corpo = novoCorpo;
+  saveNoticias();
+  showLoad('A guardar texto…');
+  try {
+    const data = await apiGuardarNoticia(n);
+    hideLoad();
+    if(data.ok){
+      toast('Texto atualizado com sucesso!','success');
+      renderDetalheNoticia(n, document.getElementById('content-validar'));
+    } else {
+      n.corpo = corpoAnterior;
+      saveNoticias();
+      toast(data.error||'Erro ao guardar o texto.','error');
+    }
+  } catch(e){
+    n.corpo = corpoAnterior;
+    saveNoticias();
+    hideLoad();
+    toast('Erro ao guardar o texto.','error');
+  }
 }
 
 async function analisarIA(id){
@@ -915,6 +963,7 @@ async function marcarComoPublicadaGestao(id){
 // ═══════════════════════════════════════════════════════════════
 function abrirEmailModal(n, nota){
   emailNotId = n._id;
+  document.getElementById('email-para').value = n.emailProponente || '—';
   document.getElementById('email-assunto').value = `Validação de Notícia: ${n.titulo}`;
   document.getElementById('email-corpo').value = 
 `Olá ${n.proponente},
