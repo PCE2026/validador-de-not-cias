@@ -67,14 +67,13 @@ input.inp:focus{outline:none;border-color:var(--blue)}
 .user-pill svg{width:13px;height:13px;stroke:var(--text2);fill:none;stroke-width:2}
 
 /* ── stats ── */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
 .sc{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
 .sv{font-size:22px;font-weight:800;color:var(--text);line-height:1}
 .sl{font-size:11px;color:var(--text2);margin-top:4px}
 
 /* ── card ── */
 .card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:20px;margin-bottom:14px}
-.presenca-banner{background:#fff8e1;border:1.5px solid #f0c14b;color:#7a5900;border-radius:var(--r);padding:10px 14px;font-size:13px;margin-bottom:12px;line-height:1.5}
 
 /* ── import box ── */
 .import-box{background:var(--bg);border:1.5px dashed #aab8cc;border-radius:var(--rl);padding:18px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
@@ -112,7 +111,7 @@ input.inp:focus{outline:none;border-color:var(--blue)}
 .nivel-b{background:#e8f0fe;color:#1a3a7a;border:1px solid #90b0e8}
 .cat-pill{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:2px 9px;font-size:11px;color:var(--text2)}
 .sec{font-size:10px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin:14px 0 7px}
-.nbody{font-size:14px;color:var(--text);line-height:1.75;white-space:pre-wrap;padding:14px;background:var(--bg2);border-radius:var(--r);margin-bottom:6px}
+.nbody{font-size:14px;color:var(--text);line-height:1.75;white-space:pre-wrap;padding:14px;background:var(--bg2);border-radius:var(--r);margin-bottom:6px;min-height:245px;max-height:245px;overflow-y:auto}
 .nbody.empty{color:var(--text2);font-style:italic}
 .prog-wrap{height:5px;background:var(--bg3);border-radius:3px;margin:5px 0 2px}
 .prog-bar{height:5px;border-radius:3px}
@@ -123,15 +122,24 @@ input.inp:focus{outline:none;border-color:var(--blue)}
 .dest-img{width:100%;max-height:220px;object-fit:cover;border-radius:var(--r);border:1px solid var(--border);display:block;margin-bottom:8px;cursor:pointer}
 .dest-img:hover{opacity:.88}
 
+/* ── verificação jornalística ── */
+.check-block{background:linear-gradient(135deg,#f0f6ff,#f4f0ff);border:1px solid #c5d5f0;border-radius:var(--rl);padding:14px 16px;margin:14px 0}
+.check-hd{font-size:10px;font-weight:800;color:#4a5a80;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.check-hd svg{width:14px;height:14px;stroke:#4a5a80;fill:none;stroke-width:2}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.check-item{display:flex;align-items:flex-start;gap:7px;padding:7px 10px;border-radius:var(--r);font-size:12px;line-height:1.4}
+.check-ok{background:#e8f5ee;color:#1a5c35}
+.check-warn{background:#fff8e1;color:#7a4100}
+.check-fail{background:#fdecea;color:#7d1f17}
+.check-ico{font-size:14px;flex-shrink:0;margin-top:1px}
+.check-score{display:flex;align-items:center;gap:10px;margin-top:10px;padding:8px 12px;border-radius:var(--r);font-size:12px;font-weight:700}
+.score-ok{background:#e8f5ee;color:#1a5c35}
+.score-warn{background:#fff8e1;color:#7a4100}
+.score-fail{background:#fdecea;color:#7d1f17}
+
 /* ── ai ── */
-.ai-block{background:linear-gradient(135deg,#f0f6ff,#f4f0ff);border:1px solid #c5d5f0;border-radius:var(--rl);padding:14px 16px;margin:14px 0}
-.ai-hd{font-size:10px;font-weight:800;color:#4a5a80;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.ai-hd svg{width:14px;height:14px;stroke:#4a5a80;fill:none;stroke-width:2}
-.ai-body{font-size:13px;color:var(--text);line-height:1.65}
-.ai-body strong{color:#2a3a5a}
 .spinner{display:inline-block;width:13px;height:13px;border:2px solid #c8d0e8;border-top-color:#5570c0;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.ai-load{font-size:12px;color:#4a5a80;display:flex;align-items:center;gap:8px;font-style:italic}
 
 /* ── decisão ── */
 .resp-banner{background:var(--amber-bg);border:1px solid #e8c070;border-radius:var(--r);padding:14px 16px;margin-bottom:16px;font-size:13px;color:var(--amber-text);line-height:1.65}
@@ -230,7 +238,7 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
 <div class="home-screen" id="screen-login-validar" style="display:none">
   <div class="login-box">
     <h2>Área de Validação</h2>
-    <p>Identifica-te para ver as notícias do teu ciclo.</p>
+    <p>Identifica-te para ver as notícias do teu grupo.</p>
     <label class="login-label">Nome completo *</label>
     <input class="inp" type="text" id="login-nome" placeholder="Ex: Ana Martins" autocomplete="name">
     <label class="login-label" style="margin-bottom:8px">Grupo de ensino *</label>
@@ -277,12 +285,15 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
   <div class="header">
     <div class="logo"><svg viewBox="0 0 24 24"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/></svg></div>
     <div class="hb"><h1>Validar Notícias</h1><p id="hdr-validar-sub"></p></div>
-    <button class="btn btn-sec" onclick="atualizarAgora()" style="font-size:12px" title="Ir buscar as notícias e estados mais recentes">
-      <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>Atualizar agora
-    </button>
-    <div class="user-pill" onclick="sairValidador()">
-      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span id="user-pill-nome"></span>
+    <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+      <div class="user-pill" onclick="atualizarNoticiasValidador()" title="Atualizar">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+        <span>Atualizar</span>
+      </div>
+      <div class="user-pill" onclick="sairValidador()">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span id="user-pill-nome"></span>
+      </div>
     </div>
   </div>
   <div class="stats" id="stats-validar"></div>
@@ -306,12 +317,12 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
   <div class="import-box">
     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
     <div class="import-text">
-      <h3>Importar Excel (processo manual — reserva)</h3>
-      <p>As notícias chegam agora automaticamente. Usa isto só se a automação falhar. Descarrega o <a href="https://aetemplarios-my.sharepoint.com/:x:/g/personal/pce_aetemplarios_pt/IQDPMod9VEGtQ6p1W-YDsBBVASYZpvq_udqBDQrykQ0tcwA" target="_blank" style="color:var(--blue);font-weight:600">Notícias 1.xlsx</a> do OneDrive → Ficheiro → Transferir uma cópia → carrega aqui</p>
+      <h3>Importar respostas do Excel</h3>
+      <p>Descarrega o <a href="https://aetemplarios-my.sharepoint.com/:x:/g/personal/pce_aetemplarios_pt/IQDPMod9VEGtQ6p1W-YDsBBVASYZpvq_udqBDQrykQ0tcwA" target="_blank" style="color:var(--blue);font-weight:600">Notícias 1.xlsx</a> do OneDrive → Ficheiro → Transferir uma cópia → carrega aqui</p>
     </div>
     <label class="file-label">
       <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      Importar Excel (processo manual — reserva)
+      Carregar Excel
       <input type="file" accept=".xlsx,.xls" onchange="importarExcel(this)">
     </label>
     <button class="btn btn-pri" onclick="sincronizarTudo()" style="font-size:12px">
@@ -332,7 +343,6 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
   <div class="modal">
     <h2><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>Email para o proponente</h2>
     <p class="sub">Revê e ajusta antes de copiar.</p>
-    <div class="ef"><label>Para</label><input type="text" id="email-para" readonly></div>
     <div class="ef"><label>Assunto</label><input type="text" id="email-assunto"></div>
     <div class="ef"><label>Mensagem</label><textarea id="email-corpo"></textarea></div>
     <div class="modal-btns">
@@ -351,8 +361,8 @@ button.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width
 // ═══════════════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════════════
-const API_URL = 'https://script.google.com/macros/s/AKfycbwFxi003S3RIYSQJdJP1rgZZ_qvgtESIFE2nQWJZN1LU1CjtZG9vCN8mNu5MGLApBQ6AA/exec';
-const PASS_GESTAO = 'templarios2027';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxbhxJiKUzRDCAZUOZxrh709EPPcineRZLUFgkwvOM4Xn93adzAd3AGNpUEUqmEY3qCmA/exec';
+const PASS_GESTAO = 'templarios2027'; // mesma do projeto Cidadania
 
 const GRUPOS = {
   A:{label:'Pré-escolar e 1.º Ciclo',
@@ -365,14 +375,12 @@ const GRUPOS = {
 // STATE
 // ═══════════════════════════════════════════════════════════════
 let noticias   = JSON.parse(localStorage.getItem('aet_noticias5')||'[]');
-let validacoes = {};
-let presencas  = {};
+let validacoes = {}; // chave → {validador,estado,meios,nota,dataValidacao}
 let sessao     = null;
 let grupoSel   = null;
 let noticiaAtual = null;
 let decisaoAtual = null;
 let filtroGestao = 'todas';
-let abaValidar   = 'pendentes'; // 'pendentes' | 'correcao'
 let emailNotId   = null;
 
 function saveNoticias(){ try{localStorage.setItem('aet_noticias5',JSON.stringify(noticias));}catch(e){} }
@@ -380,14 +388,14 @@ function saveNoticias(){ try{localStorage.setItem('aet_noticias5',JSON.stringify
 // ═══════════════════════════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════════════════════════
-function norm(s){return(s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[,.]/g,'').replace(/\s+/g,' ').trim();}
+function norm(s){return(s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[,.]/g,'').trim();}
 function escolaGrupo(escola){
   const e=norm(escola);
   if(GRUPOS.B.esc.some(s=>e.includes(norm(s))))return 'B';
   if(GRUPOS.A.esc.some(s=>e.includes(norm(s))))return 'A';
   return null;
 }
-function chave(n){ return (n&&n.chave) ? n.chave : (norm(n.titulo)+'|'+norm(n.proponente)); }
+function chave(n){ return norm(n.titulo)+'|'+norm(n.proponente); }
 
 function showLoad(msg){document.getElementById('load-msg').textContent=msg||'A processar…';document.getElementById('loading').classList.add('show');}
 function hideLoad(){document.getElementById('loading').classList.remove('show');}
@@ -403,16 +411,24 @@ function toast(msg,type='info'){
 }
 
 // ═══════════════════════════════════════════════════════════════
-// API — COMUNICAÇÃO JSONP (CONTORNA CORS TOTALMENTE)
+// API — só GET (sem CORS)
 // ═══════════════════════════════════════════════════════════════
-function jsonpFetch_(url, timeoutMs){
+async function apiListar(){
+  const url = API_URL+'?action=listar&t='+Date.now();
+  const data = await apiFetch_(url);
+  if(!data.ok) throw new Error(data.error||'Erro');
+  return data;
+}
+
+// JSONP — única forma de contornar CORS com Apps Script sem licença Premium
+function jsonpFetch_(url){
   return new Promise((resolve, reject)=>{
     const cbName = 'cb_'+Date.now()+'_'+Math.floor(Math.random()*9999);
     const script = document.createElement('script');
     const timer = setTimeout(()=>{
       cleanup();
-      reject(new Error('Timeout na comunicação com o servidor'));
-    }, timeoutMs||15000);
+      reject(new Error('Timeout'));
+    }, 10000);
     function cleanup(){
       clearTimeout(timer);
       delete window[cbName];
@@ -423,29 +439,13 @@ function jsonpFetch_(url, timeoutMs){
       resolve(data);
     };
     script.src = url + '&callback=' + cbName;
-    script.onerror = ()=>{ cleanup(); reject(new Error('Erro de ligação')); };
+    script.onerror = ()=>{ cleanup(); reject(new Error('Script error')); };
     document.head.appendChild(script);
   });
 }
 
-async function apiFetch_(url, timeoutMs){
-  let ultimoErro;
-  for(let tentativa=1; tentativa<=3; tentativa++){
-    try{
-      return await jsonpFetch_(url, timeoutMs||15000);
-    }catch(e){
-      ultimoErro = e;
-      if(tentativa<3) await new Promise(r=>setTimeout(r, 700*tentativa));
-    }
-  }
-  throw ultimoErro;
-}
-
-async function apiListar(){
-  const url = API_URL+'?action=listar&t='+Date.now();
-  const data = await apiFetch_(url);
-  if(!data.ok) throw new Error(data.error||'Erro ao listar notícias');
-  return data;
+async function apiFetch_(url){
+  return await jsonpFetch_(url);
 }
 
 async function apiGuardar(n, estado, meios, nota){
@@ -464,20 +464,6 @@ async function apiGuardar(n, estado, meios, nota){
     +'&dados='+encodeURIComponent(JSON.stringify(dados))+'&t='+Date.now();
   const data = await apiFetch_(url);
   validacoes[dados.chave] = dados;
-  return data;
-}
-
-async function apiMarcarPublicada(n, quemNome){
-  const nome = quemNome || (sessao && sessao.nome) || 'Gestão';
-  const url = API_URL+'?action=marcarPublicada&chave='+encodeURIComponent(chave(n))+'&validador='+encodeURIComponent(nome)+'&t='+Date.now();
-  const data = await apiFetch_(url);
-  if(data.ok){
-    const c = chave(n);
-    if(!validacoes[c]) validacoes[c] = {};
-    validacoes[c].estado = 'publicada';
-    validacoes[c].publicadoPor = nome;
-    validacoes[c].dataPublicacao = new Date().toISOString().slice(0,10);
-  }
   return data;
 }
 
@@ -501,7 +487,7 @@ async function apiGuardarNoticia(n){
 }
 
 // ═══════════════════════════════════════════════════════════════
-// NAVEGAÇÃO E LOGIN
+// NAVEGAÇÃO
 // ═══════════════════════════════════════════════════════════════
 function irPara(area){
   ['home-screen','screen-login-validar','screen-login-gestao','screen-validar','screen-gestao']
@@ -515,59 +501,13 @@ function irPara(area){
   if(area==='gestao') renderGestao();
 }
 
+// ═══════════════════════════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════════════════════════
 function selecionarGrupo(g){
   grupoSel=g;
   document.querySelectorAll('.grupo-btn').forEach(b=>b.classList.remove('selected'));
   document.getElementById('gbtn-'+g).classList.add('selected');
-}
-
-// Vai buscar notícias e validações ao servidor (com retry já incluído em apiFetch_).
-// A Google Sheet é sempre a fonte única de verdade: em cada chamada com sucesso,
-// a lista local é reconstruída inteiramente a partir do servidor (nunca é um
-// acumulado local), para que todos os validadores vejam sempre os mesmos números,
-// independentemente do computador ou do histórico de sincronizações anteriores.
-// Só se preserva do estado local o que é puramente local (análise de IA já feita,
-// e os checkboxes de meios ainda não gravados) e o _id, para manter a identidade
-// do item nos handlers de clique.
-async function carregarDadosServidor_(){
-  try{
-    const data = await apiListar();
-    const listaServidor = data.noticias || [];
-
-    const mapaLocal = {};
-    noticias.forEach(n => { mapaLocal[chave(n)] = n; });
-
-    let nextId = Math.max(0, ...noticias.map(n=>n._id||0)) + 1;
-
-    noticias = listaServidor.map(n=>{
-      const c = n.chave || (norm(n.titulo)+'|'+norm(n.proponente));
-      const existente = mapaLocal[c];
-      return {
-        _id: existente ? existente._id : nextId++,
-        chave: c,
-        proponente: n.proponente, titulo: n.titulo,
-        categorias: (n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
-        escola: n.escola, data: (n.timestamp||'').slice(0,10),
-        corpo: n.corpo, imgDestaque: n.imgDestaque,
-        outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
-        video: n.video, links: n.links, emailProponente: n.emailProponente||'',
-        _meios: existente ? existente._meios : {site:false,fb:false,ig:false,tk:false},
-        _analise: existente ? existente._analise : null
-      };
-    });
-
-    if(noticiaAtual){
-      const chaveAtual = chave(noticiaAtual);
-      noticiaAtual = noticias.find(n => n.chave === chaveAtual) || null;
-    }
-
-    saveNoticias();
-    validacoes = data.validacoes || {};
-    presencas  = data.presencas || {};
-    return true;
-  }catch(e){
-    return false;
-  }
 }
 
 async function fazerLogin(){
@@ -576,28 +516,70 @@ async function fazerLogin(){
   if(!grupoSel){toast('Seleciona o teu grupo','warning');return;}
   sessao={nome,grupo:grupoSel};
   document.getElementById('user-pill-nome').textContent=nome;
-  document.getElementById('hdr-validar-sub').textContent=GRUPOS[grupoSel].label+' · a validar notícias do teu ciclo';
+  document.getElementById('hdr-validar-sub').textContent=GRUPOS[grupoSel].label+' · a validar notícias do teu grupo';
   irPara('validar');
-  showLoad('A carregar notícias e estados…');
-  const ok = await carregarDadosServidor_();
-  hideLoad();
-  if(!ok){
-    toast('Servidor indisponível. A usar dados locais.','warning');
+  showLoad('A carregar notícias do servidor…');
+  try{
+    const data=await apiListar();
+    const localMap={};
+    noticias.forEach(n=>{ localMap[chave(n)]={_meios:n._meios}; });
+    let nextId=1;
+    const fromSheets=(data.noticias||[]).map(n=>{
+      const ck=norm(n.titulo)+'|'+norm(n.proponente);
+      const loc=localMap[ck]||{};
+      return {
+        _id:nextId++, proponente:n.proponente, titulo:n.titulo,
+        categorias:(n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
+        escola:n.escola, data:(n.timestamp||'').slice(0,10),
+        corpo:n.corpo, imgDestaque:n.imgDestaque,
+        outrasFotos:(n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
+        video:n.video, links:n.links,
+        _meios:loc._meios||{site:false,fb:false,ig:false,tiktok:false},
+      };
+    });
+    if(fromSheets.length>0){ noticias=fromSheets; saveNoticias(); }
+    validacoes=data.validacoes||{};
+    hideLoad();
+    toast((noticias.length||0)+' notícia(s) carregada(s).','success');
+  }catch(e){
+    hideLoad();
+    toast('Sem ligação ao servidor. A mostrar dados locais.','warning');
   }
   renderValidar();
 }
 
-async function atualizarAgora(){
+async function atualizarNoticiasValidador(){
+  if(!sessao)return;
+  noticiaAtual=null; decisaoAtual=null;
   showLoad('A atualizar…');
-  const ok = await carregarDadosServidor_();
-  hideLoad();
-  if(ok){
-    toast('Dados atualizados.','success');
-  }else{
-    toast('Servidor indisponível. A usar dados locais.','warning');
-  }
+  try{
+    const data=await apiListar();
+    const localMap={};
+    noticias.forEach(n=>{ localMap[chave(n)]={_meios:n._meios}; });
+    let nextId=1;
+    const fromSheets=(data.noticias||[]).map(n=>{
+      const ck=norm(n.titulo)+'|'+norm(n.proponente);
+      const loc=localMap[ck]||{};
+      return {
+        _id:nextId++, proponente:n.proponente, titulo:n.titulo,
+        categorias:(n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
+        escola:n.escola, data:(n.timestamp||'').slice(0,10),
+        corpo:n.corpo, imgDestaque:n.imgDestaque,
+        outrasFotos:(n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
+        video:n.video, links:n.links,
+        _meios:loc._meios||{site:false,fb:false,ig:false,tiktok:false},
+      };
+    });
+    if(fromSheets.length>0){ noticias=fromSheets; saveNoticias(); }
+    validacoes=data.validacoes||{};
+    hideLoad();
+    toast(noticias.length+' notícia(s) carregada(s).','success');
+  }catch(e){ hideLoad(); toast('Erro: '+e.message,'warning'); }
   renderValidar();
 }
+
+
+
 
 function sairValidador(){
   if(!confirm('Tens a certeza que queres sair?'))return;
@@ -615,7 +597,7 @@ function entrarGestao(){
 }
 
 // ═══════════════════════════════════════════════════════════════
-// RENDER: VALIDAR & GESTÃO
+// RENDER: VALIDAR
 // ═══════════════════════════════════════════════════════════════
 function filaGrupo(){
   return noticias.filter(n=>{
@@ -634,525 +616,618 @@ function renderStats(){
   const minha=filaGrupo();
   const pend=minha.filter(n=>estadoNoticia(n).estado==='pendente').length;
   const pub=minha.filter(n=>estadoNoticia(n).estado==='pode_publicar').length;
-  const corr=minha.filter(n=>estadoNoticia(n).estado==='precisa_correcao').length;
+  const corr=minha.filter(n=>estadoNoticia(n).estado==='enviado_correcao').length;
+  const val=minha.filter(n=>estadoNoticia(n).estado==='em_validacao').length;
   document.getElementById('stats-validar').innerHTML=`
-    <div class="sc"><div class="sv">${minha.length}</div><div class="sl">Notícias no teu ciclo</div></div>
-    <div class="sc"><div class="sv" style="color:var(--amber)">${pend}</div><div class="sl">A Validar</div></div>
-    <div class="sc"><div class="sv" style="color:var(--green)">${pub}</div><div class="sl">Prontas para publicar</div></div>
-    <div class="sc"><div class="sv" style="color:var(--blue)">${corr}</div><div class="sl">Aguarda correção</div></div>
-  `;
+    <div class="sc"><div class="sv">${minha.length}</div><div class="sl">Total</div></div>
+    <div class="sc"><div class="sv" style="color:var(--amber)">${pend}</div><div class="sl">Pendentes</div></div>
+    <div class="sc"><div class="sv" style="color:var(--green)">${pub}</div><div class="sl">A publicar</div></div>
+    <div class="sc"><div class="sv" style="color:var(--blue)">${corr+val}</div><div class="sl">Em processo</div></div>`;
 }
 
 function renderValidar(){
   renderStats();
-  const container = document.getElementById('content-validar');
-  if(noticiaAtual){
-    renderDetalheNoticia(noticiaAtual, container);
+  const el=document.getElementById('content-validar');
+  const minha=filaGrupo();
+
+  if(!noticias.length){
+    el.innerHTML=`<div class="card"><div class="empty">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg>
+      <p>Ainda não há notícias importadas.<br>Pede à gestão para importar o Excel do OneDrive.</p>
+    </div></div>`;
     return;
   }
 
-  const minha = filaGrupo();
-  const pendentes = minha.filter(n=>estadoNoticia(n).estado==='pendente');
-  const emCorrecao = minha.filter(n=>estadoNoticia(n).estado==='precisa_correcao');
-  const prontas = minha.filter(n=>estadoNoticia(n).estado==='pode_publicar');
-  const publicadas = minha.filter(n=>estadoNoticia(n).estado==='publicada');
+  if(!minha.length){
+    el.innerHTML=`<div class="card"><div class="empty">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg>
+      <p>Não há notícias para o teu grupo.</p>
+    </div></div>`;
+    return;
+  }
 
-  const abas = `<div class="filter-row">
-    <div class="chip ${abaValidar==='pendentes'?'active':''}" onclick="setAbaValidar('pendentes')">A Validar (${pendentes.length})</div>
-    <div class="chip ${abaValidar==='correcao'?'active':''}" onclick="setAbaValidar('correcao')">Aguarda correção (${emCorrecao.length})</div>
-    <div class="chip ${abaValidar==='publicar'?'active':''}" onclick="setAbaValidar('publicar')">Prontas a publicar (${prontas.length})</div>
-    <div class="chip ${abaValidar==='publicadas'?'active':''}" onclick="setAbaValidar('publicadas')">Publicadas (${publicadas.length})</div>
+  if(noticiaAtual){
+    el.innerHTML=buildDetalhe(noticiaAtual);
+    return;
+  }
+
+  // Lista de notícias do grupo
+  const listaHtml=minha.map(n=>{
+    const v=estadoNoticia(n);
+    const est=v.estado||'pendente';
+    const bmap={pendente:'b-pend',pode_publicar:'b-pub',enviado_correcao:'b-corr',em_validacao:'b-val'};
+    const lmap={pendente:'Pendente',pode_publicar:'✓ Pode publicar',enviado_correcao:'✉ Enviada para correção',em_validacao:'Em validação'};
+    const bgmap={pendente:'var(--bg2)',pode_publicar:'var(--green-bg)',enviado_correcao:'var(--blue-bg)',em_validacao:'#f0e8ff'};
+    const icmap={pendente:'var(--text2)',pode_publicar:'var(--green-text)',enviado_correcao:'var(--blue-text)',em_validacao:'#5a1a8a'};
+    return `<div class="li" onclick="abrirNoticia(${n._id})">
+      <div class="li-ico" style="background:${bgmap[est]}">
+        <svg viewBox="0 0 24 24" width="16" height="16" style="stroke:${icmap[est]};fill:none;stroke-width:1.8"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/></svg>
+      </div>
+      <div class="li-b">
+        <div class="li-t">${n.titulo}</div>
+        <div class="li-s">${n.proponente||'—'} · ${n.escola||'—'} · ${n.data||'—'}</div>
+      </div>
+      <div class="li-r">
+        <span class="badge ${bmap[est]||'b-pend'}">${lmap[est]||est}</span>
+        ${v.validador?`<span style="font-size:10px;color:var(--text2)">${v.validador}</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`<div class="card"><div>${listaHtml}</div></div>`;
+}
+
+function abrirNoticia(id){
+  noticiaAtual=noticias.find(n=>n._id===id)||null;
+  decisaoAtual=null;
+  renderValidar();
+}
+function voltarLista(){noticiaAtual=null;decisaoAtual=null;renderValidar();}
+
+// ═══════════════════════════════════════════════════════════════
+// DETALHE DA NOTÍCIA
+// ═══════════════════════════════════════════════════════════════
+function getNivelBadge(escola){
+  const g=escolaGrupo(escola);
+  if(g==='A')return`<span class="nivel-badge nivel-a">🏫 Pré-escolar / 1.º Ciclo</span>`;
+  if(g==='B')return`<span class="nivel-badge nivel-b">🎓 2.º/3.º Ciclo / Secundário</span>`;
+  return'';
+}
+
+function destacarTexto(texto){
+  if(!texto) return '';
+  // Escapar HTML
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Dividir em frases (por . ! ? ou parágrafos)
+  const frases=texto.split(/(?<=[.!?])\s+|\n+/).filter(f=>f.trim());
+  return frases.map((f,i)=>{
+    const ft=f.trim();
+    if(!ft) return '';
+    const bold=
+      i===0 || // primeira frase (lead)
+      /\d{1,3}([.,]\d+)?(%|€|aluno|professor|escola|anos?|meses?|dias?|turma|projeto|prémio|ganhou|venceu|conquistou|realizou|participou|recebeu)/i.test(ft) || // números com contexto
+      /\b(destaca(mos|ndo|r)?|importante|essencial|objetivo|meta|celebr|promov|conquist|venc|prémio|distinção|reconhec|inaugurou|lançou|criou|desenvolveu|alcançou)\b/i.test(ft);
+    return bold?`<strong>${esc(ft)}</strong>`:`${esc(ft)}`;
+  }).join(' ');
+}
+
+function buildDetalhe(n){
+  const v=estadoNoticia(n);
+  const chars=n.corpo?n.corpo.length:0;
+  const pct=Math.min(100,Math.round((chars/2200)*100));
+  const cc=chars>2200?'var(--red)':chars>1800?'var(--amber)':'var(--green)';
+
+  const cats=(n.categorias||[]).length
+    ?(n.categorias||[]).map(c=>`<span class="cat-pill">${c}</span>`).join('')
+    :'';
+
+  const imgHtml=n.imgDestaque
+    ?`<img class="dest-img" src="${n.imgDestaque}" alt="Imagem de destaque" onclick="window.open('${n.imgDestaque}','_blank')" onerror="this.style.display='none'">`
+    :`<div style="background:var(--bg2);border-radius:var(--r);padding:10px 12px;font-size:12px;color:var(--text2);margin-bottom:8px">Sem imagem de destaque</div>`;
+
+  const outrosHtml=(n.outrasFotos&&n.outrasFotos.length)
+    ?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">${n.outrasFotos.map((f,i)=>`<div class="mpill"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Foto ${i+1}: <a href="${f}" target="_blank">${f.length>35?f.slice(0,35)+'…':f}</a></div>`).join('')}</div>`
+    :'';
+
+  const videoHtml=n.video
+    ?`<div class="mpill" style="margin-bottom:8px"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg><a href="${n.video}" target="_blank">${n.video.length>45?n.video.slice(0,45)+'…':n.video}</a></div>`
+    :'';
+
+  const linksHtml=n.links
+    ?`<div class="mpill" style="margin-bottom:8px"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg><a href="${n.links}" target="_blank">${n.links.length>55?n.links.slice(0,55)+'…':n.links}</a></div>`
+    :'';
+
+  // Decisão
+  const meios=n._meios||{site:false,fb:false,ig:false,tiktok:false};
+  const pubHtml=`<div class="pub-row">
+    ${['Site','Facebook','Instagram','TikTok'].map(m=>{
+      const k=m.toLowerCase();
+      return`<label class="pub-lbl ${meios[k]?'on':''}" id="pub-${n._id}-${k}">
+        <input type="checkbox" ${meios[k]?'checked':''} onchange="toggleMeio(${n._id},'${k}',this.checked)">${m}
+      </label>`;
+    }).join('')}
   </div>`;
 
-  const listasPorAba = { pendentes, correcao:emCorrecao, publicar:prontas, publicadas };
-  const lista = listasPorAba[abaValidar] || pendentes;
+  const jaValidado=v.estado&&v.estado!=='pendente';
 
-  if(!lista.length){
-    const msgs = {
-      pendentes:'Não há notícias a validar para este ciclo.',
-      correcao:'Não há notícias à espera de correção neste momento.',
-      publicar:'Não há notícias prontas a publicar neste momento.',
-      publicadas:'Ainda não há notícias publicadas.'
-    };
-    container.innerHTML=`${abas}<div class="card empty"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><p>${msgs[abaValidar]}</p></div>`;
-    return;
-  }
+  return`
+  <button class="btn btn-sec" onclick="voltarLista()" style="margin-bottom:14px;font-size:12px">
+    <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Voltar à lista
+  </button>
 
-  let html = `${abas}<div class="card">`;
-  lista.forEach(n=>{
-    const v = estadoNoticia(n);
-    let badgeClass = 'b-pend', badgeTxt = 'A Validar';
-    if(v.estado==='precisa_correcao'){ badgeClass='b-corr'; badgeTxt='Aguarda correção'; }
-    if(v.estado==='pode_publicar'){ badgeClass='b-pub'; badgeTxt='Pronta a publicar'; }
-    if(v.estado==='publicada'){ badgeClass='b-val'; badgeTxt='📢 Publicada'; }
+  <div class="card">
+    <div class="ntitle">${n.titulo}</div>
+    ${getNivelBadge(n.escola)}
+    <div class="meta-row">
+      <div class="mi"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${n.proponente||'—'}</div>
+      <div class="mi"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>${n.escola||'—'}</div>
+      <div class="mi"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${n.data||'—'}</div>
+    </div>
+    ${cats?`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">${cats}</div>`:''}
 
-    const notaHtml = (abaValidar==='correcao' && v.nota) ? `<div style="font-size:11px;color:var(--text2);margin-top:3px">📝 ${v.nota}${v.dataValidacao?' · enviado em '+v.dataValidacao:''}</div>` : '';
-    const publicadaHtml = (abaValidar==='publicadas') ? `<div style="font-size:11px;color:#5a1a8a;margin-top:3px">📢 Publicada por ${v.publicadoPor||v.validador||'—'} em ${v.dataPublicacao||'—'}</div>` : '';
-    const validadorCorrecaoHtml = (abaValidar==='correcao' && v.validador) ? `<span style="font-size:10px;color:var(--text2)">${v.validador}</span>` : '';
+    <div class="sec">Imagem de destaque</div>
+    ${imgHtml}
+    ${outrosHtml}${videoHtml}
+    ${linksHtml?`<div class="sec">Links</div>${linksHtml}`:''}
 
-    html += `
-      <div class="li" onclick="abrirNoticia(${n._id})">
-        <div class="li-ico" style="background:var(--blue-bg)">📄</div>
-        <div class="li-b">
-          <div class="li-t">${n.titulo}</div>
-          <div class="li-s">${n.escola || 'Escola não indicada'} · ${n.proponente}</div>
-          ${notaHtml}
-          ${publicadaHtml}
-        </div>
-        <div class="li-r">
-          <span class="badge ${badgeClass}">${badgeTxt}</span>
-          ${validadorCorrecaoHtml}
-        </div>
+    <div class="sec">Texto da notícia</div>
+    <div class="nbody ${!n.corpo?'empty':''}">${n.corpo?destacarTexto(n.corpo):'(sem texto)'}</div>
+    <div class="char-info"><span>Comprimento</span><span style="color:${cc};font-weight:700">${chars} / 2200</span></div>
+    <div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${cc}"></div></div>
+    </div>
+  </div>
+
+  ${buildVerificacao(n)}
+
+  <div class="card">
+    ${jaValidado?`
+    <div style="background:var(--bg2);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--text2)">
+      ✓ Já validado por <strong>${v.validador}</strong> em ${v.dataValidacao||'—'} — Estado: <strong>${{pode_publicar:'Pode publicar',enviado_correcao:'Enviado para correção',em_validacao:'Em validação'}[v.estado]||v.estado}</strong>
+    </div>`:''}
+    <div style="font-size:13px;font-weight:700;margin-bottom:12px">Decisão de validação</div>
+    <div class="decisao-grid">
+      <div class="dec-btn dec-pub" onclick="selecionarDecisao('pode_publicar')">
+        <div class="di">✅</div>
+        <div class="dt">Pode publicar</div>
+        <div class="ds">A notícia está aprovada para publicação</div>
       </div>
-    `;
-  });
-  html += `</div>`;
-  container.innerHTML = html;
-}
-
-function setAbaValidar(a){ abaValidar=a; renderValidar(); }
-
-async function abrirNoticia(id){
-  noticiaAtual = noticias.find(n=>n._id===id);
-  decisaoAtual = null;
-  renderValidar();
-  if(noticiaAtual && sessao){
-    try {
-      const url = API_URL+'?action=marcarPresenca&chave='+encodeURIComponent(chave(noticiaAtual))+'&validador='+encodeURIComponent(sessao.nome);
-      await apiFetch_(url);
-      const urlPres = API_URL+'?action=obterPresenca&chave='+encodeURIComponent(chave(noticiaAtual))+'&validador='+encodeURIComponent(sessao.nome);
-      const res = await apiFetch_(urlPres);
-      if(res.ok && res.presenca){
-        toast(`Atenção: ${res.presenca.validador} também está a ver esta notícia!`, 'warning');
-      }
-    } catch(e){}
-  }
-}
-
-function renderDetalheNoticia(n, container){
-  const v = estadoNoticia(n);
-  const len = (n.corpo||'').length;
-  const emCorrecao = v.estado==='precisa_correcao';
-
-  const corpoHtml = emCorrecao ? `
-    <textarea class="nbody" id="corpo-editavel" style="width:100%;min-height:160px;resize:vertical;font-family:var(--font);font-size:14px;line-height:1.75;border:1.5px solid var(--border2);border-radius:var(--r);padding:14px;background:var(--bg2)" oninput="document.getElementById('char-count-editavel').textContent=this.value.length+' caracteres'">${n.corpo || ''}</textarea>
-    <div class="char-info"><span id="char-count-editavel">${len} caracteres</span></div>
-    <button class="btn btn-pri" onclick="guardarTextoCorrigido(${n._id})" style="margin-top:8px">
-      <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Guardar Texto Corrigido
-    </button>
-  ` : `
-    <div class="nbody ${!n.corpo?'empty':''}">${n.corpo || 'Sem texto.'}</div>
-    <div class="char-info"><span>${len} caracteres</span></div>
-  `;
-
-  const textoBtnGravar = (decisaoAtual==='precisa_correcao' || (!decisaoAtual && v.estado==='precisa_correcao'))
-    ? 'Gravar Validação e Gerar Email para Correção'
-    : 'Gravar Validação';
-
-  let html = `
-    <button class="btn btn-sec" onclick="noticiaAtual=null;renderValidar()" style="margin-bottom:14px">
-      <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Voltar à lista
-    </button>
-    
-    <div id="presenca-banner-container"></div>
-
-    <div class="card">
-      <h2 class="ntitle">${n.titulo}</h2>
-      <div class="meta-row">
-        <div class="mi">👤 ${n.proponente}</div>
-        <div class="mi">✉️ ${n.emailProponente||'—'}</div>
-        <div class="mi">🏫 ${n.escola||'—'}</div>
-        <div class="mi">📅 ${n.data||'—'}</div>
-      </div>
-      
-      ${n.imgDestaque ? `<img src="${n.imgDestaque}" class="dest-img" onclick="window.open('${n.imgDestaque}')">` : ''}
-
-      <div class="sec">Texto da notícia</div>
-      ${corpoHtml}
-
-      ${n.video || n.links ? `
-        <div class="sec">Anexos & Links</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          ${n.video ? `<div class="mpill">🎥 <a href="${n.video}" target="_blank">Vídeo</a></div>` : ''}
-          ${n.links ? `<div class="mpill">🔗 <a href="${n.links}" target="_blank">Links externos</a></div>` : ''}
-        </div>
-      ` : ''}
-
-      <!-- IA -->
-      <div class="ai-block">
-        <div class="ai-hd"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg> Análise de Inteligência Artificial</div>
-        <div class="ai-body" id="ai-content">
-          ${n._analise ? n._analise.replace(/\n/g,'<br>') : `<button class="btn btn-sec" onclick="analisarIA(${n._id})">✨ Analisar com Gemini IA</button>`}
-        </div>
+      <div class="dec-btn dec-corr" onclick="selecionarDecisao('enviado_correcao')">
+        <div class="di">✉️</div>
+        <div class="dt">Enviar para correção</div>
+        <div class="ds">Notificar o autor com indicações</div>
       </div>
     </div>
 
-    <!-- DECISÃO -->
-    <div class="card">
-      ${v.estado==='publicada' ? `
-        <div class="sec">Estado</div>
-        <div class="presenca-banner" style="background:#f0e8ff;border-color:#c9a8f5;color:#5a1a8a">
-          📢 <strong>Já publicada</strong> por ${v.publicadoPor||v.validador||'—'} em ${v.dataPublicacao||'—'}. Não precisa de mais nenhuma ação.
-        </div>
-      ` : `
-      <div class="sec">Decisão de Validação</div>
-      <div class="decisao-grid">
-        <div class="dec-btn dec-pub ${decisaoAtual==='pode_publicar'||v.estado==='pode_publicar'?'selected':''}" onclick="selecionarDecisao('pode_publicar')">
-          <div class="di">✅</div>
-          <div class="dt">Pronta a publicar</div>
-          <div class="ds">Sem reparos ou alterações ligeiras</div>
-        </div>
-        <div class="dec-btn dec-corr ${decisaoAtual==='precisa_correcao'||v.estado==='precisa_correcao'?'selected':''}" onclick="selecionarDecisao('precisa_correcao')">
-          <div class="di">✏️</div>
-          <div class="dt">Pedir correção</div>
-          <div class="ds">Necessita de alterações pelo proponente</div>
-        </div>
-      </div>
-
-      <div id="decisao-opcoes">
-        ${(decisaoAtual==='pode_publicar'||v.estado==='pode_publicar') ? `
-          <div class="sec">Meios onde pode ser publicada</div>
-          <div class="pub-row">
-            <label class="pub-lbl"><input type="checkbox" id="m-site"> Site AET</label>
-            <label class="pub-lbl"><input type="checkbox" id="m-fb"> Facebook</label>
-            <label class="pub-lbl"><input type="checkbox" id="m-ig"> Instagram</label>
-            <label class="pub-lbl"><input type="checkbox" id="m-tk"> TikTok</label>
-          </div>
-        ` : ''}
-
-        ${(decisaoAtual==='precisa_correcao'||v.estado==='precisa_correcao') ? `
-          <div class="sec">Notas / Correções necessárias</div>
-          <textarea class="nota" id="val-nota" placeholder="Descreve as correções necessárias...">${v.nota||''}</textarea>
-        ` : ''}
-      </div>
-
+    <div id="panel-pub" style="display:none">
+      <div class="sec" style="margin-top:0">Publicar em</div>
+      ${pubHtml}
       <div class="btn-row">
-        <button class="btn btn-apro btn-full" onclick="submeterValidacao()">${textoBtnGravar}</button>
+        <button class="btn btn-apro btn-full" onclick="submeterDecisao()">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Confirmar — Pode publicar
+        </button>
       </div>
-      `}
     </div>
-  `;
-  container.innerHTML = html;
+
+    <div id="panel-corr" style="display:none">
+      <div class="sec" style="margin-top:0">Nota para o proponente *</div>
+      <textarea class="nota" id="nota-corr" placeholder="Descreve o que precisa de ser corrigido ou melhorado…"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-corr btn-full" onclick="submeterDecisao()">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>Gerar email e registar
+        </button>
+      </div>
+    </div>
+  </div>`;
 }
 
-function selecionarDecisao(tipo){
-  decisaoAtual = tipo;
-  renderDetalheNoticia(noticiaAtual, document.getElementById('content-validar'));
+function selecionarDecisao(d){
+  decisaoAtual=d;
+  document.querySelectorAll('.dec-btn').forEach(b=>b.classList.remove('selected'));
+  const sel=document.querySelector('.dec-btn.dec-'+(d==='pode_publicar'?'pub':'corr'));
+  if(sel)sel.classList.add('selected');
+  const panelPub=document.getElementById('panel-pub');
+  const panelCorr=document.getElementById('panel-corr');
+  if(panelPub)panelPub.style.display=d==='pode_publicar'?'block':'none';
+  if(panelCorr)panelCorr.style.display=d==='enviado_correcao'?'block':'none';
 }
 
-async function guardarTextoCorrigido(id){
-  const n = noticias.find(x=>x._id===id);
-  if(!n) return;
-  const campo = document.getElementById('corpo-editavel');
-  if(!campo) return;
-  const novoCorpo = campo.value;
-  const corpoAnterior = n.corpo;
-  n.corpo = novoCorpo;
-  saveNoticias();
-  showLoad('A guardar texto…');
-  try {
-    const data = await apiGuardarNoticia(n);
-    hideLoad();
-    if(data.ok){
-      toast('Texto atualizado com sucesso!','success');
-      renderDetalheNoticia(n, document.getElementById('content-validar'));
-    } else {
-      n.corpo = corpoAnterior;
-      saveNoticias();
-      toast(data.error||'Erro ao guardar o texto.','error');
-    }
-  } catch(e){
-    n.corpo = corpoAnterior;
-    saveNoticias();
-    hideLoad();
-    toast('Erro ao guardar o texto.','error');
+function toggleMeio(id,k,v){
+  const n=noticias.find(x=>x._id===id);
+  if(!n)return;
+  if(!n._meios)n._meios={site:false,fb:false,ig:false,tiktok:false};
+  n._meios[k]=v;
+  const l=document.getElementById(`pub-${id}-${k}`);
+  if(l){v?l.classList.add('on'):l.classList.remove('on');}
+}
+
+async function submeterDecisao(){
+  const n=noticiaAtual;
+  if(!n||!decisaoAtual)return;
+  const meios=n._meios||{site:false,fb:false,ig:false,tiktok:false};
+  let nota='';
+
+  if(decisaoAtual==='enviado_correcao'){
+    nota=(document.getElementById('nota-corr')||{}).value||'';
+    if(!nota.trim()){toast('Escreve uma nota para o proponente','warning');return;}
   }
-}
 
-async function analisarIA(id){
-  const el = document.getElementById('ai-content');
-  el.innerHTML = `<div class="ai-load"><span class="spinner"></span> A analisar notícia com Gemini IA…</div>`;
+  showLoad('A guardar decisão…');
   try{
-    const n = noticias.find(x=>x._id===id);
-    const url = API_URL+'?action=analisarIA&chave='+encodeURIComponent(chave(n))+'&t='+Date.now();
-    const res = await apiFetch_(url, 45000);
-    if(res.ok){
-      n._analise = res.analise;
-      saveNoticias();
-      el.innerHTML = res.analise.replace(/\n/g,'<br>');
+    await apiGuardar(n,decisaoAtual,meios,nota);
+    hideLoad();
+    if(decisaoAtual==='pode_publicar'){
+      toast('Notícia aprovada para publicação!','success');
+      noticiaAtual=null;decisaoAtual=null;
+      renderValidar();
     } else {
-      el.innerHTML = `<span style="color:var(--red)">Erro na análise: ${res.error}</span>`;
+      // Abre modal de email
+      hideLoad();
+      abrirEmailModal(n,nota);
     }
   }catch(e){
-    el.innerHTML = `<span style="color:var(--red)">Erro ao comunicar com o serviço de IA.</span>`;
-  }
-}
-
-async function submeterValidacao(){
-  if(!decisaoAtual && !validacoes[chave(noticiaAtual)]?.estado){
-    toast('Seleciona uma decisão primeiro','warning');
-    return;
-  }
-  const estado = decisaoAtual || validacoes[chave(noticiaAtual)].estado;
-  const meios = {
-    site: document.getElementById('m-site')?.checked || false,
-    fb: document.getElementById('m-fb')?.checked || false,
-    ig: document.getElementById('m-ig')?.checked || false,
-    tk: document.getElementById('m-tk')?.checked || false
-  };
-  const nota = document.getElementById('val-nota')?.value || '';
-
-  showLoad('A guardar validação…');
-  try {
-    await apiGuardar(noticiaAtual, estado, meios, nota);
     hideLoad();
-    toast('Validação gravada com sucesso!','success');
-    if(estado === 'precisa_correcao'){
-      abrirEmailModal(noticiaAtual, nota);
-    } else {
-      noticiaAtual = null;
-      renderValidar();
-    }
-  } catch(e){
-    hideLoad();
-    toast('Erro ao guardar validação.','error');
-  }
-}
-
-async function marcarComoPublicada(id){
-  const n = noticias.find(x=>x._id===id);
-  if(!n) return;
-  showLoad('A marcar como publicada…');
-  try {
-    const data = await apiMarcarPublicada(n);
-    hideLoad();
-    if(data.ok){
-      toast('Notícia marcada como publicada!','success');
-      noticiaAtual = null;
-      renderValidar();
-    } else {
-      toast(data.error||'Erro ao marcar como publicada.','error');
-    }
-  } catch(e){
-    hideLoad();
-    toast('Erro ao marcar como publicada.','error');
-  }
-}
-
-async function marcarComoPublicadaGestao(id){
-  const n = noticias.find(x=>x._id===id);
-  if(!n) return;
-  showLoad('A marcar como publicada…');
-  try {
-    const data = await apiMarcarPublicada(n, 'Gestão');
-    hideLoad();
-    if(data.ok){
-      toast('Notícia marcada como publicada!','success');
-      renderGestaoConteudo();
-    } else {
-      toast(data.error||'Erro ao marcar como publicada.','error');
-    }
-  } catch(e){
-    hideLoad();
-    toast('Erro ao marcar como publicada.','error');
+    toast('Erro ao guardar: '+e.message,'error');
   }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// MODAL DE EMAIL
+// AI
 // ═══════════════════════════════════════════════════════════════
-function abrirEmailModal(n, nota){
-  emailNotId = n._id;
-  document.getElementById('email-para').value = n.emailProponente || '—';
-  document.getElementById('email-assunto').value = `Validação de Notícia: ${n.titulo}`;
-  document.getElementById('email-corpo').value = 
-`Olá ${n.proponente},
 
-Relativamente à notícia proposta com o título "${n.titulo}", foram sugeridas as seguintes revisões/correções antes da sua publicação:
 
-${nota}
+// ═══════════════════════════════════════════════════════════════
+// VERIFICAÇÃO JORNALÍSTICA
+// ═══════════════════════════════════════════════════════════════
+function verificarNoticia(n){
+  const texto = (n.corpo||'').toLowerCase();
+  const titulo = (n.titulo||'');
+  const checks = [];
 
-Agradecemos o envio das alterações assim que possível.
+  // Título — verificar comprimento e evitar acrónimos/siglas
+  const tituloSigla = /^[A-Z0-9\s\-\.]{2,}$/.test(titulo.trim()) && titulo.trim().split(' ').every(w=>w===w.toUpperCase()&&w.length<=5);
+  const tituloMuitoCurto = titulo.length < 5;
+  const tituloSoPalavrasGrandes = titulo.trim().split(' ').filter(w=>w.length>1).every(w=>w===w.toUpperCase());
+  if(tituloMuitoCurto)
+    checks.push({ok:false, label:'Título ausente ou muito curto', detalhe:'Mínimo 5 caracteres'});
+  else if(tituloSigla||tituloSoPalavrasGrandes)
+    checks.push({ok:'warn', label:'Título parece um acrónimo ou sigla', detalhe:'"'+titulo+'" — o título deve ser descritivo e legível'});
+  else
+    checks.push({ok:true, label:'Título adequado', detalhe:titulo.slice(0,50)+(titulo.length>50?'…':'')});
 
-Melhores cumprimentos,
-${sessao.nome}
-Agrupamento de Escolas Templários`;
+  // Imagem de destaque
+  if(n.imgDestaque)
+    checks.push({ok:true, label:'Imagem de destaque', detalhe:'Presente'});
+  else
+    checks.push({ok:false, label:'Sem imagem de destaque', detalhe:'Recomendada para publicação'});
 
+  // Comprimento do texto
+  const chars = (n.corpo||'').length;
+  if(chars >= 150)
+    checks.push({ok:true, label:'Texto suficiente', detalhe:chars+' caracteres'});
+  else if(chars >= 50)
+    checks.push({ok:'warn', label:'Texto curto', detalhe:chars+' caracteres (mínimo recomendado: 150)'});
+  else
+    checks.push({ok:false, label:'Texto insuficiente', detalhe:chars+' caracteres — muito curto'});
+
+  // QUEM
+  const quem = /(alunos?|professores?|escola|turma|agrupamento|diretor|equipa|clube|grupo|comunidade|estudantes?)/.test(texto);
+  checks.push({ok:quem, label:'Quem — intervenientes', detalhe:quem?'Identificados no texto':'Quem participou ou organizou?'});
+
+  // O QUÊ
+  const oque = chars > 30;
+  checks.push({ok:oque, label:'O quê — ação/evento', detalhe:oque?'Descrito no texto':'Descreve o que aconteceu'});
+
+  // QUANDO — data, mês, época, trimestre, ano letivo
+  const quando = /(\d{1,2}[\/\-]\d{1,2}|\d{4}|janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|esta semana|este mês|hoje|ontem|recentemente|no início|no final|no fim|em meados|início do ano|final do ano|ano letivo|primeiro trimestre|segundo trimestre|terceiro trimestre|período|natal|páscoa|carnaval|verão|inverno|outono|primavera|festas|fim de ano|início de ano)/.test(texto);
+  checks.push({ok:quando, label:'Quando — data/período', detalhe:quando?'Referência temporal presente':'Indica quando ocorreu: data, mês, época ou trimestre'});
+
+  // ONDE
+  const onde = /(escola|biblioteca|pavilhão|sala|auditório|ginásio|campo|tomar|aetemplários|santa iria|gualdim|jácome|ratton|valdonas|junceira|curvaceiras)/.test(texto);
+  checks.push({ok:onde, label:'Onde — local', detalhe:onde?'Local identificado':'Onde aconteceu?'});
+
+  // PORQUÊ / COMO
+  const porque = /(para|porque|com o objetivo|no âmbito|inserido|celebrar|assinalar|promover|sensibilizar|desenvolver|participar|comemorar)/.test(texto);
+  checks.push({ok:porque?true:'warn', label:'Porquê/Como — contexto', detalhe:porque?'Contexto presente':'Qual o objetivo ou razão?'});
+
+  // Categoria
+  if(n.categorias&&n.categorias.length>0)
+    checks.push({ok:true, label:'Categoria', detalhe:n.categorias.join(', ')});
+  else
+    checks.push({ok:'warn', label:'Sem categoria', detalhe:'Recomendado selecionar uma categoria'});
+
+  const total = checks.length;
+  const ok = checks.filter(c=>c.ok===true).length;
+  const warn = checks.filter(c=>c.ok==='warn').length;
+  const score = Math.round((ok + warn*0.5) / total * 100);
+
+  return {checks, score, ok, warn, fail: total-ok-warn};
+}
+
+function buildVerificacao(n){
+  const {checks, score, ok, warn, fail} = verificarNoticia(n);
+  const scoreClass = score>=80?'score-ok':score>=50?'score-warn':'score-fail';
+  const scoreEmoji = score>=80?'✅':score>=50?'⚠️':'❌';
+
+  const itemsHtml = checks.map(ch=>{
+    const cls = ch.ok===true?'check-ok':ch.ok==='warn'?'check-warn':'check-fail';
+    const ico = ch.ok===true?'✅':ch.ok==='warn'?'⚠️':'❌';
+    return `<div class="check-item ${cls}">
+      <span class="check-ico">${ico}</span>
+      <div><strong>${ch.label}</strong><br>${ch.detalhe}</div>
+    </div>`;
+  }).join('');
+
+  return `<div class="check-block">
+    <div class="check-hd">
+      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Verificação jornalística automática
+    </div>
+    <div class="check-grid">${itemsHtml}</div>
+    <div class="check-score ${scoreClass}">
+      ${scoreEmoji} Pontuação: ${score}% &nbsp;·&nbsp; ${ok} OK · ${warn} atenção · ${fail} em falta
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EMAIL MODAL
+// ═══════════════════════════════════════════════════════════════
+function abrirEmailModal(n,nota){
+  emailNotId=n._id;
+  const assunto=`Notícia "${n.titulo}" — sugestões de melhoria antes da publicação`;
+  const corpo=`Olá ${n.proponente||''},\n\nObrigado/a pela submissão da notícia "${n.titulo}".\n\nApresentamos algumas sugestões de melhoria antes da publicação:\n\n${nota}\n\nApós realizar as correções, pedimos que nos envie a versão atualizada diretamente para este email.\n\nObrigado pela colaboração!\n${sessao.nome}\nEquipa de Comunicação — AET`;
+  document.getElementById('email-assunto').value=assunto;
+  document.getElementById('email-corpo').value=corpo;
   document.getElementById('email-modal').classList.add('show');
 }
-
-function fecharEmailModal(){
-  document.getElementById('email-modal').classList.remove('show');
-  noticiaAtual = null;
-  renderValidar();
-}
-
-function copiarEmail(){
-  const corpo = document.getElementById('email-corpo').value;
-  navigator.clipboard.writeText(corpo).then(()=>{
-    toast('Mensagem copiada para a área de transferência!','success');
+function fecharEmailModal(){document.getElementById('email-modal').classList.remove('show');}
+async function copiarEmail(){
+  const texto='Assunto: '+document.getElementById('email-assunto').value+'\n\n'+document.getElementById('email-corpo').value;
+  try{
+    await navigator.clipboard.writeText(texto);
+    toast('Mensagem copiada! Cola no teu email.','success');
     fecharEmailModal();
-  });
+    noticiaAtual=null;decisaoAtual=null;
+    renderValidar();
+  }catch(e){toast('Seleciona e copia manualmente.','warning');}
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ÁREA DE GESTÃO & IMPORTAÇÃO EXCEL
+// EXCEL IMPORT
 // ═══════════════════════════════════════════════════════════════
-async function renderGestao(){
-  showLoad('A carregar do Google Sheets…');
-  await carregarDadosServidor_();
-  hideLoad();
-  renderGestaoConteudo();
-}
-
-function renderGestaoConteudo(){
-  const total = noticias.length;
-  const pend = noticias.filter(n=>estadoNoticia(n).estado==='pendente').length;
-  const pub = noticias.filter(n=>estadoNoticia(n).estado==='pode_publicar').length;
-  const corr = noticias.filter(n=>estadoNoticia(n).estado==='precisa_correcao').length;
-  const publ = noticias.filter(n=>estadoNoticia(n).estado==='publicada').length;
-
-  document.getElementById('stats-gestao').innerHTML = `
-    <div class="sc"><div class="sv">${total}</div><div class="sl">Total de Noticias</div></div>
-    <div class="sc"><div class="sv" style="color:var(--amber)">${pend}</div><div class="sl">Pendentes</div></div>
-    <div class="sc"><div class="sv" style="color:var(--green)">${pub}</div><div class="sl">Prontas a publicar</div></div>
-    <div class="sc"><div class="sv" style="color:var(--blue)">${corr}</div><div class="sl">Aguarda correção</div></div>
-    <div class="sc"><div class="sv" style="color:#5a1a8a">${publ}</div><div class="sl">Publicadas</div></div>
-  `;
-
-  document.getElementById('filter-row-gestao').innerHTML = `
-    <span class="chip ${filtroGestao==='todas'?'active':''}" onclick="setFiltroGestao('todas')">Todas (${total})</span>
-    <span class="chip ${filtroGestao==='pendente'?'active':''}" onclick="setFiltroGestao('pendente')">Pendentes (${pend})</span>
-    <span class="chip ${filtroGestao==='pode_publicar'?'active':''}" onclick="setFiltroGestao('pode_publicar')">Prontas (${pub})</span>
-    <span class="chip ${filtroGestao==='precisa_correcao'?'active':''}" onclick="setFiltroGestao('precisa_correcao')">Aguarda correção (${corr})</span>
-    <span class="chip ${filtroGestao==='publicada'?'active':''}" onclick="setFiltroGestao('publicada')">Publicadas (${publ})</span>
-  `;
-
-  const filtradas = noticias.filter(n=>{
-    if(filtroGestao==='todas') return true;
-    return estadoNoticia(n).estado === filtroGestao;
-  });
-
-  const container = document.getElementById('lista-gestao');
-  if(!filtradas.length){
-    container.innerHTML = `<div class="empty"><p>Nenhuma notícia encontrada.</p></div>`;
-    return;
-  }
-
-  let html = '';
-  filtradas.forEach(n=>{
-    const v = estadoNoticia(n);
-    let badgeClass = 'b-pend', badgeTxt = 'Pendente';
-    if(v.estado==='pode_publicar'){ badgeClass='b-pub'; badgeTxt='Pronta a publicar'; }
-    if(v.estado==='precisa_correcao'){ badgeClass='b-corr'; badgeTxt='Aguarda correção'; }
-    if(v.estado==='publicada'){ badgeClass='b-val'; badgeTxt='📢 Publicada'; }
-
-    const infoValidacao = v.validador ? ` · Validado por ${v.validador}${v.dataValidacao?' em '+v.dataValidacao:''}` : '';
-    const infoPublicacao = v.estado==='publicada' ? `<div style="font-size:11px;color:#5a1a8a;margin-top:2px">📢 Publicada por ${v.publicadoPor||v.validador||'—'} em ${v.dataPublicacao||'—'}</div>` : '';
-
-    const pres = presencas[n.chave || chave(n)];
-    let presencaHtml = '';
-    if(pres && pres.validador){
-      let dataStr = '';
-      try{ dataStr = new Date(pres.timestamp).toLocaleDateString('pt-PT'); }catch(e){}
-      presencaHtml = `<div style="font-size:11px;color:var(--amber-text);margin-top:2px">🔎 Em validação por: ${pres.validador}${dataStr?' ('+dataStr+')':''}</div>`;
-    }
-
-    const botaoPublicar = (v.estado==='pode_publicar') ? `
-      <button class="btn" style="background:#f0e8ff;color:#5a1a8a;font-size:11px;padding:6px 10px" onclick="marcarComoPublicadaGestao(${n._id})">Publicámos!</button>
-    ` : '';
-
-    html += `
-      <div class="li">
-        <div class="li-ico" style="background:var(--blue-bg)">📄</div>
-        <div class="li-b">
-          <div class="li-t">${n.titulo}</div>
-          <div class="li-s">${n.escola||'Escola não indicada'} · ${n.proponente}${infoValidacao}</div>
-          ${infoPublicacao}
-          ${presencaHtml}
-        </div>
-        <div class="li-r">
-          <span class="badge ${badgeClass}">${badgeTxt}</span>
-          ${botaoPublicar}
-        </div>
-      </div>
-    `;
-  });
-  container.innerHTML = html;
-}
-
-function setFiltroGestao(f){
-  filtroGestao = f;
-  renderGestaoConteudo();
-}
-
 function importarExcel(input){
-  const file = input.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e){
-    try {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, {type: 'array'});
-      const sheetName = workbook.SheetNames[0];
-      const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-      
-      let adicionados = 0;
-      let nextId = Math.max(0,...noticias.map(n=>n._id||0))+1;
-      const chavesLocais = new Set(noticias.map(n=>chave(n)));
+  const file=input.files[0];
+  if(!file)return;
+  const st=document.getElementById('import-status');
+  st.textContent='A ler ficheiro…';
+  showLoad('A importar notícias do Excel…');
+  const reader=new FileReader();
+  reader.onload=async function(e){
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});
+      if(!rows.length){hideLoad();st.textContent='Ficheiro sem dados.';return;}
 
-      rows.forEach(r=>{
-        const proponente = r['Nome'] || r['proponente'] || r['Carimbo de data/hora'] || 'Sem nome';
-        const titulo = r['Título da notícia'] || r['titulo'] || r['Título'] || 'Sem título';
-        const c = norm(titulo)+'|'+norm(proponente);
+      const headers=Object.keys(rows[0]);
+      const ci=pats=>headers.find(h=>pats.some(p=>h.toLowerCase().includes(p.toLowerCase())))||null;
+      const COL={
+        ts:   ci(['hora de início','hora da última','submission time','início']),
+        prop: ci(['nome do proponente','proponente']),
+        email:ci(['email','e-mail']),
+        tit:  ci(['título da notícia','titulo da noticia','título (sem','título da not']),
+        cats: ci(['categoria da notícia','categoria','pergunta']),
+        esc:  ci(['estabelecimento']),
+        corp: ci(['texto do tipo','notícia texto','noticia texto','texto da not']),
+        img:  ci(['insira uma fotografia','imagem de destaque','fotografia (inserir 1','fotografia']),
+        fotos:ci(['outras fotos','inserir até']),
+        vid:  ci(['vídeo','video','vídeos']),
+        lnk:  ci(['links','formulários']),
+      };
 
-        if(!chavesLocais.has(c)){
-          const nova = {
-            _id: nextId++,
-            proponente: r['Nome'] || r['proponente'] || '',
-            emailProponente: r['Endereço de e-mail'] || r['emailProponente'] || '',
-            titulo: titulo,
-            categorias: (r['Categoria']||r['categorias']||'').toString().split(';').map(s=>s.trim()).filter(Boolean),
-            escola: r['Escola / Jardim de Infância'] || r['escola'] || '',
-            data: r['Data'] || new Date().toISOString().slice(0,10),
-            corpo: r['Texto da notícia'] || r['corpo'] || '',
-            imgDestaque: r['Imagem de destaque'] || r['imgDestaque'] || '',
-            outrasFotos: (r['Outras imagens']||r['outrasFotos']||'').toString().split(';').map(s=>s.trim()).filter(Boolean),
-            video: r['Vídeo'] || r['video'] || '',
-            links: r['Links'] || r['links'] || '',
-            _meios:{site:false,fb:false,ig:false,tk:false}, _analise:null
-          };
-          noticias.push(nova);
-          chavesLocais.add(c);
-          adicionados++;
-        }
+      const existKeys=new Set(noticias.map(n=>norm(n.titulo)+'|'+norm(n.proponente)));
+      let nextId=Math.max(0,...noticias.map(n=>n._id||0))+1;
+      let imported=0;
+
+      rows.forEach(row=>{
+        const get=col=>col?(row[col]||'').toString().trim():'';
+        const titulo=get(COL.tit);
+        const proponente=get(COL.prop);
+        if(!titulo)return;
+
+        // Ignora linhas que são cabeçalhos repetidos
+        if(headers.some(h=>norm(h)===norm(titulo)))return;
+
+        const key=norm(titulo)+'|'+norm(proponente);
+        if(existKeys.has(key))return;
+
+        let data=new Date().toISOString().slice(0,10);
+        const ts=get(COL.ts);
+        if(ts){try{const d=new Date(ts);if(!isNaN(d))data=d.toISOString().slice(0,10);}catch(_){}}
+
+        noticias.push({
+          _id:nextId++,
+          proponente,titulo,
+          categorias:get(COL.cats).split(/[;,]/).map(s=>s.trim()).filter(Boolean),
+          escola:get(COL.esc),data,corpo:get(COL.corp),
+          imgDestaque:get(COL.img),
+          outrasFotos:get(COL.fotos).split(/[;\n]/).map(s=>s.trim()).filter(Boolean),
+          video:get(COL.vid),links:get(COL.lnk),
+          _meios:{site:false,fb:false,ig:false,tiktok:false}
+        });
+        existKeys.add(key);
+        imported++;
       });
 
-      saveNoticias();
-      renderGestao();
-      document.getElementById('import-status').textContent = `${adicionados} notícias importadas do ficheiro!`;
-      toast(`${adicionados} notícias importadas com sucesso!`,'success');
-    } catch(err){
-      toast('Erro ao ler o ficheiro Excel. Verifique a estrutura das colunas.','error');
+      saveNoticias();hideLoad();input.value='';
+      if(imported>0){
+        st.textContent=`✓ ${imported} importada(s) — a sincronizar…`;
+        // Envia para Google Sheets em background
+        const novasNoticias = noticias.slice(-imported);
+        let sincOk=0;
+        for(const n of novasNoticias){
+          try{ const r=await apiGuardarNoticia(n); if(r.ok)sincOk++; }catch(_){}
+        }
+        st.textContent=`✓ ${imported} importada(s) · ${sincOk} sincronizadas com Google Sheets`;
+        toast(`${imported} notícia(s) importada(s) e sincronizadas!`,'success');
+        renderGestao();
+      } else {
+        st.textContent='✓ Sem notícias novas';
+        toast('Sem notícias novas para importar.','info');
+      }
+    }catch(err){
+      hideLoad();
+      st.textContent='Erro: '+err.message;
+      toast('Erro ao ler ficheiro.','error');
     }
   };
   reader.readAsArrayBuffer(file);
 }
 
+// ═══════════════════════════════════════════════════════════════
+// SINCRONIZAR TUDO
+// ═══════════════════════════════════════════════════════════════
 async function sincronizarTudo(){
-  showLoad('A sincronizar notícias com a Google Sheets…');
-  let enviadas = 0;
-  try {
-    for(const n of noticias){
-      await apiGuardarNoticia(n);
-      enviadas++;
-    }
-    hideLoad();
-    toast(`${enviadas} notícias sincronizadas com o servidor!`,'success');
-  } catch(e){
-    hideLoad();
-    toast('Erro durante a sincronização total.','error');
+  if(!noticias.length){toast('Não há notícias para sincronizar.','warning');return;}
+  const st=document.getElementById('import-status');
+  showLoad('A sincronizar '+noticias.length+' notícias com Google Sheets…');
+  let ok=0, err=0;
+  for(const n of noticias){
+    try{
+      const r=await apiGuardarNoticia(n);
+      if(r&&r.ok)ok++;
+      else err++;
+    }catch(e){err++;}
   }
+  hideLoad();
+  st.textContent=`✓ ${ok} sincronizadas · ${err} erros`;
+  if(ok>0) toast(`${ok} notícia(s) sincronizadas com Google Sheets!`,'success');
+  else toast('Não foi possível sincronizar. Verifica a ligação.','error');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GESTÃO
+// ═══════════════════════════════════════════════════════════════
+async function renderGestao(){
+  showLoad('A carregar do Google Sheets…');
+  try{
+    const data = await apiListar();
+    // Merge notícias do Sheets
+    const chavesLocais = new Set(noticias.map(n=>chave(n)));
+    let nextId = Math.max(0,...noticias.map(n=>n._id||0))+1;
+    (data.noticias||[]).forEach(n=>{
+      const c = norm(n.titulo)+'|'+norm(n.proponente);
+      if(!chavesLocais.has(c)){
+        noticias.push({
+          _id: nextId++,
+          proponente: n.proponente, titulo: n.titulo,
+          categorias: (n.categorias||'').split(';').map(s=>s.trim()).filter(Boolean),
+          escola: n.escola, data: (n.timestamp||'').slice(0,10),
+          corpo: n.corpo, imgDestaque: n.imgDestaque,
+          outrasFotos: (n.outrasFotos||'').split(';').map(s=>s.trim()).filter(Boolean),
+          video: n.video, links: n.links,
+          _meios:{site:false,fb:false,ig:false,tiktok:false}
+        });
+        chavesLocais.add(c);
+      }
+    });
+    saveNoticias();
+    validacoes = data.validacoes || {};
+  }catch(e){
+    // usa dados locais, não interrompe
+  }
+  hideLoad();
+
+  const total=noticias.length;
+  const pend=noticias.filter(n=>!validacoes[chave(n)]||validacoes[chave(n)].estado==='pendente').length;
+  const pub=noticias.filter(n=>(validacoes[chave(n)]||{}).estado==='pode_publicar').length;
+  const corr=noticias.filter(n=>(validacoes[chave(n)]||{}).estado==='enviado_correcao').length;
+
+  document.getElementById('stats-gestao').innerHTML=`
+    <div class="sc"><div class="sv">${total}</div><div class="sl">Total</div></div>
+    <div class="sc"><div class="sv" style="color:var(--amber)">${pend}</div><div class="sl">Pendentes</div></div>
+    <div class="sc"><div class="sv" style="color:var(--green)">${pub}</div><div class="sl">A publicar</div></div>
+    <div class="sc"><div class="sv" style="color:var(--blue)">${corr}</div><div class="sl">Para correção</div></div>`;
+
+  const filtros=['todas','pendente','pode_publicar','enviado_correcao'];
+  const fLabels={todas:`Todas (${total})`,pendente:`Pendentes (${pend})`,pode_publicar:`A publicar (${pub})`,enviado_correcao:`Para correção (${corr})`};
+  document.getElementById('filter-row-gestao').innerHTML=filtros.map(f=>
+    `<div class="chip ${filtroGestao===f?'active':''}" onclick="setFiltroGestao('${f}')">${fLabels[f]}</div>`
+  ).join('');
+
+  renderListaGestao();
+}
+
+function setFiltroGestao(f){filtroGestao=f;renderGestao();}
+
+function renderListaGestao(){
+  const el=document.getElementById('lista-gestao');
+  let lista=noticias;
+  if(filtroGestao!=='todas'){
+    lista=noticias.filter(n=>{
+      const est=(validacoes[chave(n)]||{}).estado||'pendente';
+      return est===filtroGestao;
+    });
+  }
+
+  if(!lista.length){
+    el.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24"><path d="M21 8v13H3V8"/><rect x="1" y="3" width="22" height="5" rx="1"/><line x1="10" y1="12" x2="14" y2="12"/></svg><p>Sem notícias nesta categoria.</p></div>`;
+    return;
+  }
+
+  const bmap={pendente:'b-pend',pode_publicar:'b-pub',enviado_correcao:'b-corr',em_validacao:'b-val'};
+  const lmap={pendente:'Pendente',pode_publicar:'✓ Pode publicar',enviado_correcao:'✉ Para correção',em_validacao:'Em validação'};
+
+  el.innerHTML=[...lista].reverse().map(n=>{
+    const v=validacoes[chave(n)]||{};
+    const est=v.estado||'pendente';
+    const meiosStr=v.meios?v.meios.split(';').filter(Boolean).map(m=>`<span style="font-size:10px;background:var(--green-bg);color:var(--green-text);padding:1px 6px;border-radius:20px">${m}</span>`).join(''):'';
+    const nid=chave(n);
+    return`<div class="li" style="cursor:pointer" onclick="abrirDetalheGestao('${nid}')">
+      <div class="li-ico" style="background:var(--bg2)">
+        <svg viewBox="0 0 24 24" width="16" height="16" style="stroke:var(--text2);fill:none;stroke-width:1.8"><path d="M4 22V4a2 2 0 012-2h12a2 2 0 012 2v18l-4-2-4 2-4-2-4 2z"/></svg>
+      </div>
+      <div class="li-b">
+        <div class="li-t">${n.titulo}</div>
+        <div class="li-s">${n.proponente||'—'} · ${n.escola||'—'} · ${n.data||'—'}${v.validador?' · '+v.validador:''}</div>
+      </div>
+      <div class="li-r">
+        <span class="badge ${bmap[est]||'b-pend'}">${lmap[est]||est}</span>
+        <div style="display:flex;gap:3px;flex-wrap:wrap">${meiosStr}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function abrirDetalheGestao(id){
+  const n=noticias.find(x=>chave(x)===id);
+  if(!n) return;
+  // Mostrar detalhe numa overlay simples
+  let ov=document.getElementById('ov-gestao');
+  if(!ov){
+    ov=document.createElement('div');
+    ov.id='ov-gestao';
+    ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px';
+    ov.onclick=e=>{if(e.target===ov)fecharDetalheGestao();};
+    document.body.appendChild(ov);
+  }
+  const v=validacoes[id]||{};
+  const veri=buildVerificacao(n);
+  ov.innerHTML=`<div style="background:var(--bg);border-radius:var(--rl);max-width:700px;width:100%;max-height:90vh;overflow-y:auto;padding:24px;position:relative">
+    <button onclick="fecharDetalheGestao()" style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text2)">✕</button>
+    ${buildDetalhe(n)}
+    ${veri}
+    ${v.estado?`<div style="margin-top:14px;padding:12px;background:var(--bg2);border-radius:var(--r);font-size:13px">
+      <strong>Validação:</strong> ${v.estado||'—'} · ${v.validador||'—'} · ${v.dataValidacao||'—'}
+      ${v.nota?`<div style="margin-top:6px;color:var(--text2)">${v.nota}</div>`:''}
+    </div>`:''}
+  </div>`;
+  ov.style.display='flex';
+}
+
+function fecharDetalheGestao(){
+  const ov=document.getElementById('ov-gestao');
+  if(ov) ov.style.display='none';
 }
 </script>
 </body>
