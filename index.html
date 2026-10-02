@@ -1059,11 +1059,11 @@ function renderGestaoConteudo(){
     }
 
     const botaoPublicar = (v.estado==='pode_publicar') ? `
-      <button class="btn" style="background:#f0e8ff;color:#5a1a8a;font-size:11px;padding:6px 10px" onclick="marcarComoPublicadaGestao(${n._id})">Publicámos!</button>
+      <button class="btn" style="background:#f0e8ff;color:#5a1a8a;font-size:11px;padding:6px 10px" onclick="event.stopPropagation();marcarComoPublicadaGestao(${n._id})">Publicámos!</button>
     ` : '';
 
     html += `
-      <div class="li">
+      <div class="li" onclick="abrirDetalheGestao(${n._id})" style="cursor:pointer">
         <div class="li-ico" style="background:var(--blue-bg)">📄</div>
         <div class="li-b">
           <div class="li-t">${n.titulo}</div>
@@ -1084,6 +1084,76 @@ function renderGestaoConteudo(){
 function setFiltroGestao(f){
   filtroGestao = f;
   renderGestaoConteudo();
+}
+
+function destacarIdentidade(texto){
+  if(!texto) return '';
+  const termos = ['Tomar','Junceira','Linhaceira','Curvaceiras','Carvalhos de Figueiredo','Santa Iria','Casais','Gualdim Pais','Valdonas','São Pedro','Serra','Olalhas','Agrupamento de Escolas Templários','AET','Templários de Tomar'];
+  let resultado = texto.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  termos.forEach(t => {
+    const re = new RegExp('('+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+    resultado = resultado.replace(re,'<strong>$1</strong>');
+  });
+  return resultado;
+}
+
+function abrirDetalheGestao(id){
+  const n = noticias.find(x=>x._id===id);
+  if(!n) return;
+  const v = estadoNoticia(n);
+  let ov = document.getElementById('ov-gestao');
+  if(!ov){
+    ov = document.createElement('div');
+    ov.id = 'ov-gestao';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px';
+    ov.onclick = e=>{ if(e.target===ov) fecharDetalheGestao(); };
+    document.body.appendChild(ov);
+  }
+  const imgHtml = n.imgDestaque ? `<img src="${n.imgDestaque}" style="width:100%;max-height:200px;object-fit:cover;border-radius:var(--r);margin-bottom:10px;cursor:pointer" onclick="window.open('${n.imgDestaque}','_blank')" onerror="this.style.display='none'">` : '';
+  const estadoMap = {pendente:'Pendente',pode_publicar:'Pronta a publicar',precisa_correcao:'Aguarda correção',publicada:'Publicada'};
+  const badgeClass = v.estado==='pode_publicar'?'b-pub':v.estado==='precisa_correcao'?'b-corr':v.estado==='publicada'?'b-val':'b-pend';
+  const corpoSeguro = (n.corpo||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  ov.innerHTML = `<div style="background:var(--bg);border-radius:var(--rl);max-width:680px;width:100%;max-height:90vh;overflow-y:auto;padding:24px;position:relative">
+    <button onclick="fecharDetalheGestao()" style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text2)">✕</button>
+    <h2 style="font-size:18px;font-weight:800;margin-bottom:10px;padding-right:30px">${n.titulo}</h2>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--text2);margin-bottom:14px;padding:8px 12px;background:var(--bg2);border-radius:var(--r)">
+      <span>👤 ${n.proponente||'—'}</span>
+      <span>🏫 ${n.escola||'—'}</span>
+      <span>📅 ${n.data||'—'}</span>
+      <span class="badge ${badgeClass}">${estadoMap[v.estado]||'Pendente'}</span>
+    </div>
+    ${imgHtml}
+    <div style="font-size:10px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px">Texto da notícia</div>
+    <div id="corpo-gestao-view" style="font-size:14px;color:var(--text);line-height:1.75;white-space:pre-wrap;padding:14px;background:var(--bg2);border-radius:var(--r)">${destacarIdentidade(n.corpo)}</div>
+    <textarea id="corpo-gestao-edit" style="display:none;width:100%;box-sizing:border-box;font-size:14px;color:var(--text);line-height:1.75;padding:14px;background:var(--bg2);border:1.5px solid var(--border2);border-radius:var(--r);resize:vertical;min-height:160px;font-family:var(--font)">${corpoSeguro}</textarea>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button id="btn-editar-corpo" onclick="document.getElementById('corpo-gestao-view').style.display='none';document.getElementById('corpo-gestao-edit').style.display='block';this.style.display='none';document.getElementById('btn-guardar-corpo').style.display='inline-flex';document.getElementById('btn-cancelar-corpo').style.display='inline-flex'" style="font-size:12px;padding:6px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;color:var(--text);font-family:var(--font)">✏️ Editar texto</button>
+      <button id="btn-guardar-corpo" onclick="guardarCorpoGestao(${n._id})" style="display:none;font-size:12px;padding:6px 12px;background:var(--blue);border:none;border-radius:var(--r);cursor:pointer;color:#fff;font-family:var(--font);font-weight:700">💾 Guardar</button>
+      <button id="btn-cancelar-corpo" onclick="fecharDetalheGestao()" style="display:none;font-size:12px;padding:6px 12px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;color:var(--text);font-family:var(--font)">Cancelar</button>
+    </div>
+    ${v.validador?`<div style="margin-top:12px;font-size:12px;color:var(--text2)">Validado por <strong>${v.validador}</strong>${v.dataValidacao?' em '+v.dataValidacao:''}</div>`:''}
+  </div>`;
+  ov.style.display = 'flex';
+}
+
+function fecharDetalheGestao(){
+  const ov = document.getElementById('ov-gestao');
+  if(ov) ov.style.display = 'none';
+}
+
+function guardarCorpoGestao(id){
+  const n = noticias.find(x=>x._id===id);
+  if(!n) return;
+  const novoCorpo = document.getElementById('corpo-gestao-edit').value;
+  n.corpo = novoCorpo;
+  saveNoticias();
+  document.getElementById('corpo-gestao-view').innerHTML = destacarIdentidade(novoCorpo);
+  document.getElementById('corpo-gestao-view').style.display = 'block';
+  document.getElementById('corpo-gestao-edit').style.display = 'none';
+  document.getElementById('btn-editar-corpo').style.display = 'inline-flex';
+  document.getElementById('btn-guardar-corpo').style.display = 'none';
+  document.getElementById('btn-cancelar-corpo').style.display = 'none';
+  toast('Texto guardado localmente.','success');
 }
 
 function importarExcel(input){
