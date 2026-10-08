@@ -810,15 +810,6 @@ function renderDetalheNoticia(n, container){
       </div>
 
       <div id="decisao-opcoes">
-        ${(decisaoAtual==='pode_publicar'||v.estado==='pode_publicar') ? `
-          <div class="sec">Meios onde pode ser publicada</div>
-          <div class="pub-row">
-            <label class="pub-lbl"><input type="checkbox" id="m-site"> Site AET</label>
-            <label class="pub-lbl"><input type="checkbox" id="m-fb"> Facebook</label>
-            <label class="pub-lbl"><input type="checkbox" id="m-ig"> Instagram</label>
-            <label class="pub-lbl"><input type="checkbox" id="m-tk"> TikTok</label>
-          </div>
-        ` : ''}
 
         ${(decisaoAtual==='precisa_correcao'||v.estado==='precisa_correcao') ? `
           <div class="sec">Notas / Correções necessárias</div>
@@ -1088,7 +1079,7 @@ function setFiltroGestao(f){
 
 function destacarIdentidade(texto){
   if(!texto) return '';
-  const termos = ['Tomar','Junceira','Linhaceira','Curvaceiras','Carvalhos de Figueiredo','Santa Iria','Casais','Gualdim Pais','Valdonas','São Pedro','Serra','Olalhas','Agrupamento de Escolas Templários','AET','Templários de Tomar'];
+  const termos = ['Tomar','Junceira','Linhaceira','Curvaceiras','Carvalhos de Figueiredo','Santa Iria','Casais','Gualdim Pais','Valdonas','São Pedro','Serra','Olalhas','Agrupamento de Escolas Templários','AET','Templários de Tomar','projecto','projeto'];
   let resultado = texto.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   termos.forEach(t => {
     const re = new RegExp('('+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
